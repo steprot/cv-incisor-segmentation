@@ -5,13 +5,14 @@ import os
 import numpy as np
 import fnmatch
 from landmark import Landmarks, render_landmark, render_landmark_over_image
+from activeshapemodel import ActiveShapeModel
 
 if __name__ == '__main__':
     
     # Read the landmarks *******************************************************
+
     number_teeth = 8
     number_samples = 2
-    
     teeth_landmarks = np.zeros((number_teeth, number_samples * 80))
         
     i = 1
@@ -26,7 +27,7 @@ if __name__ == '__main__':
             
             landmark = Landmarks(dir_path)
             # Print it 
-            #render_landmark(landmark)
+            #render_landmark(landmark.as_vector())
             tooth_landmarks[j-1,:] = landmark.as_vector()
 
             # Got the next sample
@@ -36,20 +37,37 @@ if __name__ == '__main__':
         # Go to the next tooth
         i +=1
         
-    #Print the landmarks over the radiographs **********************************
+    # Print the landmarks over the radiographs *********************************
     
-    i = 0
-    while i < number_samples:
-        j = 0
-        directory = '../_Data/Radiographs/0' + str("%01d" % (i+1)) + '.tif'
-        dir_path = os.path.join(os.getcwd(), directory)
-        img = cv2.imread(dir_path)
-        while j < number_teeth:
-            tooth_landamarks = teeth_landmarks[j,:]
-            tooth_landamarks = tooth_landamarks[i*80:i*80+80]
-            img = render_landmark_over_image(img, tooth_landamarks)
-            
-            # Go to the next tooth
-            j += 1
-        # Got the next sample   
+    #i = 0
+    #while i < number_samples:
+    #    j = 0
+    #    directory = '../_Data/Radiographs/0' + str("%01d" % (i+1)) + '.tif'
+    #    dir_path = os.path.join(os.getcwd(), directory)
+    #    img = cv2.imread(dir_path)
+    #    while j < number_teeth:
+    #        tooth_landamarks = teeth_landmarks[j,:]
+    #        tooth_landamarks = tooth_landamarks[i*80:i*80+80]
+    #        img = render_landmark_over_image(img, tooth_landamarks)
+    #        
+    #        # Go to the next tooth
+    #        j += 1
+    #    # Got the next sample   
+    #    i += 1
+        
+    # Fit the ActiveShapeModel and compute the mean sample for each tooth ******
+    
+    mean_teeth_landmarks = np.zeros((number_teeth, 80))
+    
+    i = 0 
+    while i < number_teeth:
+        activeShapeModel = ActiveShapeModel(teeth_landmarks[i,:], number_samples)
+        mean_teeth_landmarks[i] = activeShapeModel.compute_mean()
+        
+        # Print it 
+        render_landmark(mean_teeth_landmarks[i])
+        # print(mean_teeth_landmarks)
         i += 1
+    
+    
+    

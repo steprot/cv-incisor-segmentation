@@ -56,7 +56,14 @@ class Landmarks():
 
 def render_landmark(landmark):
         
-    points = landmark.as_matrix()
+        # Transform the array in a matrix 
+    i = 0
+    points = []
+    while i < len(landmark)-1: # -1 because then I add +1
+        points.append([float(landmark[i]), float(landmark[i+1])])
+        i += 2 # To go to the next couple
+    points = np.array(points)
+    
     max_y = points[:, 0].max()
     min_y = points[:, 0].min()
     max_x = points[:, 1].max()
