@@ -101,11 +101,36 @@ def scale_to_unit(tooth, centroid):
     
     return points
     
-def align_teeth_to_mean_shape(elem, mean):
-    align_parameters(elem, mean)
-    pass
+def rotate(element, theta):
+    # create rotation matrix
+    rotation_matrix = np.array([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
+
+    # apply rotation on each landmark point
+    #centroid = np.mean(element, axis=0)
+    #tmp_points = element - centroid
     
-def align_parameters(element, scaled_mean):
+    element = tooth_from_vector_to_matrix(element)
+    rotated_element = np.zeros_like(element)
+    for ind in range(len(element)):
+        rotated_element[ind, :] = element[ind, :].dot(rotation_matrix)
+        
+    #element = points + centroid
+    
+    return rotated_element
+ 
+def align_teeth_to_mean_shape(elem, mean):
+    t, s, theta = get_aligning_parameters(elem, mean)
+    
+    print('elem shape', elem.shape)
+    print('mean shape', mean.shape)    
+    rotated_element = rotate(elem, theta)
+    
+    print('ELEM')
+    print(elem)
+    print('ROT_ELEM')
+    print(rotated_element)
+    
+def get_aligning_parameters(element, scaled_mean):
     """
     Finds the best parameters to align the two shapes. 
     Based on: "An Introduction to Active Shape Model"
@@ -138,7 +163,7 @@ def align_parameters(element, scaled_mean):
     # the optimal translation is chosen to match their centroids
     t = x2_centroid - x1_centroid
     
-    print('result of the align parametersss', t, s, theta)
+    print('result of the align parameters', t, s, theta)
     return t, s, theta
 
 def render_landmark(landmark):
