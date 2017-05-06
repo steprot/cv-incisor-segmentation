@@ -4,7 +4,7 @@ import cv2.cv as cv
 import os
 import numpy as np
 import fnmatch
-from landmark import Landmarks, render_landmark, render_landmark_over_image, translate_to_origin, compute_mean
+from landmark import Landmarks, render_landmark_over_image, translate_to_origin, compute_centroids, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector
 
 '''
     Prints teeth's landmark points over the radiographs.
@@ -55,7 +55,6 @@ def print_landmarks(tooth_landmarks):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-
 '''
     Main function of the project.
 '''
@@ -63,7 +62,7 @@ if __name__ == '__main__':
     
     # *** Read the landmarks ****
     number_teeth = 8 
-    number_samples = 2
+    number_samples = 3
     teeth_landmarks = [] # 3D array: 8*number_samples*80
         
     i = 1
@@ -89,27 +88,52 @@ if __name__ == '__main__':
         # Go to the next tooth
         i +=1
         
-    teeth_landmarks = np.array(teeth_landmarks)    
-    #print(np.array(teeth_landmarks[0]).shape)  
-    
+    teeth_landmarks = np.array(teeth_landmarks)  
+        
     # *** Print the teeth_landmarks over  *** 
-    print_landmarks_over_radiographs(teeth_landmarks)
+    #print_landmarks_over_radiographs(teeth_landmarks)
     
-    # *** Compute the mean_teeth from the landmarks ****
-    mean_teeth = []
+    # *** Compute the centroids from the landmarks ***
+    centroids = []
     for i in range(0,number_teeth):
-        mean_teeth.append(compute_mean(teeth_landmarks[i]))
+        centroids.append(compute_centroids(teeth_landmarks[i]))
+    #print('Len of centroids', len(centroids)) # it is 8
     
-    print(mean_teeth)  
+    # *** Compute the mean_shape from the landmarks ***
+    mean_shape = []
+    for i in range(0,number_teeth):
+        mean_shape.append(np.mean(teeth_landmarks[0], axis = 0))
+    #print('Len of mean_shape', len(mean_shape)) # it is 8
+    # print(mean_shape)
     
-    ##print(tooth_landamarks)
-    ##       
-    #aroundOrigin = []
-    #for i in range(0,number_teeth): 
-    #    for j in range(0,number_samples):
-    #        orig  = translate_to_origin(teeth_landmarks[i,j])
-    #        aroundOrigin.append(orig)
-    #print(aroundOrigin)
-    #print 'End'
-    #
-    #
+    # *** Translate the landmarks around the origin ***
+    around_origin = []
+    for i in range(0,number_teeth): 
+        for j in range(0,number_samples):
+            orig = translate_to_origin(teeth_landmarks[i,j])
+            around_origin.append(orig)
+    #print('Len of around_origin', len(around_origin)) # it is n*8
+    # print(around_origin)
+
+    # *** Scale the landmarks to have the norm of the shape equal to 1 *** 
+    
+    # This is the scaled shape of the teeth, centred in the origin
+    scaled_shape_from_means = []
+    for i in range(0,number_teeth):
+        scaled_shape_from_means.append(scale_to_unit(tooth_from_vector_to_matrix(mean_shape[i]), centroids[i]))
+    # print(scaled_shape_from_means)
+    
+    # Flag to break the while loop when the model converges
+    converge = False
+    while not converge:
+        for index, element in enumerate(around_origin):
+            # For each tooth align_teeth_to_mean_shape takes 1 row (n*80) and the scaled_mean for the same tooth
+            around_origin[index] = align_teeth_to_mean_shape(tooth_from_matrix_to_vector(around_origin[index]), tooth_from_matrix_to_vector(scaled_shape_from_means[index]))
+            break
+        break     
+            
+        
+        
+        
+        
+        
