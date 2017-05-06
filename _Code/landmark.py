@@ -52,53 +52,16 @@ class Landmarks():
     def as_matrix(self):
         
         return self.points
-        
-def compute_centroid(points, weights=None):
-        
-        # Transform the array in a matrix 
-        #i = 0
-        #points = []
-        #while i < len(landmark)-1: # -1 because then I add +1
-        #    points.append([float(landmark[i]), float(landmark[i+1])])
-        #    i += 2 # To go to the next couple
-        #points = np.array(points)
-    
-        if weights is None:
-            centroid = np.mean(points, axis=0)
-        else: 
-            # len(points[0]) is 2
-            centroid = np.zeros((1, len(points[0])))
-            for ind in range(len(points)): # len(points) is 40, so for each pair 
-                centroid += points[ind, :] * weights[ind]
-        return centroid 
-        
-def translate_to_origin(landmark, weights=None):
-    
-        # Transform the array in a matrix 
-        i = 0
-        points = []
-        while i < len(landmark)-1: # -1 because then I add +1
-            points.append([float(landmark[i]), float(landmark[i+1])])
-            i += 2 # To go to the next couple
-        points = np.array(points)
-    
-        if weights is None:
-            centroid = np.mean(points, axis=0)
-        else: 
-            centroid = np.zeros((1, len(points[0])))
-            for ind in range(len(points)):
-                centroid += points[ind, :] * weights[ind]
-            #in case when sum of weights doesn't correspond to 1
-            centroid = centroid.dot(1. / weights.sum()) # Normalizing 
-            
-        points = points - centroid
-
-        #update_centroid
-        #old_centroid = centroid
-        centroid = compute_centroid(points, weights)
-        
-        print(points)
-        return points
+                                                    
+def compute_mean(tooth):
+    """
+    Computes the mean for a tooth, over all the samples stored 
+    Parameter:
+        tooth; number_sample * 80 matrix, containing 80 landmark points for each sample 
+    """
+    t = tooth.transpose()
+    mean_points = np.mean(t, axis = 0)
+    return mean_points
 
 def render_landmark(landmark):
         
@@ -149,3 +112,18 @@ def render_landmark_over_image(img, landmark):
     cv2.destroyAllWindows()
     
     return img
+    
+def translate_to_origin(landmarks):
+    """
+    Translates the landmark points so that the centre of gravitiy of this
+    shape is at the origin.
+    """
+    i = 0
+    points = []
+    while i<len(landmarks)-1:
+        points.append([landmarks[i],landmarks[i+1]])
+        i = i+2
+    centroid = np.mean(points, axis=0)
+    points = points - centroid
+    
+    return points
