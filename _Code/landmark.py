@@ -117,6 +117,17 @@ def rotate(element, theta):
     #element = points + centroid
     
     return rotated_element
+    
+def scale(element,value):
+    """
+    Rescale element by given value
+    """
+    #centroid  = np.mean(element, axis=0)
+    #Elem is already centered to 0 right??? If not, change code to something like this\/
+    #points = (self.points - centroid).dot(factor) + centroid
+    e = element.dot(value)
+
+    return e
  
 def align_teeth_to_mean_shape(elem, mean):
     t, s, theta = get_aligning_parameters(elem, mean)
@@ -124,19 +135,31 @@ def align_teeth_to_mean_shape(elem, mean):
     print('elem shape', elem.shape)
     print('mean shape', mean.shape)    
     rotated_element = rotate(elem, theta)
+    scaled = scale(rotated_element,s)
     
     print('ELEM')
     print(elem)
     print('ROT_ELEM')
     print(rotated_element)
+    print('SCALED')
+    print(scaled)
     
 def get_aligning_parameters(element, scaled_mean):
     """
     Finds the best parameters to align the two shapes. 
     Based on: "An Introduction to Active Shape Model"
     Parameters:
-        element; n_teeth*80
-        scaled_mean; 
+        element; 1*80
+        scaled_mean; 1*80
+        
+    When we want to scale and rotate element by (s, theta) the optimal way ( minimizing 
+    |s*A*element - scaled_mean|). 
+    
+    --- A performs a rotation and of element by theta)
+    --- s^2 = a^2+b^2
+        a = element*scaled_mean/|element|^2
+        b = sum( [element(i,0)*scaled_mean(i,1) - element(i,1)*scaled_mean(i,0)]/|element|^2)
+        sigma = arctan(b/a)
     """
     l1 = len(element)/2
     l2 = len(scaled_mean)/2
@@ -147,11 +170,11 @@ def get_aligning_parameters(element, scaled_mean):
     element = [x - x1_centroid[0] for x in element[:l1]] + [y - x1_centroid[1] for y in element[l1:]]
     scaled_mean = [x - x2_centroid[0] for x in scaled_mean[:l2]] + [y - x2_centroid[1] for y in scaled_mean[l2:]]
     
-    # a = (x1.x2)/|x1|^2
+    # a = element*scaled_mean/|element|^2
     norm_x1_sq = (np.linalg.norm(element)**2)
     a = np.dot(element, scaled_mean) / norm_x1_sq
 
-    # b = sum_1->l2(x1_i*y2_i - y1_i*x2_i)/|x1|^2
+    # b = sum( [element(i,0)*scaled_mean(i,1) - element(i,1)*scaled_mean(i,0)]/|element|^2)
     b = (np.dot(element[:l1], scaled_mean[l2:]) - np.dot(element[l1:], scaled_mean[:l2])) / norm_x1_sq
 
     # s^2 = a^2 + b^2
