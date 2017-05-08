@@ -94,6 +94,11 @@ if __name__ == '__main__':
     #print_landmarks_over_radiographs(teeth_landmarks)
     
     # *** Compute the centroids from the landmarks ***
+    
+    """ WE ARE DOING THE WRONG THING HERE, teeth_landmarks[i] RETURNS
+        ALL THE TEETH FROM ONE PERSON 
+        
+    WE WANT TO BUILD THE MODEL FOR A TYPE OF TOOTH NOT FOR A PERSON! """
     centroids = []
     for i in range(0,number_teeth):
         centroids.append(compute_centroids(teeth_landmarks[i]))

@@ -46,15 +46,17 @@ class Landmarks():
         self.points = np.array(self.points)
 
     def as_vector(self):
-        
+        #Possibly can be removed
         return np.hstack(self.points)
         
     def as_matrix(self):
-        
+        #Possibly can be removed -- Pretty sure this is wrong
         return self.points
         
 def tooth_from_vector_to_matrix(vector):
-    # Transform the array in a matrix 
+    # Transform the array into a matrix 
+    """Original: [ x1, y1, x2, y2, x3, y3 ... ] 
+       Result  : [ [x1 y1] ,  [x2 y2],  [x3 y3] ... ]  """
     i = 0
     points = []
     while i < len(vector)-1: # -1 because then I add +1
@@ -96,6 +98,22 @@ def compute_centroids(tooth):
     mean_tooth = tooth_from_vector_to_matrix(mean_tooth)
     centroid = np.mean(mean_tooth, axis = 0,)
     return centroid 
+    
+def get_centroid(points):
+        """
+        Returns the center of mass [x, y] of this shape.
+        
+        """
+        return np.mean(points, axis=0)
+
+def get_center(points):
+    """
+    Returns the center [x,y] of this shape.
+    
+    """
+    vertical_size = points[:, 1].min() + (points[:, 1].max() - points[:, 1].min())/2
+    horizontal_size = points[:, 0].min() + (points[:, 0].max() - points[:, 0].min())/2
+    return [horizontal_size,vertical_size]
 
 def translate_to_origin(landmarks):
     """
