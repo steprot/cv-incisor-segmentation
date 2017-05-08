@@ -97,7 +97,8 @@ if __name__ == '__main__':
     
     """ teeth_landmarks[i] RETURNS ALL THE TEETH FROM ONE sample ! """
     
-    centroids = []
+    centroids = [] # Contains the centers of the means, not the individual tooth
+    
     for i in range(0,number_teeth):
         #centroids.append(compute_centroids(teeth_landmarks[i]))
         centroids.append(compute_centroids(teeth_landmarks[i]))
@@ -106,7 +107,7 @@ if __name__ == '__main__':
     # *** Compute the mean_shape from the landmarks ***
     mean_shape = []
     for i in range(0,number_teeth):
-        mean_shape.append(np.mean(teeth_landmarks[0], axis = 0))
+        mean_shape.append(np.mean(teeth_landmarks[i], axis = 0))
     #print('Len of mean_shape', len(mean_shape)) # it is 8
     # print(mean_shape)
     
@@ -133,7 +134,7 @@ if __name__ == '__main__':
         for index, element in enumerate(around_origin):
             # For each tooth align_teeth_to_mean_shape takes 1 row (n*80) and the scaled_mean for the same tooth
             around_origin[index] = align_teeth_to_mean_shape(tooth_from_matrix_to_vector(around_origin[index]), tooth_from_matrix_to_vector(scaled_shape_from_means[index]))
-            print(around_origin[index] )
+            #print(around_origin[index] )
             break
         break     
             

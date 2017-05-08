@@ -103,11 +103,11 @@ def compute_centroids(tooth):
     return centroid 
     
 def get_tooth_centroid(points):
-        """
+    """
         Returns the center of mass [x, y] of this shape.
         
-        """
-        return np.mean(points, axis=0)
+    """
+    return np.mean(points, axis=0)
 
 def get_tooth_center(points):
     """
@@ -141,11 +141,14 @@ def scale_to_unit(tooth, centroid):
     return points
     
 def rotate(element, theta):
+    
+    """ shouldn't np.mean(element) be 0?"""
     # create rotation matrix
     rotation_matrix = np.array([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
 
     # apply rotation on each landmark point
     #centroid = np.mean(element, axis=0)
+    #print centroid
     #tmp_points = element - centroid
     
     element = tooth_from_vector_to_matrix(element)
