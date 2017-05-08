@@ -91,22 +91,25 @@ def tooth_from_matrix_to_vector(vector):
                                                     
 def compute_centroids(tooth):
     """ 
-    Compute the centroid as the mean point of all the teeth, and then the mean
-    value of x and y of the mean point 
+    Input: An array of all the samples for the tooth i
+    
+    Compute first a mean "shape" which is the mean of each point representing a 
+    point in the the contour. Than get the mean of the x,y values to get the centroid
+    
     """
     mean_tooth = np.mean(tooth, axis = 0)
     mean_tooth = tooth_from_vector_to_matrix(mean_tooth)
     centroid = np.mean(mean_tooth, axis = 0,)
     return centroid 
     
-def get_centroid(points):
+def get_tooth_centroid(points):
         """
         Returns the center of mass [x, y] of this shape.
         
         """
         return np.mean(points, axis=0)
 
-def get_center(points):
+def get_tooth_center(points):
     """
     Returns the center [x,y] of this shape.
     

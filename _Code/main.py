@@ -95,12 +95,11 @@ if __name__ == '__main__':
     
     # *** Compute the centroids from the landmarks ***
     
-    """ WE ARE DOING THE WRONG THING HERE, teeth_landmarks[i] RETURNS
-        ALL THE TEETH FROM ONE PERSON 
-        
-    WE WANT TO BUILD THE MODEL FOR A TYPE OF TOOTH NOT FOR A PERSON! """
+    """ teeth_landmarks[i] RETURNS ALL THE TEETH FROM ONE sample ! """
+    
     centroids = []
     for i in range(0,number_teeth):
+        #centroids.append(compute_centroids(teeth_landmarks[i]))
         centroids.append(compute_centroids(teeth_landmarks[i]))
     #print('Len of centroids', len(centroids)) # it is 8
     
