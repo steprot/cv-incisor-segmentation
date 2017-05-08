@@ -130,16 +130,42 @@ if __name__ == '__main__':
     
     # Flag to break the while loop when the model converges
     converge = False
+    #pa_result = np.zeros_like(around_origin)# Generalized Procrustes Analysis results
+    pa_result = []
     while not converge:
         for index, element in enumerate(around_origin):
             # For each tooth align_teeth_to_mean_shape takes 1 row (n*80) and the scaled_mean for the same tooth
-            around_origin[index] = align_teeth_to_mean_shape(tooth_from_matrix_to_vector(around_origin[index]), tooth_from_matrix_to_vector(scaled_shape_from_means[index]))
+            #around_origin[index] = align_teeth_to_mean_shape(tooth_from_matrix_to_vector(around_origin[index]), tooth_from_matrix_to_vector(scaled_shape_from_means[index]))
+            
+            """I get different results if I do the two things below, why?"""
+            #pa_result[index] = align_teeth_to_mean_shape(tooth_from_matrix_to_vector(around_origin[index]), tooth_from_matrix_to_vector(scaled_shape_from_means[index]))
+            pa_result.append(align_teeth_to_mean_shape(tooth_from_matrix_to_vector(around_origin[index]), tooth_from_matrix_to_vector(scaled_shape_from_means[index])))
             #print(around_origin[index] )
             break
         break     
-            
-        
-        
+   
+    # Do PCA
+     
+    # Covariance matrix  
+    """ Error when creating covariance matrix"""
+    #TODO -- Needs to be corrected
+    print(pa_result)
+    pa_result_matrix = []
+    for i in range(len(pa_result)):
+        pa_result_matrix.append(tooth_from_vector_to_matrix(pa_result[i]))
+    print(pa_result_matrix)
+    C = np.cov(pa_result_matrix, rowvar=0)
+    
+    eigvals, eigvecs = np.linalg.eigh(C) # Get eigenvalues and eigenvectors
+    indeces = np.argsort(-eigvals)   # Sort them in descending order
+    eigvals = eigvals[indeces]
+    eigvecs = eigvecs[:, indeces]
+    
+    scores = np.dot(pa_result_matrix, eigvecs)
+    mean_scores = np.dot(mean_shape, eigvecs)
+    variance = np.cumsum(eigvals/np.sum(eigvals))
+    
+    print scores, mean_scores, variance
         
         
         

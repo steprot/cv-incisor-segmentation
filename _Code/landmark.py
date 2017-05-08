@@ -194,9 +194,9 @@ def align_teeth_to_mean_shape(elem, mean):
     #print scaled
     #print mean
     xx = np.dot(tooth_from_matrix_to_vector(scaled), mean)
-    print xx
+    #print xx
     result = (tooth_from_matrix_to_vector(scaled))/xx
-    print(result)
+    #print(result)
     
     return result
     
