@@ -63,20 +63,29 @@ def tooth_from_vector_to_matrix(vector):
     points = np.array(points)
     return points
     
+#def tooth_from_matrix_to_vector(vector):
+#    """Original: [ [x1 y1] ,  [x2 y2],  [x3 y3] ... ] 
+#       Result  : [ x1, y1, x2, y2, x3, y3 ... ] """
+#    # Transform the matrix in an array by brushing the first list together    
+#    i = 0
+#    points = []
+#
+#    x=len(vector)
+#
+#    while i < x:
+#        points.append(float(vector[i,0]))
+#        points.append(float(vector[i,1]))
+#        i += 1 
+#    
+#    return points
+    
 def tooth_from_matrix_to_vector(vector):
-    # Transform the matrix in an array    
-    i = 0
-    points = []
-
-    x=len(vector)
-
-    while i < x:
-        points.append(float(vector[i,0]))
-        points.append(float(vector[i,1]))
-        i += 1 
-    
+    # Transform the matrix in an array  by appending the second list to the end 
+    # of the first one
+    """Original: [ [x1 y1] ,  [x2 y2],  [x3 y3] ... ] 
+       Result  : [ x1, x2, x3,..., y1, y2, y3 ... ] """
+    points = np.hstack(vector)
     return points
-    
                                                     
 def compute_centroids(tooth):
     """ 
