@@ -91,9 +91,6 @@ if __name__ == '__main__':
         
     # ***** Print the teeth_landmarks over radiographs ***** 
     # print_landmarks_over_radiographs(teeth_landmarks)
-
-      
-
     
     
     # ***** Scale landmarks ***** 
@@ -119,11 +116,9 @@ if __name__ == '__main__':
     # ***** Compute the mean_shape from the around origin scaled landmarks *****   
     mean_shape = [] # Matrix of nr of teeth x 80
     for i in range(0, number_teeth):
-        # print_landmarks(np.array(np.mean(around_origin[i], axis = 0)))
         mean_shape.append(np.array(np.mean(around_origin_scaled[i], axis = 0))) # len of mean_shape is 8
     mean_shape = np.array(mean_shape)
-    # print('mean_shape shape', mean_shape.shape) # 8x80
-    # print('mean_shape', mean_shape)
+
     
     
     # ***** Compute the mean_centroids from the landmarks *****
@@ -132,25 +127,9 @@ if __name__ == '__main__':
         mean_centroids.append(get_tooth_centroid(mean_shape[i]))
     mean_centroids = np.array(mean_centroids)
     
-    ## ***** Scale the mean landmarks to have the norm of the shape equal to 1 ***** 
-    #scaled_shape_from_means = []
-    #for i in range(number_teeth):
-    #    scaled_shape_from_means.append(np.array(scale_to_unit(tooth_from_vector_to_matrix(mean_shape[i]), 
-    #                                                          mean_centroids[i]))) # len of scaled_shape_from_means is 8
-    #scaled_shape_from_means = np.array(scaled_shape_from_means)
-    ## Transform the scaled_shape_from_means from 8x40x2 in 8x80
-    #tmp = []
-    #for i in range(number_teeth):
-    #    tmp.append(tooth_from_matrix_to_vector(scaled_shape_from_means[i]))
-    #scaled_shape_from_means = np.array(tmp)
-    ## print('scaled_shape_from_means shape', scaled_shape_from_means.shape)
-    ## print('scaled_shape_from_means', scaled_shape_from_means)
-    
     # ***** Do the Generalized Procrustes Analysis on the landmarks ***** 
-    
     while True:
         
-        print()
         #Alligne shapes
         aligned_shape = np.copy(around_origin_scaled) # we don't need the copy, we will update it in the for loops with the aligned shapes
         for i in range(0, number_teeth):
@@ -178,38 +157,8 @@ if __name__ == '__main__':
         mean_shape = new_mean_shape
         print('Still looping :/ ')
         
+    print_landmarks_over_radiographs(aligned_shape)
     
-    
-#    # ***** Do the Generalized Procrustes Analysis on the landmarks ***** 
-#    converge = False # Flag to break the while loop when the model converges
-#    pa_result = [] # Procrustes Analysis result
-#    ''' this is just the first round, to create the pa_result list. then in the while loop we can update it, there are already the indexes '''
-#    for i in range(number_teeth):
-#        pa_result_row = []
-#        for j in range(number_samples):
-#            pa_result_row.append(np.array(align_teeth_to_mean_shape(around_origin_scaled[i,j], 
-#                                            tooth_from_matrix_to_vector(scaled_shape_from_means[i]))))
-#        pa_result.append(np.array(pa_result_row))
-#    pa_result = np.array(pa_result)
-#    # print('pa_result shape', pa_result.shape) 8xnx80
-#                                                                    
-#    # Till there is not convergence;
-#    while not converge:
-#        # scaled_shape_from_means and new_scaled_shape_from_means they have the same shape
-#        # Compute the new_mean from the values just obtained. 
-#        new_scaled_shape_from_means = compute_new_mean_shape(pa_result, number_teeth, number_samples)
-#    
-#        print('Diffeneces: ', scaled_shape_from_means - new_scaled_shape_from_means)
-#        if (scaled_shape_from_means - new_scaled_shape_from_means < 1e-3).all():
-#            converge = True
-#
-#            print('fine ciclo while')
-#            break
-            
-    # print('pa_result shape', pa_result.shape)
-    
-    # plot_procrustes(scaled_shape_from_means[0], pa_result[0], incisor_nr=0, save=False)
-      
     # ***** Do PCA *****
     # Covariance matrix  
     """ Error when creating covariance matrix"""
