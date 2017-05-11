@@ -95,17 +95,17 @@ def tooth_from_matrix_to_vector(vector):
     points = np.hstack(vector)
     return points
                                                     
-def compute_centroids(tooth):
-    """ 
-        Input: An array of all the samples for the tooth i
-    
-        Compute first a mean "shape" which is the mean of each point representing a 
-        point in the the contour. Than get the mean of the x,y values to get the centroid
-    """
-    mean_tooth = np.mean(tooth, axis = 0)
-    mean_tooth = tooth_from_vector_to_matrix(mean_tooth)
-    centroid = np.mean(mean_tooth, axis = 0,)
-    return centroid 
+#def compute_centroids(tooth):
+#    """ 
+#        Input: An array of all the samples for the tooth i
+#    
+#        Compute first a mean "shape" which is the mean of each point representing a 
+#        point in the the contour. Than get the mean of the x,y values to get the centroid
+#    """
+#    mean_tooth = np.mean(tooth, axis = 0)
+#    mean_tooth = tooth_from_vector_to_matrix(mean_tooth)
+#    centroid = np.mean(mean_tooth, axis = 0,)
+#    return centroid 
     
 def get_tooth_centroid(points):
     """
@@ -266,19 +266,7 @@ def compute_new_mean_shape(aligned_teeth, number_teeth, number_samples):
     
     # print('new_mean shape', new_mean.shape)
     return new_mean
-    
-    #teeth = np.zeros((number_teeth, number_samples, 80))
-    #for tooth_ind in range(number_teeth):
-    #    for sample_ind in range(number_samples):
-    #        teeth[tooth_ind, sample_ind] = aligned_teeth[sample_ind*number_teeth + tooth_ind]
-    #        print('aligned teeth fatta', sample_ind, tooth_ind, aligned_teeth[sample_ind*number_teeth + tooth_ind].shape) 
-    ## print('teeth shape', teeth.shape) # 8*n*80
-    #mean_teeth = np.mean(teeth, axis = 1) 
-    ## print('mean_teeth shape', mean_teeth.shape) # 8*80
-    #new_mean = []
-    #for i in range(number_teeth):
-    #    new_mean.append(tooth_from_vector_to_matrix(mean_teeth[i]))
-    #return new_mean
+
 
 def render_landmark(landmark):
         

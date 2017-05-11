@@ -4,7 +4,7 @@ import cv2.cv as cv
 import os
 import numpy as np
 import fnmatch
-from landmark import Landmarks, render_landmark_over_image, translate_to_origin, compute_centroids, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector, compute_new_mean_shape, get_tooth_centroid, plot_procrustes
+from landmark import Landmarks, render_landmark_over_image, translate_to_origin, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector, compute_new_mean_shape, get_tooth_centroid, plot_procrustes
 
 '''
     Prints teeth's landmark points over the radiographs.
@@ -91,90 +91,121 @@ if __name__ == '__main__':
         
     # ***** Print the teeth_landmarks over radiographs ***** 
     # print_landmarks_over_radiographs(teeth_landmarks)
-    
-    """ teeth_landmarks[i] RETURNS ALL THE TEETH FROM ONE sample ! """
-    # ***** Compute the mean_centroids from the landmarks *****
-    mean_centroids = [] # Contains the centers of the means, not the individual tooth
-    for i in range(0, number_teeth):
-        mean_centroids.append(compute_centroids(teeth_landmarks[i])) # len of mean_centroids is 8
-    # print(mean_centroids)
+
       
-    # ***** Translate the landmarks around the origin *****
-    around_origin = []
+
+    
+    
+    # ***** Scale landmarks ***** 
+    scaled = []
+    for i in range(number_teeth):
+        scaled_row = []
+        for j in range(number_samples):
+            scaled_row.append(np.array(tooth_from_matrix_to_vector(scale_to_unit(tooth_from_vector_to_matrix(teeth_landmarks[i,j]), get_tooth_centroid(teeth_landmarks[i,j])))))
+        scaled.append(np.array(scaled_row))
+    scaled =  np.array(scaled)
+
+    
+    # ***** Translate the scaled lendmarks around the origin *****
+    around_origin_scaled = []
     for i in range(0, number_teeth): 
         around_origin_row = []
         for j in range(0, number_samples):
-            around_origin_row.append(tooth_from_matrix_to_vector(np.array(translate_to_origin(teeth_landmarks[i,j]))))
-        around_origin.append(np.array(around_origin_row))
-    around_origin = np.array(around_origin) # shape of around_origin is 8xnx80
-    # print('around_origin shape', around_origin.shape)
+            around_origin_row.append(tooth_from_matrix_to_vector(np.array(translate_to_origin(scaled[i,j]))))
+        around_origin_scaled.append(np.array(around_origin_row))
+    around_origin_scaled = np.array(around_origin_scaled) # shape of around_origin is 8xnx80
     
-    # ***** Compute the mean_shape from the around origin landmarks *****   
-    mean_shape = []
+    
+    # ***** Compute the mean_shape from the around origin scaled landmarks *****   
+    mean_shape = [] # Matrix of nr of teeth x 80
     for i in range(0, number_teeth):
         # print_landmarks(np.array(np.mean(around_origin[i], axis = 0)))
-        mean_shape.append(np.array(np.mean(around_origin[i], axis = 0))) # len of mean_shape is 8
+        mean_shape.append(np.array(np.mean(around_origin_scaled[i], axis = 0))) # len of mean_shape is 8
     mean_shape = np.array(mean_shape)
     # print('mean_shape shape', mean_shape.shape) # 8x80
     # print('mean_shape', mean_shape)
-
-    # ***** Scale the mean landmarks to have the norm of the shape equal to 1 ***** 
-    scaled_shape_from_means = []
-    for i in range(number_teeth):
-        scaled_shape_from_means.append(np.array(scale_to_unit(tooth_from_vector_to_matrix(mean_shape[i]), mean_centroids[i]))) # len of scaled_shape_from_means is 8
-    scaled_shape_from_means = np.array(scaled_shape_from_means)
-    # Transform the scaled_shape_from_means from 8x40x2 in 8x80
-    tmp = []
-    for i in range(number_teeth):
-        tmp.append(tooth_from_matrix_to_vector(scaled_shape_from_means[i]))
-    scaled_shape_from_means = np.array(tmp)
-    # print('scaled_shape_from_means shape', scaled_shape_from_means.shape)
-    # print('scaled_shape_from_means', scaled_shape_from_means)
     
-    # ***** Scale also all the other points ***** 
-    around_origin_scaled = []
-    for i in range(number_teeth):
-        around_origin_scaled_row = []
-        for j in range(number_samples):
-            around_origin_scaled_row.append(np.array(tooth_from_matrix_to_vector(scale_to_unit(tooth_from_vector_to_matrix(around_origin[i,j]), get_tooth_centroid(around_origin[i,j])))))
-        around_origin_scaled.append(np.array(around_origin_scaled_row))
-    around_origin_scaled =  np.array(around_origin_scaled)
-    # print('around_origin_scaled shape', around_origin_scaled.shape)
-        
+    
+    # ***** Compute the mean_centroids from the landmarks *****
+    mean_centroids = [] # Contains the centroids of the mean shape
+    for i in range(0, number_teeth):
+        mean_centroids.append(get_tooth_centroid(mean_shape[i]))
+    mean_centroids = np.array(mean_centroids)
+    
+    ## ***** Scale the mean landmarks to have the norm of the shape equal to 1 ***** 
+    #scaled_shape_from_means = []
+    #for i in range(number_teeth):
+    #    scaled_shape_from_means.append(np.array(scale_to_unit(tooth_from_vector_to_matrix(mean_shape[i]), 
+    #                                                          mean_centroids[i]))) # len of scaled_shape_from_means is 8
+    #scaled_shape_from_means = np.array(scaled_shape_from_means)
+    ## Transform the scaled_shape_from_means from 8x40x2 in 8x80
+    #tmp = []
+    #for i in range(number_teeth):
+    #    tmp.append(tooth_from_matrix_to_vector(scaled_shape_from_means[i]))
+    #scaled_shape_from_means = np.array(tmp)
+    ## print('scaled_shape_from_means shape', scaled_shape_from_means.shape)
+    ## print('scaled_shape_from_means', scaled_shape_from_means)
+    
     # ***** Do the Generalized Procrustes Analysis on the landmarks ***** 
-    converge = False # Flag to break the while loop when the model converges
-    pa_result = []
-    ''' this is just the first round, to create the pa_result list. then in the while loop we can update it, there are already the indexes '''
-    for i in range(number_teeth):
-        pa_result_row = []
-        for j in range(number_samples):
-            pa_result_row.append(np.array(align_teeth_to_mean_shape(around_origin_scaled[i,j], 
-                                                                tooth_from_matrix_to_vector(scaled_shape_from_means[i]))))
-        pa_result.append(np.array(pa_result_row))
-    pa_result = np.array(pa_result)
-    # print('pa_result shape', pa_result.shape) 8xnx80
-                                                                    
-    # Till there is not convergence, it always goes through the first round 
-    while not converge:
-        # scaled_shape_from_means and new_scaled_shape_from_means they have the same shape
-        # Compute the new_mean from the values just obtained. 
-        new_scaled_shape_from_means = compute_new_mean_shape(pa_result, number_teeth, number_samples)
-
-        if (scaled_shape_from_means - new_scaled_shape_from_means < 1e-10).all():
-            converge = True
-            print('fine ciclo while')
+    
+    while True:
+        
+        print()
+        #Alligne shapes
+        aligned_shape = np.copy(around_origin_scaled) # we don't need the copy, we will update it in the for loops with the aligned shapes
+        for i in range(0, number_teeth):
+            for j in range(0, number_samples):
+                aligned_shape[i,j] = align_teeth_to_mean_shape(around_origin_scaled[i,j], mean_shape[i] )
+        
+        #Calculate new mean
+        new_mean_shape = [] # Matrix of nr of teeth x 80
+        for i in range(0, number_teeth):
+        # print_landmarks(np.array(np.mean(around_origin[i], axis = 0)))
+            new_mean_shape.append(np.array(np.mean(aligned_shape[i], axis = 0))) # len of mean_shape is 8
+        new_mean_shape = np.array(new_mean_shape)
+        
+        
+        
+        # Scaleing and translating new mean shapes
+        for i in range(0, number_teeth):
+            new_mean_shape[i] = scale_to_unit(new_mean_shape[i], get_tooth_centroid((new_mean_shape[i])))
+            new_mean_shape[i] = tooth_from_matrix_to_vector(translate_to_origin(new_mean_shape[i]))
+        
+        if (mean_shape - new_mean_shape < 1e-10).all():
+            print('Yeyy it works!')
             break
-        else:
-            scaled_shape_from_means = new_scaled_shape_from_means
-            # Align the new shapes to the new_scaled_shape_from_means
-            for i in range(number_teeth):
-                pa_result_row = []
-                for j in range(number_samples):
-                    tmp = translate_to_origin(align_teeth_to_mean_shape(pa_result[i,j], scaled_shape_from_means[i]))
-                    # Also scale the result 
-                    pa_result[i,j] = tooth_from_matrix_to_vector(scale_to_unit(tmp, get_tooth_centroid(tmp)))
-            print('else cycle')
-            break
+        
+        mean_shape = new_mean_shape
+        print('Still looping :/ ')
+        
+    
+    
+#    # ***** Do the Generalized Procrustes Analysis on the landmarks ***** 
+#    converge = False # Flag to break the while loop when the model converges
+#    pa_result = [] # Procrustes Analysis result
+#    ''' this is just the first round, to create the pa_result list. then in the while loop we can update it, there are already the indexes '''
+#    for i in range(number_teeth):
+#        pa_result_row = []
+#        for j in range(number_samples):
+#            pa_result_row.append(np.array(align_teeth_to_mean_shape(around_origin_scaled[i,j], 
+#                                            tooth_from_matrix_to_vector(scaled_shape_from_means[i]))))
+#        pa_result.append(np.array(pa_result_row))
+#    pa_result = np.array(pa_result)
+#    # print('pa_result shape', pa_result.shape) 8xnx80
+#                                                                    
+#    # Till there is not convergence;
+#    while not converge:
+#        # scaled_shape_from_means and new_scaled_shape_from_means they have the same shape
+#        # Compute the new_mean from the values just obtained. 
+#        new_scaled_shape_from_means = compute_new_mean_shape(pa_result, number_teeth, number_samples)
+#    
+#        print('Diffeneces: ', scaled_shape_from_means - new_scaled_shape_from_means)
+#        if (scaled_shape_from_means - new_scaled_shape_from_means < 1e-3).all():
+#            converge = True
+#
+#            print('fine ciclo while')
+#            break
+            
     # print('pa_result shape', pa_result.shape)
     
     # plot_procrustes(scaled_shape_from_means[0], pa_result[0], incisor_nr=0, save=False)
@@ -188,24 +219,24 @@ if __name__ == '__main__':
     #for i in range(len(pa_result)):
     #    pa_result_matrix.append(tooth_from_vector_to_matrix(pa_result[i]))
         
-    pa_result_matrix = np.zeros((number_teeth, number_samples, 80))
-    for tooth_ind in range(number_teeth):
-        for sample_ind in range(number_samples):
-            pa_result_matrix[tooth_ind, sample_ind] = pa_result[sample_ind*number_teeth + tooth_ind]
-       
-    # Create the covariance matrix  
-    C = np.cov(pa_result_matrix, rowvar=0)
-    
-    eigvals, eigvecs = np.linalg.eigh(C) # Get eigenvalues and eigenvectors
-    indeces = np.argsort(-eigvals)   # Sort them in descending order
-    eigvals = eigvals[indeces]
-    eigvecs = eigvecs[:, indeces]
-    
-    scores = np.dot(pa_result_matrix, eigvecs)
-    mean_scores = np.dot(mean_shape, eigvecs)
-    variance = np.cumsum(eigvals/np.sum(eigvals))
-    
-    print scores, mean_scores, variance
-        
+    #pa_result_matrix = np.zeros((number_teeth, number_samples, 80))
+    #for tooth_ind in range(number_teeth):
+    #    for sample_ind in range(number_samples):
+    #        pa_result_matrix[tooth_ind, sample_ind] = pa_result[sample_ind*number_teeth + tooth_ind]
+    #   
+    ## Create the covariance matrix  
+    #C = np.cov(pa_result_matrix, rowvar=0)
+    #
+    #eigvals, eigvecs = np.linalg.eigh(C) # Get eigenvalues and eigenvectors
+    #indeces = np.argsort(-eigvals)   # Sort them in descending order
+    #eigvals = eigvals[indeces]
+    #eigvecs = eigvecs[:, indeces]
+    #
+    #scores = np.dot(pa_result_matrix, eigvecs)
+    #mean_scores = np.dot(mean_shape, eigvecs)
+    #variance = np.cumsum(eigvals/np.sum(eigvals))
+    #
+    #print scores, mean_scores, variance
+    #    
         
         
