@@ -5,6 +5,7 @@ import os
 import numpy as np
 import fnmatch
 from landmark import Landmarks, render_landmark_over_image, translate_to_origin, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector, compute_new_mean_shape, get_tooth_centroid, plot_procrustes
+from sklearn.decomposition import PCA
 
 '''
     Prints teeth's landmark points over the radiographs.
@@ -156,36 +157,39 @@ if __name__ == '__main__':
         
         mean_shape = new_mean_shape
         print('Still looping :/ ')
-        
-    print_landmarks_over_radiographs(aligned_shape)
     
     # ***** Do PCA *****
     # Covariance matrix  
-    """ Error when creating covariance matrix"""
-    #TODO -- Needs to be corrected
     
-    #pa_result_matrix = []
-    #for i in range(len(pa_result)):
-    #    pa_result_matrix.append(tooth_from_vector_to_matrix(pa_result[i]))
+    print(aligned_shape.shape)
+    
+    aligned_shape_matrix = np.copy(aligned_shape)
+    #for i in range(number_teeth):
+    #    aligned_shape_matrix_row = []
+    #    for j in range(number_samples):
+    #        aligned_shape_matrix_row.append(tooth_from_vector_to_matrix(aligned_shape[i,j]).T)
+    #    aligned_shape_matrix.append(np.array(aligned_shape_matrix_row))
+    #aligned_shape_matrix = np.asarray(aligned_shape_matrix)
+    
+    for i in range(len(aligned_shape)):
+        #print(aligned_shape_matrix[i].shape)
+        #C = np.cov(aligned_shape_matrix[i], rowvar=0)
+        #print('C:' , C)
+        #print(C.shape)
+        #    
+        #eigvals, eigvecs = np.linalg.eigh(C) # Get eigenvalues and eigenvectors
+        #indeces = np.argsort(-eigvals)   # Sort them in descending order
+        #eigvals = eigvals[indeces]
+        #eigvecs = eigvecs[:, indeces]
+        #    
+        #scores = np.dot(aligned_shape_matrix, eigvecs)
+        #mean_scores = np.dot(mean_shape, eigvecs)
+        #variance = np.cumsum(eigvals/np.sum(eigvals))
+        #    
+        #print scores, mean_scores, variance
         
-    #pa_result_matrix = np.zeros((number_teeth, number_samples, 80))
-    #for tooth_ind in range(number_teeth):
-    #    for sample_ind in range(number_samples):
-    #        pa_result_matrix[tooth_ind, sample_ind] = pa_result[sample_ind*number_teeth + tooth_ind]
-    #   
-    ## Create the covariance matrix  
-    #C = np.cov(pa_result_matrix, rowvar=0)
-    #
-    #eigvals, eigvecs = np.linalg.eigh(C) # Get eigenvalues and eigenvectors
-    #indeces = np.argsort(-eigvals)   # Sort them in descending order
-    #eigvals = eigvals[indeces]
-    #eigvecs = eigvecs[:, indeces]
-    #
-    #scores = np.dot(pa_result_matrix, eigvecs)
-    #mean_scores = np.dot(mean_shape, eigvecs)
-    #variance = np.cumsum(eigvals/np.sum(eigvals))
-    #
-    #print scores, mean_scores, variance
-    #    
-        
-        
+        pca_res = PCA(n_components = 3, 80) # Maybe we should set the nr of components 
+        pca_res.fit(aligned_shape[i])
+        np.asarray(pca_res.components_)
+        #print (pca_res.explained_variance_ratio_, pca_res.components_, pca_res.mean_)
+        print(pca_res.explained_variance_ratio_)        
