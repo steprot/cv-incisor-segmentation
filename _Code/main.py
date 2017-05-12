@@ -63,7 +63,7 @@ if __name__ == '__main__':
     
     # ***** Read the landmarks ******
     number_teeth = 8 
-    number_samples = 3
+    number_samples = 14
     teeth_landmarks = [] # 3D array: 8*number_samples*80
         
     i = 1
@@ -171,25 +171,26 @@ if __name__ == '__main__':
     #    aligned_shape_matrix.append(np.array(aligned_shape_matrix_row))
     #aligned_shape_matrix = np.asarray(aligned_shape_matrix)
     
+    reduced_dim = []
     for i in range(len(aligned_shape)):
-        #print(aligned_shape_matrix[i].shape)
-        #C = np.cov(aligned_shape_matrix[i], rowvar=0)
-        #print('C:' , C)
-        #print(C.shape)
-        #    
-        #eigvals, eigvecs = np.linalg.eigh(C) # Get eigenvalues and eigenvectors
-        #indeces = np.argsort(-eigvals)   # Sort them in descending order
-        #eigvals = eigvals[indeces]
-        #eigvecs = eigvecs[:, indeces]
-        #    
-        #scores = np.dot(aligned_shape_matrix, eigvecs)
-        #mean_scores = np.dot(mean_shape, eigvecs)
-        #variance = np.cumsum(eigvals/np.sum(eigvals))
-        #    
-        #print scores, mean_scores, variance
         
-        pca_res = PCA(n_components = 3, 80) # Maybe we should set the nr of components 
+        #pca_res = PCA(.99) 
+        pca_res = PCA(n_components=8) 
+                           # Instead of setting th nr of components, we make sure 
+                           # that we capture 99% of the variance 
+                           # this gives eigenvectors with different length! for each incisor so 
+                           # it was better to set the nr to a fixed value, 8 cover around 99%
+        # From pca_res we can obtain :
+            # components_
+            # explained_variance_
+            # explained_variance_ratio_
+            # components_
+            # mean_
+            # n_components_
         pca_res.fit(aligned_shape[i])
-        np.asarray(pca_res.components_)
-        #print (pca_res.explained_variance_ratio_, pca_res.components_, pca_res.mean_)
-        print(pca_res.explained_variance_ratio_)        
+        #np.asarray(pca_res.components_)
+
+        reduced_dim.append(pca_res.transform(aligned_shape[i])) # Reduce dimensionality of the training data
+
+    reduced_dim = np.asarray(reduced_dim)
+             
