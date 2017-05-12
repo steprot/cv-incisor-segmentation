@@ -1,0 +1,66 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+
+% Use wide margins, but not quite so wide as fullpage.sty
+\marginparwidth 0.5in 
+\oddsidemargin 0.25in 
+\evensidemargin 0.25in 
+\marginparsep 0.25in
+\topmargin 0.25in 
+\textwidth 6in \textheight 8 in
+
+
+% multirow allows you to combine rows in columns
+\usepackage{multirow}
+% tabularx allows manual tweaking of column width
+\usepackage{tabularx}
+% longtable does better format for tables that span pages
+\usepackage{longtable}
+
+
+\begin{document}
+
+\author{Orsolya Lukacs-Kisbandi \\ Stefano Proto}
+\title{%
+  \textbf{Computer Vision Report } \\
+   Incisor Segmentation }
+
+\maketitle
+
+\section{Introduction}
+
+The aim of this project was to write  an  algorithm  that  is  capable  of  segmenting  the upper and lower incisors in panoramic radiographs  using  a  model  based  approach. The choosen method is called Active Shape Models and it is described in \cite{cootes} Cootes at al. The implemented model can be broken down into sub-parts, namely: Building the model, Preprocessing the input images and Fitting the model on the new image. In addition our observations and experimental results will be discussed in the final part of the report. 
+
+\subsection{Active Shape Model}
+
+The reason we are building an Active Shape Model is to create a more general representation of each incisor, which is not very sensitive to variability, this way allowing to analyse and process complex images such as radiographs. This method is based on a prior model of what is expected to be seen on the new image. In our case these are the incisors, represented with landmarks.
+
+
+\begin{thebibliography}{1}
+\bibitem{cootes} 
+T. Cootes. An introduction to Active Shape Models. In , 
+\textit{Image Processing and Analysis.,}. 
+pages 223–248. 2000.
+ 
+\bibitem{paper2}
+An introduction to Active Shape Models
+
+\bibitem{paper3}
+A statistical method for robust 3D surface reconstruction from sparse data
+
+\bibitem{paper4}
+Model reconstruction 
+%\bibitem{cohnen} 
+%M Cohnen, J Kemper, O M ̈obes, J Pawelzik, and U M ̈odder. Radiation dose in dental radiology.,
+%\textit{European radiology}. 
+%12(3):634–637, 2002
+% 
+%\bibitem{anil} 
+%Anil K Jain and Hong Chen. Matching of dental x-ray images for human identification.,
+%\\\textit{37(7):1519–1532, 2004.}
+
+\end{thebibliography}
+
+\end{document}
