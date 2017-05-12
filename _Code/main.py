@@ -128,6 +128,7 @@ if __name__ == '__main__':
         mean_centroids.append(get_tooth_centroid(mean_shape[i]))
     mean_centroids = np.array(mean_centroids)
     
+    
     # ***** Do the Generalized Procrustes Analysis on the landmarks ***** 
     while True:
         
@@ -140,11 +141,8 @@ if __name__ == '__main__':
         #Calculate new mean
         new_mean_shape = [] # Matrix of nr of teeth x 80
         for i in range(0, number_teeth):
-        # print_landmarks(np.array(np.mean(around_origin[i], axis = 0)))
             new_mean_shape.append(np.array(np.mean(aligned_shape[i], axis = 0))) # len of mean_shape is 8
         new_mean_shape = np.array(new_mean_shape)
-        
-        
         
         # Scaleing and translating new mean shapes
         for i in range(0, number_teeth):
@@ -152,24 +150,12 @@ if __name__ == '__main__':
             new_mean_shape[i] = tooth_from_matrix_to_vector(translate_to_origin(new_mean_shape[i]))
         
         if (mean_shape - new_mean_shape < 1e-10).all():
-            print('Yeyy it works!')
             break
         
         mean_shape = new_mean_shape
-        print('Still looping :/ ')
     
     # ***** Do PCA *****
     # Covariance matrix  
-    
-    print(aligned_shape.shape)
-    
-    aligned_shape_matrix = np.copy(aligned_shape)
-    #for i in range(number_teeth):
-    #    aligned_shape_matrix_row = []
-    #    for j in range(number_samples):
-    #        aligned_shape_matrix_row.append(tooth_from_vector_to_matrix(aligned_shape[i,j]).T)
-    #    aligned_shape_matrix.append(np.array(aligned_shape_matrix_row))
-    #aligned_shape_matrix = np.asarray(aligned_shape_matrix)
     
     reduced_dim = []
     for i in range(len(aligned_shape)):
@@ -188,7 +174,6 @@ if __name__ == '__main__':
             # mean_
             # n_components_
         pca_res.fit(aligned_shape[i])
-        #np.asarray(pca_res.components_)
 
         reduced_dim.append(pca_res.transform(aligned_shape[i])) # Reduce dimensionality of the training data
 

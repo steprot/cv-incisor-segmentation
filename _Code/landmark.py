@@ -70,30 +70,30 @@ def tooth_from_vector_to_matrix(vector):
     points = np.array(points)
     return points
     
-def tooth_from_matrix_to_vector(vector):
-    """Original: [ [x1 y1] ,  [x2 y2],  [x3 y3] ... ] 
-       Result  : [ x1, y1, x2, y2, x3, y3 ... ] """
-    # Transform the matrix in an array by brushing the first list together    
-    i = 0
-    points = []
-
-    x=len(vector)
-
-    while i < x:
-        points.append(float(vector[i,0]))
-        points.append(float(vector[i,1]))
-        i += 1 
-    
-    return points
-    
 #def tooth_from_matrix_to_vector(vector):
-#    # Transform the matrix in an array  by appending the second list to the end 
-#    # of the first one
 #    """Original: [ [x1 y1] ,  [x2 y2],  [x3 y3] ... ] 
-#       Result  : [ x1, x2, x3,..., y1, y2, y3 ... ]
-#    """
-#    points = np.hstack(vector)
+#       Result  : [ x1, y1, x2, y2, x3, y3 ... ] """
+#    # Transform the matrix in an array by brushing the first list together    
+#    i = 0
+#    points = []
+#
+#    x=len(vector)
+#
+#    while i < x:
+#        points.append(float(vector[i,0]))
+#        points.append(float(vector[i,1]))
+#        i += 1 
+#    
 #    return points
+    
+def tooth_from_matrix_to_vector(vector):
+    # Transform the matrix in an array  by appending the second list to the end 
+    # of the first one
+    """Original: [ [x1 y1] ,  [x2 y2],  [x3 y3] ... ] 
+       Result  : [ x1, x2, x3,..., y1, y2, y3 ... ]
+    """
+    points = np.hstack(vector)
+    return points
                                                     
 #def compute_centroids(tooth):
 #    """ 
@@ -390,3 +390,23 @@ def __fit_on_screen(image):
     # find minimum scale to fit image on screen
     scale = min(float(SCREEN_W) / image.shape[1], float(SCREEN_H) / image.shape[0])
     return cv2.resize(image, (int(image.shape[1] * scale), int(image.shape[0] * scale)))
+    
+def lists_to_matrix(data,number_teeth,number_samples):
+    res = []
+    for i in range(number_teeth):
+        row = []
+        for j in range(number_samples):
+            row.append(tooth_from_vector_to_matrix(data[i,j]))
+        res.append(np.array(row))
+    res =  np.array(res)
+    return res
+
+def matrix_to_list(data,number_teeth,number_samples):
+    res = []
+    for i in range(number_teeth):
+        row = []
+        for j in range(number_samples):
+            row.append(tooth_from_matrix_to_vector(data[i,j]))
+        res.append(np.array(row))
+    res =  np.array(res)
+    return res
