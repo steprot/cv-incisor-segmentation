@@ -12,13 +12,6 @@
 \textwidth 6in \textheight 8 in
 
 
-% multirow allows you to combine rows in columns
-\usepackage{multirow}
-% tabularx allows manual tweaking of column width
-\usepackage{tabularx}
-% longtable does better format for tables that span pages
-\usepackage{longtable}
-
 
 \begin{document}
 
@@ -33,9 +26,17 @@
 
 The aim of this project was to write  an  algorithm  that  is  capable  of  segmenting  the upper and lower incisors in panoramic radiographs  using  a  model  based  approach. The choosen method is called Active Shape Models and it is described in \cite{cootes} Cootes at al. The implemented model can be broken down into sub-parts, namely: Building the model, Preprocessing the input images and Fitting the model on the new image. In addition our observations and experimental results will be discussed in the final part of the report. 
 
-\subsection{Active Shape Model}
+\section{Active Shape Model}
 
-The reason we are building an Active Shape Model is to create a more general representation of each incisor, which is not very sensitive to variability, this way allowing to analyse and process complex images such as radiographs. This method is based on a prior model of what is expected to be seen on the new image. In our case these are the incisors, represented with landmarks.
+The reason we are building an Active Shape Model is to create a more general representation of each incisor, which is not very sensitive to variability, this way allowing to analyse and process complex images such as radiographs. This method is based on a prior model of what is expected to be seen on the new image. In our case these are the incisors, represented with landmarks. Based on these landmarks, a general representation of the expected shape is created, which can be used to find the best match of the model in the new image. This model gives a compact representation of the previous knowledge allowing some variation, but being specific enough to not to allow changes which haven't been seen in the training data. The landmarks are points on the training images which represent a distinguishable point which appears on every training example.
+
+\subsection{ Landmarks } % Maybe rename this
+The training set contains samples from several people, for each person every incisor is represented by a set of 40 landmark points describing the shape of the tooth. In order to create the models, the shapes had to be aligned, scaled and centred around the same point. To perform these operations, an iterative approach proposed in \cite{cootes} Cootes et al. was implemented. By doing Generalized Procrustes Analysis iteratively until our model converged to a certain mean, we achieved a general representation of the incisor. The model was considered stable (it converged) when the squared sum of the distance of each shape to the mean was less than $10^{-10}$.
+
+\subsection{Principle Component Analysis}
+
+Principal Component Analysis is a statistical procedure  used to identifying a smaller number of uncorrelated variables, called "principal components", from a large set of data to explain the maximum amount of variance with the fewest number of principal components. In other words, to reduce the dimensionality of the data. This is an improvement both in terms of memory and computational power.\\
+In our case, we set the number of principal components to 8, which covers 99\% of the variance of the data. This way, we reduced the number of landmarks from 40 to 4.
 
 
 \begin{thebibliography}{1}
