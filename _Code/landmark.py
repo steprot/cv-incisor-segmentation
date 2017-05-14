@@ -63,30 +63,30 @@ def tooth_from_vector_to_matrix(vector):
     points = np.array(points)
     return points
     
-#def tooth_from_matrix_to_vector(vector):
-#    """Original: [ [x1 y1] ,  [x2 y2],  [x3 y3] ... ] 
-#       Result  : [ x1, y1, x2, y2, x3, y3 ... ] """
-#    # Transform the matrix in an array by brushing the first list together    
-#    i = 0
-#    points = []
-#
-#    x=len(vector)
-#
-#    while i < x:
-#        points.append(float(vector[i,0]))
-#        points.append(float(vector[i,1]))
-#        i += 1 
-#    
-#    return points
-    
 def tooth_from_matrix_to_vector(vector):
-    # Transform the matrix in an array  by appending the second list to the end 
-    # of the first one
     """Original: [ [x1 y1] ,  [x2 y2],  [x3 y3] ... ] 
-       Result  : [ x1, x2, x3,..., y1, y2, y3 ... ]
-    """
-    points = np.hstack(vector)
+       Result  : [ x1, y1, x2, y2, x3, y3 ... ] """
+    # Transform the matrix in an array by brushing the first list together    
+    i = 0
+    points = []
+
+    x=len(vector)
+
+    while i < x:
+        points.append(float(vector[i,0]))
+        points.append(float(vector[i,1]))
+        i += 1 
+    
     return points
+    
+#def tooth_from_matrix_to_vector(vector):
+#    # Transform the matrix in an array  by appending the second list to the end 
+#    # of the first one
+#    """Original: [ [x1 y1] ,  [x2 y2],  [x3 y3] ... ] 
+#       Result  : [ x1, x2, x3,..., y1, y2, y3 ... ]
+#    """
+#    points = np.hstack(vector)
+#    return points
                                                     
 #def compute_centroids(tooth):
 #    """ 
@@ -172,30 +172,18 @@ def scale(element, value):
  
 def align_teeth_to_mean_shape(elem, mean):
     t, s, theta = get_aligning_parameters(elem, mean)
-    
-    #print('elem shape', elem.shape)
-    #print('mean shape', mean.shape)    
+   
     rotated_element = rotate(elem, theta)
     scaled = scale(rotated_element, s)
-    
-    #print('ELEM')
-    #print(elem)
-    #print('ROT_ELEM')
-    #print(rotated_element)
-    #print('SCALED')
-    #print(scaled)
     
     # project into tangent space by scaling x1 with 1/(x1.x2)
     # tangent space of a manifold facilitates the generalization of vectors from 
     # affine spaces to general manifolds, since in the latter case one cannot 
     # simply subtract two points to obtain a vector that gives the displacement 
     # of the one point from the other
-    #print scaled
-    #print mean
+
     xx = np.dot(tooth_from_matrix_to_vector(scaled), mean)
-    #print xx
     result = (tooth_from_matrix_to_vector(scaled))/xx
-    #print(result)
     
     return result
     
@@ -245,20 +233,20 @@ def get_aligning_parameters(element, scaled_mean):
     #print('result of the align parameters', t, s, theta)
     return t, s, theta
     
-def compute_new_mean_shape(aligned_teeth, number_teeth, number_samples):
-    '''
-        Compute the new mean, starting from the just aligned teeth.
-        aligned_teeth is a list of 24 arrays, each with 80 elements (the landmark points)
-    '''
-    # print('aligned teeth shape', aligned_teeth.shape)
-    
-    new_mean = []
-    for i in range(0, number_teeth):
-        new_mean.append(np.array(np.mean(aligned_teeth[i], axis = 0)))
-    new_mean = np.array(new_mean)
-    
-    # print('new_mean shape', new_mean.shape)
-    return new_mean
+#def compute_new_mean_shape(aligned_teeth, number_teeth, number_samples):
+#    '''
+#        Compute the new mean, starting from the just aligned teeth.
+#        aligned_teeth is a list of 24 arrays, each with 80 elements (the landmark points)
+#    '''
+#    # print('aligned teeth shape', aligned_teeth.shape)
+#    
+#    new_mean = []
+#    for i in range(0, number_teeth):
+#        new_mean.append(np.array(np.mean(aligned_teeth[i], axis = 0)))
+#    new_mean = np.array(new_mean)
+#    
+#    # print('new_mean shape', new_mean.shape)
+#    return new_mean
 
 def lists_to_matrix(data,number_teeth,number_samples):
     res = []
