@@ -4,7 +4,7 @@ import cv2.cv as cv
 import os
 import numpy as np
 import fnmatch
-from landmark import Landmarks, render_landmark_over_image, translate_to_origin, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector, compute_new_mean_shape, get_tooth_centroid, plot_procrustes
+from landmark import Landmarks, translate_to_origin, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector, compute_new_mean_shape, get_tooth_centroid
 from sklearn.decomposition import PCA
 
 '''
@@ -12,20 +12,20 @@ from sklearn.decomposition import PCA
     Parameters: 
          teeth_landmarks; 3D table containing the 80 landmark points per tooth, per sample.
 '''
-def print_landmarks_over_radiographs(teeth_landmarks):
-    i = 0
-    while i < number_samples:
-        j = 0
-        directory = '../_Data/Radiographs/' + str("%02d" % (i+1)) + '.tif'
-        dir_path = os.path.join(os.getcwd(), directory)
-        img = cv2.imread(dir_path)
-        while j < number_teeth:
-            # Call the helper function
-            img = render_landmark_over_image(img, teeth_landmarks[j,i,:])
-            # Go to the next tooth
-            j += 1
-        # Got the next sample   
-        i += 1
+#def print_landmarks_over_radiographs(teeth_landmarks):
+#    i = 0
+#    while i < number_samples:
+#        j = 0
+#        directory = '../_Data/Radiographs/' + str("%02d" % (i+1)) + '.tif'
+#        dir_path = os.path.join(os.getcwd(), directory)
+#        img = cv2.imread(dir_path)
+#        while j < number_teeth:
+#            # Call the helper function
+#            img = render_landmark_over_image(img, teeth_landmarks[j,i,:])
+#            # Go to the next tooth
+#            j += 1
+#        # Got the next sample   
+#        i += 1
 
 '''
     Prints the single tooth landmark points over a black image. 
