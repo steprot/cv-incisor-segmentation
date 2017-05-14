@@ -6,6 +6,8 @@ import numpy as np
 import fnmatch
 from landmark import Landmarks, translate_to_origin, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector, compute_new_mean_shape, get_tooth_centroid
 from sklearn.decomposition import PCA
+from preprocessing import load_radiographs, preprocess_radiographs
+
 
 '''
     Prints teeth's landmark points over the radiographs.
@@ -179,3 +181,7 @@ if __name__ == '__main__':
 
     reduced_dim = np.asarray(reduced_dim)
              
+	# ***** Do pre-processing of the images *****
+    radiographs = load_radiographs(number_samples)
+    for i in range(len(radiographs)):
+        preprocess_radiographs(radiographs[i])
