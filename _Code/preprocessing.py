@@ -27,7 +27,7 @@ def load_radiographs(number_samples):
     return images
 
 
-def preprocess_radiographs(img):
+def preprocess_radiograph(img):
     '''
         Enhances a dental x-ray image by
             1. applying a bilateral filter,
@@ -129,3 +129,69 @@ def togradient_sobel(img):
     abs_grad_y = cv2.convertScaleAbs(sobely)
     
     return cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
+    
+    
+#def adaptive_median(image_array, window, threshold):
+#    """Applies an adaptive median filter to the image. This is essentially a
+#    despeckling filter for grayscale images.
+#
+#    Args:
+#        image_array: The source image, as a numpy array
+#        window: Sets the filter window size (must be a scalar between 1 and 5).
+#                Window size (ws) is defined as W = 2*ws + 1 so that W = 3 is a
+#                3x3 filter window.
+#        threshold: Sets the adaptive threshold (0=normal median behavior).
+#                    Higher values reduce the "aggresiveness" of the filter.
+#
+#    Returns:
+#        The filtered image.
+#
+#    .. _Based on:
+#        https://github.com/sarnold/adaptive-median/blob/master/adaptive_median.py
+#
+#    """
+#    image_array = image_array.copy()
+#    image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2GRAY)
+#
+#
+#    def med(target_array, array_length):
+#        """Computes the median of a sublist.
+#        """
+#        sorted_array = np.sort(target_array)
+#        median = sorted_array[array_length/2]
+#        return median
+#
+#    # set filter window and image dimensions
+#    W = 2*window + 1
+#    ylength, xlength = image_array.shape
+#    vlength = W*W
+#
+#    # create 2-D image array and initialize window
+#    filter_window = np.array(np.zeros((W, W)))
+#    target_vector = np.array(np.zeros(vlength))
+#    pixel_count = 0
+#
+#    # loop over image with specified window W
+#    for y in range(window, ylength-(window+1)):
+#        for x in range(window, xlength-(window+1)):
+#            # populate window, sort, find median
+#            filter_window = image_array[y-window:y+window+1, x-window:x+window+1]
+#            target_vector = np.reshape(filter_window, ((vlength),))
+#            # internal sort
+#            median = med(target_vector, vlength)
+#            # check for threshold
+#            if not threshold > 0:
+#                image_array[y, x] = median
+#                pixel_count += 1
+#            else:
+#                scale = np.zeros(vlength)
+#                for n in range(vlength):
+#                    scale[n] = abs(target_vector[n] - median)
+#                scale = np.sort(scale)
+#                Sk = 1.4826 * (scale[vlength/2])
+#                if abs(image_array[y, x] - median) > (threshold * Sk):
+#                    image_array[y, x] = median
+#                    pixel_count += 1
+#
+#    print(pixel_count, "pixel(s) filtered out of", xlength*ylength)
+#    return image_array
