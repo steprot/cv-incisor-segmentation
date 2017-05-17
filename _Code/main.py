@@ -8,6 +8,7 @@ from landmark import Landmarks, translate_to_origin, scale_to_unit, tooth_from_v
 from sklearn.decomposition import PCA
 from preprocessing import load_radiographs, preprocess_radiograph
 from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes
+from estimate import estimate
 
 
 '''
@@ -137,6 +138,10 @@ if __name__ == '__main__':
     #render_landmarks(aligned_shape[0])         
     
     # ***** Do pre-processing of the images *****
-    #radiographs = load_radiographs(number_samples)
-    #for i in range(len(radiographs)):
-    #    preprocess_radiograph(radiographs[i])
+    radiographs = load_radiographs(number_samples,False)
+    preprocessed_r = []
+    for i in range(len(radiographs)):
+        preprocessed_r.append(preprocess_radiograph(radiographs[i]))
+        
+    estimate(mean_shape[0],1,np.asarray(preprocessed_r))
+    

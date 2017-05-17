@@ -7,7 +7,7 @@ import fnmatch
 from scipy.ndimage import morphology
 
 
-def load_radiographs(number_samples):
+def load_radiographs(number_samples,testing):
     '''
         Load the radiograph images
         Returns:
@@ -15,14 +15,20 @@ def load_radiographs(number_samples):
             ordered the same as the given indices.
     '''
     images = []
-    i = 0        
-    while i < number_samples:
-        directory = '../_Data/Radiographs/' + str("%02d" % (i+1)) + '.tif'
+    if testing:
+        directory = '../_Data/Radiographs/test.tif'
         dir_path = os.path.join(os.getcwd(), directory)
         # Read the image and save it in images
-        images.append(cv2.imread(dir_path))
-        # Go to the next sample 
-        i += 1
+        images = cv2.imread(dir_path)
+    else:
+        i = 0        
+        while i < number_samples:
+            directory = '../_Data/Radiographs/' + str("%02d" % (i+1)) + '.tif'
+            dir_path = os.path.join(os.getcwd(), directory)
+            # Read the image and save it in images
+            images.append(cv2.imread(dir_path))
+            # Go to the next sample 
+            i += 1
         
     return images
 
