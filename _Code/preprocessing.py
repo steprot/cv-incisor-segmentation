@@ -44,8 +44,8 @@ def preprocess_radiograph(img):
         Returns:
             The enhanced radiograph as a grayscale image.
     '''
-    cv2.imshow('Initial Radiograph', img)
-    cv2.waitKey(0)
+    #cv2.imshow('Initial Radiograph', img)
+    #cv2.waitKey(0)
     
     img = img.copy()
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -77,8 +77,8 @@ def preprocess_radiograph(img):
     
     # Finding the edges 
     img = togradient_sobel(img)
-    cv2.imshow('Sobel Filter Radiograph', img)
-    cv2.waitKey(0)
+    #cv2.imshow('Sobel Filter Radiograph', img)
+    #cv2.waitKey(0)
     
     cv2.destroyAllWindows()
     return img

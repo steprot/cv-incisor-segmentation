@@ -10,6 +10,18 @@ from preprocessing import load_radiographs, preprocess_radiograph
 from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes
 from estimate import estimate
 
+def getcut(img):
+    """ this is a bad isea, get the parameters from the hand draw shapes """
+    h, w = img.shape
+    print(img.shape)
+    b1 = int(w/2 - w/10)
+    b2 = int(w/2 + w/10)
+    a1 = int(h/2 + h/7) - 350
+    a2 = int(h/2 + h/6) - 40
+    
+    crp = img[a1 :a2, b1:b2]
+    #crp = img[b1:b2, a1 :a2]
+    cv2.imshow("cut it damn",crp)
 
 '''
     Main function of the project.
@@ -20,6 +32,7 @@ if __name__ == '__main__':
     number_teeth = 8 
     number_samples = 14
     teeth_landmarks = [] # 3D array: 8*number_samples*80
+    n_components = 8
         
     i = 1
     while i <= number_teeth: # For all the different teeth 
@@ -116,7 +129,7 @@ if __name__ == '__main__':
     for i in range(len(aligned_shape)):
         
         #pca_res = PCA(.99) 
-        pca_res = PCA(n_components=8) 
+        pca_res = PCA(n_components) 
                            # Instead of setting th nr of components, we make sure 
                            # that we capture 99% of the variance 
                            # this gives eigenvectors with different length! for each incisor so 
@@ -134,7 +147,8 @@ if __name__ == '__main__':
 
     reduced_dim = np.asarray(reduced_dim)
     
-    plot_procrustes(mean_shape[0],aligned_shape[0],0,False )
+    #plot_procrustes(mean_shape[0],aligned_shape[0],0,False )
+    
     #render_landmarks(aligned_shape[0])         
     
     # ***** Do pre-processing of the images *****
@@ -143,5 +157,8 @@ if __name__ == '__main__':
     for i in range(len(radiographs)):
         preprocessed_r.append(preprocess_radiograph(radiographs[i]))
         
-    estimate(mean_shape[0],1,np.asarray(preprocessed_r))
+    #estimate(mean_shape[0],1,np.asarray(preprocessed_r))
+    #getcut(preprocessed_r[0])
+
+    
     
