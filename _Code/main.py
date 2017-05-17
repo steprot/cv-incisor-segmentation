@@ -6,7 +6,7 @@ import numpy as np
 import fnmatch
 from landmark import Landmarks, translate_to_origin, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector, get_tooth_centroid
 from sklearn.decomposition import PCA
-from preprocessing import load_radiographs, preprocess_radiographs
+from preprocessing import load_radiographs, preprocess_radiograph
 from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes
 
 
@@ -135,7 +135,8 @@ if __name__ == '__main__':
     
     plot_procrustes(mean_shape[0],aligned_shape[0],0,False )
     #render_landmarks(aligned_shape[0])         
+    
     # ***** Do pre-processing of the images *****
     #radiographs = load_radiographs(number_samples)
     #for i in range(len(radiographs)):
-    #    preprocess_radiographs(radiographs[i])
+    #    preprocess_radiograph(radiographs[i])
