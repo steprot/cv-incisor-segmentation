@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 
@@ -12,44 +12,54 @@
 \textwidth 6in \textheight 8 in
 
 
+\author{Orsolya Lukacs-Kisbandi \\
+		Stefano Proto, r0650809}
+\title{ \textbf{Computer Vision Report \\ 
+		Incisor Segmentation} }
+\date{\today}
 
 \begin{document}
 
-\author{Orsolya Lukacs-Kisbandi \\ Stefano Proto}
-\title{%
-  \textbf{Computer Vision Report } \\
-   Incisor Segmentation }
-
 \maketitle
+\newpage
+\setcounter{page}{1}
+\tableofcontents
+
 
 \section{Introduction}
 
-The aim of this project was to write  an  algorithm  that  is  capable  of  segmenting  the upper and lower incisors in panoramic radiographs  using  a  model  based  approach. The choosen method is called Active Shape Models and it is described in \cite{cootes} Cootes at al. The implemented model can be broken down into sub-parts, namely: Building the model, Preprocessing the input images and Fitting the model on the new image. In addition our observations and experimental results will be discussed in the final part of the report. 
+The aim of this project was to write  an  algorithm  that  is  capable  of  segmenting  the upper and lower incisors in panoramic radiographs  using  a  model  based  approach. The choosen method is called Active Shape Models and it is described in \cite{cootes1} Cootes at al. The implemented model can be broken down into sub-parts, namely: Building the model, Preprocessing the input images and Fitting the model on the new image. In addition our observations and experimental results will be discussed in the final part of the report. 
 
 \section{Active Shape Model}
 
 The reason we are building an Active Shape Model is to create a more general representation of each incisor, which is not very sensitive to variability, this way allowing to analyse and process complex images such as radiographs. This method is based on a prior model of what is expected to be seen on the new image. In our case these are the incisors, represented with landmarks. Based on these landmarks, a general representation of the expected shape is created, which can be used to find the best match of the model in the new image. This model gives a compact representation of the previous knowledge allowing some variation, but being specific enough to not to allow changes which haven't been seen in the training data. The landmarks are points on the training images which represent a distinguishable point which appears on every training example.
 
-\subsection{ Landmarks } % Maybe rename this
-The training set contains samples from several people, for each person every incisor is represented by a set of 40 landmark points describing the shape of the tooth. In order to create the models, the shapes had to be aligned, scaled and centred around the same point. To perform these operations, an iterative approach proposed in \cite{cootes} Cootes et al. was implemented. By doing Generalized Procrustes Analysis iteratively until our model converged to a certain mean, we achieved a general representation of the incisor. The model was considered stable (it converged) when the squared sum of the distance of each shape to the mean was less than $10^{-10}$.
+\subsection{Landmarks} % Maybe rename this
+The training set contains samples from several people, for each person every incisor is represented by a set of 40 landmark points describing the shape of the tooth. In order to create the models, the shapes had to be aligned, scaled and centred around the same point. To perform these operations, an iterative approach proposed in \cite{cootes1} Cootes et al. was implemented. By doing Generalized Procrustes Analysis iteratively until our model converged to a certain mean, we achieved a general representation of the incisor. The model was considered stable (it converged) when the squared sum of the distance of each shape to the mean was less than $10^{-10}$.
 
 \subsection{Principle Component Analysis}
 
 Principal Component Analysis is a statistical procedure  used to identifying a smaller number of uncorrelated variables, called "principal components", from a large set of data to explain the maximum amount of variance with the fewest number of principal components. In other words, to reduce the dimensionality of the data. This is an improvement both in terms of memory and computational power.\\
 In our case, we set the number of principal components to 8, which covers 99\% of the variance of the data. This way, we reduced the number of landmarks from 40 to 4.
 
+\section{Pre-processing}
+Radiograph images are usually and intrinsically noisy and low in contrast. These characteristics make the images features difficult to be identified; in order to overcome this issue sharpening techniques and contrast enhancement alogorithms are applied to the images before them being analyzed. \\
+In order to reduce the noise different filters have been tried, having though the disadvantage of removing high-frequency features, and then introducing blurring edges; a trade-off among noise suppression, image deblurring and edge detection has then to be found. To achieve this goal an adaptive median filter and a bilateral filters are applied in order to reduce the impulsive and the Gaussian noise, without affecting the edges. Only afterwards the contrast of the image is enhanced by means of two gray-level morphology techniques (top-hat and bottom-hat transform) and an histogram equalization technique. \\
+The Adaptive Median filtering removes the salt-and-pepper noise, also called impulsive noise. However, it can't remove noise that spreads large areas of image because it would also destroy other features like edges of teeth. The bilateral filter is therefore applied, equalizing the colour throughout the large areas, removing the noise without affecting the edges. The next step is applying the top-hat transform, that is able to enhance brighter structures, and then the bottom-hat transform, that enhances the darker structures. \\ 
+The last step is enhance the constrast of the image, and since several and different are the techniques available, analysis of the different possibilities have been made by many researchers. Among all the candidate algorithms, Ahmad et al. shown that the Contrast Limited Adaptive Histogram Equalization (CLAHE) better enhances the image quality and increases the diagnostic ease, overperforming both the Sharp Contrast Limited Adaptive Histogram Equalization (SCLAHE) and the Median Adaptive Histogram Equalization (SMAHE) \cite{ahmad}. This technique is based on the Adaptive histogram equalization (AHE), that assigns to each pixel an intensity value, based on the equalization of the histogram of the its neighbour pixels. This allows the algorithm to adapt to local variations in an image like shadows and highlights that would not be treated by global histogram equalization. AHE could overamplificate the noise, so the Contrast Limited technique is used: the value of the pixels over a certain contrast level are randomly redistributed over the neighbourhood window considered while computing the Adaptive histogram equalization. 
 
-\begin{thebibliography}{1}
-\bibitem{cootes} 
-T. Cootes. An introduction to Active Shape Models. In , 
-\textit{Image Processing and Analysis.,}. 
-pages 223–248. 2000.
+
  
-\bibitem{paper2}
-An introduction to Active Shape Models
 
-\bibitem{paper3}
-A statistical method for robust 3D surface reconstruction from sparse data
+\begin{thebibliography}{99}
+
+\bibitem{cootes1} Cootes, Tim, E. Baldock, and J. Graham. "An introduction to active shape models." \textit{Image processing and analysis} (2000): 223-248.
+
+\bibitem{cootes2} Cootes, Timothy F., et al. "Active shape models-their training and application." \textit{Computer vision and image understanding} 61.1 (1995): 38-59.
+
+\bibitem{blanz} Blanz, Volker, et al. "A statistical method for robust 3D surface reconstruction from sparse data." \textit{3D Data Processing, Visualization and Transmission, 2004. 3DPVT 2004. Proceedings. 2nd International Symposium on.} IEEE, 2004.
+
+\bibitem{ahmad} Ahmad, Siti Arpah Bt, et al. "Utilizing contrast enhancement algorithms (CEAs) in identification of dental abnormalities." \textit{Technological Advances in Electrical, Electronics and Computer Engineering (TAEECE), 2013 International Conference on.} IEEE, 2013.
 
 \bibitem{paper4}
 Model reconstruction 
