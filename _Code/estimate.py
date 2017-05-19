@@ -54,80 +54,80 @@ def slide(image, seg, step, window):
         for x in range(seg[0][0], seg[1][0] - window[0], step) + [seg[1][0] - window[0]]:
             yield (x, y, image[y:y + window[1], x:x + window[0]])
 
-def best_seg(mean, evecs, image, width, height, is_upper, show):
-    
-    # ------------------------------------------------
-    # THIS REALLY SUCKS AND ALSO DOESNT FREAKING WORK
-    # ------------------------------------------------
-    """Finds a bounding box around the four upper or lower incisors.
-    A sliding window is moved over the given image. The window which matches best
-    with the given appearance model is returned.
-
-    Args:
-        mean: PCA mean.
-        evecs: PCA eigen vectors.
-        image: The dental radiograph on which the incisors should be located.
-        width (int): The default width of the search window.
-        height (int): The default height of the search window.
-        is_upper (bool): Wheter to look for the upper (True) or lower (False) incisors.
-        jaw_split (Path): The jaw split.
-
-    Returns:
-        A bounding box around what looks like four incisors.
-        The region of the image selected by the bounding box.
-
-    """
-    h, w = image.shape
-
-    # [b1, a1]---------------
-    # -----------------------
-    # -----------------------
-    # -----------------------
-    # ---------------[b2, a2]
-
-    if is_upper:
-        b1 = int(w/2 - w/10)
-        b2 = int(w/2 + w/10)
-        a1 = int(np.max(jaw_split.get_part(b1, b2), axis=0)[1]) - 350
-        a2 = int(np.max(jaw_split.get_part(b1, b2), axis=0)[1])
-    else:
-        b1 = int(w/2 - w/12)
-        b2 = int(w/2 + w/12)
-        a1 = int(np.min(jaw_split.get_part(b1, b2), axis=0)[1])
-        a2 = int(np.min(jaw_split.get_part(b1, b2), axis=0)[1]) + 350
-
-    search_region = [(b1, a1), (b2, a2)]
-
-    best_score = 100000
-    best_score_bbox = [(-1, -1), (-1, -1)]
-    best_score_img = np.zeros((500, 400))
-    for wscale in np.arange(0.8, 1.3, 0.1):
-        for hscale in np.arange(0.7, 1.3, 0.1):
-            winW = int(width * wscale)
-            winH = int(height * hscale)
-            for (x, y, window) in slide(image, search_region, step_size=36, window_size=(winW, winH)):
-                # if the window does not meet our desired window size, ignore it
-                if window.shape[0] != winH or window.shape[1] != winW:
-                    continue
-
-                reCut = cv2.resize(window, (width, height))
-
-                X = reCut.flatten()
-                Y = project(evecs, X, mean)
-                Xacc = reconstruct(evecs, Y, mean)
-
-                score = np.linalg.norm(Xacc - X)
-                if score < best_score:
-                    best_score = score
-                    best_score_bbox = [(x, y), (x + winW, y + winH)]
-                    best_score_img = reCut
-
-                if show:
-                    window = [(x, y), (x + winW, y + winH)]
-                    Plotter.plot_autoinit(image, window, score, jaw_split, search_region, best_score_bbox,
-                                          title="wscale="+str(wscale)+" hscale="+str(hscale))
-
-    return (best_score_bbox)
+#def best_seg(mean, evecs, image, width, height, is_upper, show):
+#    
+#    # ------------------------------------------------
+#    # THIS REALLY SUCKS AND ALSO DOESNT FREAKING WORK
+#    # ------------------------------------------------
+#    """Finds a bounding box around the four upper or lower incisors.
+#    A sliding window is moved over the given image. The window which matches best
+#    with the given appearance model is returned.
+#
+#    Args:
+#        mean: PCA mean.
+#        evecs: PCA eigen vectors.
+#        image: The dental radiograph on which the incisors should be located.
+#        width (int): The default width of the search window.
+#        height (int): The default height of the search window.
+#        is_upper (bool): Wheter to look for the upper (True) or lower (False) incisors.
+#        jaw_split (Path): The jaw split.
+#
+#    Returns:
+#        A bounding box around what looks like four incisors.
+#        The region of the image selected by the bounding box.
+#
+#    """
+#    h, w = image.shape
+#
+#    # [b1, a1]---------------
+#    # -----------------------
+#    # -----------------------
+#    # -----------------------
+#    # ---------------[b2, a2]
+#
+#    if is_upper:
+#        b1 = int(w/2 - w/10)
+#        b2 = int(w/2 + w/10)
+#        a1 = int(np.max(jaw_split.get_part(b1, b2), axis=0)[1]) - 350
+#        a2 = int(np.max(jaw_split.get_part(b1, b2), axis=0)[1])
+#    else:
+#        b1 = int(w/2 - w/12)
+#        b2 = int(w/2 + w/12)
+#        a1 = int(np.min(jaw_split.get_part(b1, b2), axis=0)[1])
+#        a2 = int(np.min(jaw_split.get_part(b1, b2), axis=0)[1]) + 350
+#
+#    search_region = [(b1, a1), (b2, a2)]
+#
+#    best_score = 100000
+#    best_score_bbox = [(-1, -1), (-1, -1)]
+#    best_score_img = np.zeros((500, 400))
+#    for wscale in np.arange(0.8, 1.3, 0.1):
+#        for hscale in np.arange(0.7, 1.3, 0.1):
+#            winW = int(width * wscale)
+#            winH = int(height * hscale)
+#            for (x, y, window) in slide(image, search_region, step_size=36, window_size=(winW, winH)):
+#                # if the window does not meet our desired window size, ignore it
+#                if window.shape[0] != winH or window.shape[1] != winW:
+#                    continue
+#
+#                reCut = cv2.resize(window, (width, height))
+#
+#                X = reCut.flatten()
+#                Y = project(evecs, X, mean)
+#                Xacc = reconstruct(evecs, Y, mean)
+#
+#                score = np.linalg.norm(Xacc - X)
+#                if score < best_score:
+#                    best_score = score
+#                    best_score_bbox = [(x, y), (x + winW, y + winH)]
+#                    best_score_img = reCut
+#
+#                if show:
+#                    window = [(x, y), (x + winW, y + winH)]
+#                    Plotter.plot_autoinit(image, window, score, jaw_split, search_region, best_score_bbox,
+#                                          title="wscale="+str(wscale)+" hscale="+str(hscale))
+#
+#    return (best_score_bbox)
 
 
 def estimate(model,toothnr,preprocessed_r):
@@ -182,6 +182,6 @@ def estimate(model,toothnr,preprocessed_r):
     #------
     # Find the region of the radiograph that matches best with the appearance model
     img = preprocess_radiograph(img) 
-    [(a, b), (c, d)]= best_seg(mean, eigen_vec, img, width, height, upper, False)
+    #[(a, b), (c, d)]= best_seg(mean, eigen_vec, img, width, height, upper, False)
     # TO BE CONTINUED!!!!!
     

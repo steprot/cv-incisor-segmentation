@@ -9,6 +9,7 @@ from sklearn.decomposition import PCA
 from preprocessing import load_radiographs, preprocess_radiograph
 from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes
 from estimate import estimate
+import init 
 
 def getcut(img):
     """ this is a bad isea, get the parameters from the hand draw shapes """
@@ -99,7 +100,7 @@ if __name__ == '__main__':
     
     # ***** Do the Generalized Procrustes Analysis on the landmarks ***** 
     while True:
-        
+
         #Alligne shapes
         aligned_shape = np.copy(around_origin_scaled) # we don't need the copy, we will update it in the for loops with the aligned shapes
         for i in range(0, number_teeth):
@@ -159,6 +160,17 @@ if __name__ == '__main__':
         
     #estimate(mean_shape[0],1,np.asarray(preprocessed_r))
     #getcut(preprocessed_r[0])
-
     
     
+    teeth_boxes = []
+    for i in range(2): # number_samples
+        teeth_boxes_row = []
+        teeth_boxes_row.append(init.get_box_per_jaw(radiographs[i], i, 'upper'))
+        teeth_boxes_row.append(init.get_box_per_jaw(radiographs[i], i, 'lower'))    
+        teeth_boxes_row = np.asarray(teeth_boxes_row)
+        teeth_boxes_row = np.hstack(teeth_boxes_row)
+        teeth_boxes.append(teeth_boxes_row)
+    teeth_boxes = np.asarray(teeth_boxes)
+    #print(teeth_boxes)
+    #print(teeth_boxes_row.shape)
+            
