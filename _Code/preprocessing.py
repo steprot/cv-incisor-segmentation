@@ -28,8 +28,7 @@ def load_radiographs(number_samples,testing):
             # Read the image and save it in images
             images.append(cv2.imread(dir_path))
             # Go to the next sample 
-            i += 1
-        
+            i += 1  
     return images
 
 
@@ -52,32 +51,21 @@ def preprocess_radiograph(img):
     
     # RISOLVERE QUESTA FUNZIONE 
     #img = adaptive_median(img, 3, 5)
-    #cv2.imshow('adaptive', img)
-    #cv2.waitKey(0)
+    
+    # using only the median filter instead of the adaptive median filter. 
+    img = cv2.medianBlur(img, 5)
     
     img = bilateral_filter(img)
-    #cv2.imshow('Bilateral Filter Radiograph', img)
-    #cv2.waitKey(0)
     
     img_top = top_hat_transform(img)
-    #cv2.imshow('Top Hat Filter Radiograph', img)
-    #cv2.waitKey(0)
     img_bottom = bottom_hat_transform(img)
-    #cv2.imshow('Bottom Hat Filter Radiograph', img)
-    #cv2.waitKey(0)
     img = cv2.add(img, img_top)
     img = cv2.subtract(img, img_bottom)
-    #cv2.imshow('Applied Filter Radiograph', img)
-    #cv2.waitKey(0)
 
     img = clahe(img)
-    #cv2.imshow('Clahe Filter Radiograph', img)
-    #cv2.waitKey(0)
-    
+
     # Finding the edges 
     img = togradient_sobel(img)
-    #cv2.imshow('Sobel Filter Radiograph', img)
-    #cv2.waitKey(0)
     
     cv2.destroyAllWindows()
     return img

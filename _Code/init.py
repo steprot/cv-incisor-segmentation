@@ -126,6 +126,12 @@ def mouse_callback_function(ev, x, y, flags, param):
     # if mouse is drawing set tmp rectangle endpoint to (x,y)
     elif ev == cv2.EVENT_MOUSEMOVE and drawing:
         point2tmp = (x, y)
+        
+        
+        
+        
+        
+        
 '''
     MANUAL INIT ***************************************
 '''

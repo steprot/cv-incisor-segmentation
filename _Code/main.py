@@ -59,7 +59,7 @@ if __name__ == '__main__':
         
     teeth_landmarks = np.array(teeth_landmarks) # teeth_landmarks.shape is 8*n*80
         
-     #***** Print the teeth_landmarks over radiographs ***** 
+    # ***** Print the teeth_landmarks over radiographs ***** 
     #print_landmarks_over_radiographs(teeth_landmarks)
     
     
@@ -88,7 +88,6 @@ if __name__ == '__main__':
     for i in range(0, number_teeth):
         mean_shape.append(np.array(np.mean(around_origin_scaled[i], axis = 0))) # len of mean_shape is 8
     mean_shape = np.array(mean_shape)
-
     
     
     # ***** Compute the mean_centroids from the landmarks *****
@@ -113,7 +112,7 @@ if __name__ == '__main__':
             new_mean_shape.append(np.array(np.mean(aligned_shape[i], axis = 0))) # len of mean_shape is 8
         new_mean_shape = np.array(new_mean_shape)
         
-        # Scaleing and translating new mean shapes
+        # Scaling and translating new mean shapes
         for i in range(0, number_teeth):
             new_mean_shape[i] = scale_to_unit(new_mean_shape[i], get_tooth_centroid((new_mean_shape[i])))
             new_mean_shape[i] = tooth_from_matrix_to_vector(translate_to_origin(new_mean_shape[i]))
@@ -124,8 +123,8 @@ if __name__ == '__main__':
         mean_shape = new_mean_shape
     
     # ***** Do PCA *****
-    # Covariance matrix  
     
+    # Covariance matrix  
     reduced_dim = []
     for i in range(len(aligned_shape)):
         
@@ -153,6 +152,7 @@ if __name__ == '__main__':
     #render_landmarks(aligned_shape[0])         
     
     # ***** Do pre-processing of the images *****
+    # radiographs contains the raw radiographs images
     radiographs = load_radiographs(number_samples,False)
     preprocessed_r = []
     for i in range(len(radiographs)):
@@ -161,6 +161,7 @@ if __name__ == '__main__':
     #estimate(mean_shape[0],1,np.asarray(preprocessed_r))
     #getcut(preprocessed_r[0])
     
+    # ***** Ask the user to draw the boxes around the jaws ***** 
     
     teeth_boxes = []
     for i in range(2): # number_samples
