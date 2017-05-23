@@ -73,7 +73,7 @@ def get_box_per_jaw(radiograph, i, where):
         if not drawing:
             cv2.imshow(window_title, radiograph)
         else:
-            cv2.rectangle(rect_cpy, point1, point2tmp, (255, 0, 0), 1)
+            cv2.rectangle(rect_cpy, point1, point2tmp, (0, 0, 255), 1)
             cv2.imshow(window_title, rect_cpy)
             
         key = cv2.waitKey(1) & 0xFF
