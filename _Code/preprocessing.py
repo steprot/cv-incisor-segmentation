@@ -53,7 +53,7 @@ def preprocess_radiograph(img):
     #img = adaptive_median(img, 3, 5)
     
     # using only the median filter instead of the adaptive median filter. 
-    img = cv2.medianBlur(img, 5)
+    img = cv2.medianBlur(img, 3)
     
     img = bilateral_filter(img)
     
@@ -63,9 +63,6 @@ def preprocess_radiograph(img):
     img = cv2.subtract(img, img_bottom)
 
     img = clahe(img)
-
-    # Finding the edges 
-    img = togradient_sobel(img)
     #cv2.imshow('Edges', img)
     #cv2.waitKey(0)
     

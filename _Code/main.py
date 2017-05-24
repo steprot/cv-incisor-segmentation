@@ -6,7 +6,7 @@ import numpy as np
 import fnmatch
 from landmark import Landmarks, translate_to_origin, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector, get_tooth_centroid
 from sklearn.decomposition import PCA
-from preprocessing import load_radiographs, preprocess_radiograph
+from preprocessing import load_radiographs, preprocess_radiograph, togradient_sobel
 from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes
 from estimate import estimate
 from init import print_boxes_on_teeth, get_box_per_jaw, save_boxes
@@ -157,6 +157,14 @@ if __name__ == '__main__':
     preprocessed_r = []
     for i in range(len(radiographs)):
         preprocessed_r.append(preprocess_radiograph(radiographs[i]))
+        #cv2.imshow("preprocessed in main", preprocessed_r[i])
+        #cv2.waitKey(0)
+    edges = []
+    for i in range(len(preprocessed_r)):
+        # Finding the edges 
+        edges.append(togradient_sobel(preprocessed_r[i]))
+        cv2.imshow('Edges', edges[i])
+        cv2.waitKey(0)
         
     #estimate(mean_shape[0],1,np.asarray(preprocessed_r))
     #getcut(preprocessed_r[0])
