@@ -66,6 +66,8 @@ def preprocess_radiograph(img):
 
     # Finding the edges 
     img = togradient_sobel(img)
+    #cv2.imshow('Edges', img)
+    #cv2.waitKey(0)
     
     cv2.destroyAllWindows()
     return img

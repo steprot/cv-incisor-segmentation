@@ -2,7 +2,7 @@
 import cv2.cv as cv
 import cv2
 import numpy as np
-import preprocessing as pp
+import os
 
 box_coordinates = []
 condition = True
@@ -127,10 +127,61 @@ def mouse_callback_function(ev, x, y, flags, param):
     elif ev == cv2.EVENT_MOUSEMOVE and drawing:
         point2tmp = (x, y)
         
+def print_boxes_on_teeth(boxes, radiograph):
+    lx = boxes[0]
+    rx = boxes[2]
+    width = rx - lx
+    width = int(width / 4)
+    width2 = 2 * width
+    cv2.rectangle(radiograph, (lx - 10, boxes[1]), (lx + width + 10, boxes[3]), (0, 255, 0), 1)
+    cv2.rectangle(radiograph, (lx + width - 10, boxes[1]), (lx + width2 + 10, boxes[3]), (255, 0, 0), 1)
+    cv2.rectangle(radiograph, (lx + width2 - 10, boxes[1]), (rx - width + 10, boxes[3]), (0, 0, 255), 1)
+    cv2.rectangle(radiograph, (rx - width - 10, boxes[1]), (rx + 10, boxes[3]), (0, 255, 0), 1)
+    
+    lx = boxes[4]
+    rx = boxes[6]
+    width = rx - lx
+    width = int(width / 4)
+    width2 = 2 * width
+    cv2.rectangle(radiograph, (lx - 10, boxes[5]), (lx + width + 10, boxes[7]), (0, 255, 0), 1)
+    cv2.rectangle(radiograph, (lx + width - 10, boxes[5]), (lx + width2 + 10, boxes[7]), (255, 0, 0), 1)
+    cv2.rectangle(radiograph, (lx + width2 - 10, boxes[5]), (rx - width + 10, boxes[7]), (0, 0, 255), 1)
+    cv2.rectangle(radiograph, (rx - width - 10, boxes[5]), (rx + 10, boxes[7]), (0, 255, 0), 1)
+    cv2.imshow('Radiograph with boxes', radiograph)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    return
+    
+def save_boxes(boxes):
+    #directory = '../_Data/Radiographs/'
+    #dir_path = os.path.join(os.getcwd(), directory)
+    
+    text_file = open("boxes.txt", "w")
+    offs = 10
+    
+    for i in range(boxes.shape[0]):
+        ulx = boxes[i][0]
+        urx = boxes[i][2]
+        uwidth = urx - ulx
+        uwidth = int(uwidth / 4)
+        uwidth2 = 2 * uwidth
+        llx = boxes[i][4]
+        lrx = boxes[i][6]
+        lwidth = lrx - llx
+        lwidth = int(lwidth / 4)
+        lwidth2 = 2 * lwidth
+    
+        text_file.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(
+            (ulx - offs), boxes[i][1], (ulx + uwidth + offs), boxes[i][3],
+            (ulx + uwidth - offs), boxes[i][1], (ulx + uwidth2 + offs), boxes[i][3],
+            (ulx + uwidth2 - offs), boxes[i][1], (urx - uwidth + offs), boxes[i][3], 
+            (urx - uwidth - offs), boxes[i][1], (urx + offs), boxes[i][3],
+            (llx - offs), boxes[i][5], (llx + lwidth + offs), boxes[i][7], 
+            (llx + lwidth - offs), boxes[i][5], (llx + lwidth2 + offs), boxes[i][7], 
+            (llx + lwidth2 - offs), boxes[i][5], (lrx - lwidth + offs), boxes[i][7], 
+            (lrx - lwidth - offs), boxes[i][5], (lrx + offs), boxes[i][7]             ))
         
-        
-        
-        
+    text_file.close()
         
 '''
     MANUAL INIT ***************************************

@@ -9,7 +9,7 @@ from sklearn.decomposition import PCA
 from preprocessing import load_radiographs, preprocess_radiograph
 from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes
 from estimate import estimate
-import init 
+from init import print_boxes_on_teeth, get_box_per_jaw, save_boxes
 
 def getcut(img):
     """ this is a bad isea, get the parameters from the hand draw shapes """
@@ -166,12 +166,15 @@ if __name__ == '__main__':
     teeth_boxes = []
     for i in range(2): # number_samples
         teeth_boxes_row = []
-        teeth_boxes_row.append(init.get_box_per_jaw(radiographs[i], i, 'upper'))
-        teeth_boxes_row.append(init.get_box_per_jaw(radiographs[i], i, 'lower'))    
+        teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'upper'))
+        teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'lower'))    
         teeth_boxes_row = np.asarray(teeth_boxes_row)
         teeth_boxes_row = np.hstack(teeth_boxes_row)
+        print_boxes_on_teeth(teeth_boxes_row, radiographs[i])
         teeth_boxes.append(teeth_boxes_row)
+    
     teeth_boxes = np.asarray(teeth_boxes)
-    #print(teeth_boxes)
-    #print(teeth_boxes_row.shape)
+    save_boxes(teeth_boxes)
+    
+    
             
