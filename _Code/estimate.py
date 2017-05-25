@@ -53,7 +53,7 @@ def slide(image, seg, step, window):
     for y in range(seg[0][1], seg[1][1] - window[1], step) + [seg[1][1] - window[1]]:
         for x in range(seg[0][0], seg[1][0] - window[0], step) + [seg[1][0] - window[0]]:
             yield (x, y, image[y:y + window[1], x:x + window[0]])
-
+#
 #def best_seg(mean, evecs, image, width, height, is_upper, show):
 #    
 #    # ------------------------------------------------
@@ -127,7 +127,7 @@ def slide(image, seg, step, window):
 #                    Plotter.plot_autoinit(image, window, score, jaw_split, search_region, best_score_bbox,
 #                                          title="wscale="+str(wscale)+" hscale="+str(hscale))
 #
-#    return (best_score_bbox)
+    #return (best_score_bbox)
 
 
 def estimate(model,toothnr,preprocessed_r):

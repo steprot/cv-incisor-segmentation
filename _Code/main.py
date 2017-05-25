@@ -7,7 +7,7 @@ import fnmatch
 from landmark import Landmarks, translate_to_origin, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector, get_tooth_centroid
 from sklearn.decomposition import PCA
 from preprocessing import load_radiographs, preprocess_radiograph, togradient_sobel
-from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes
+from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes, render_landmark_over_image
 from estimate import estimate
 from init import print_boxes_on_teeth, get_box_per_jaw, save_boxes
 
@@ -147,42 +147,69 @@ if __name__ == '__main__':
 
     reduced_dim = np.asarray(reduced_dim)
     
-    #plot_procrustes(mean_shape[0],aligned_shape[0],0,False )
-    
-    #render_landmarks(aligned_shape[0])         
+    radiographs = load_radiographs(number_samples,False)
+
+    """ Be careful when printing, the order is  k[i,1],k[i,0] not the other way around!"""
+    plot_procrustes(mean_shape[0],aligned_shape[0],0,False )       
     
     # ***** Do pre-processing of the images *****
     # radiographs contains the raw radiographs images
     radiographs = load_radiographs(number_samples,False)
-    preprocessed_r = []
-    for i in range(len(radiographs)):
-        preprocessed_r.append(preprocess_radiograph(radiographs[i]))
-        #cv2.imshow("preprocessed in main", preprocessed_r[i])
-        #cv2.waitKey(0)
-    edges = []
-    for i in range(len(preprocessed_r)):
-        # Finding the edges 
-        edges.append(togradient_sobel(preprocessed_r[i]))
-        cv2.imshow('Edges', edges[i])
-        cv2.waitKey(0)
+    #preprocessed_r = []
+    #for i in range(len(radiographs)):
+    #    preprocessed_r.append(preprocess_radiograph(radiographs[i]))
+    #    #cv2.imshow("preprocessed in main", preprocessed_r[i])
+    #    #cv2.waitKey(0)
+    #edges = []
+    #for i in range(len(preprocessed_r)):
+    #    # Finding the edges 
+    #    edges.append(togradient_sobel(preprocessed_r[i]))
+    #    #cv2.imshow('Edges', edges[i])
+    #    #cv2.waitKey(0)
         
     #estimate(mean_shape[0],1,np.asarray(preprocessed_r))
     #getcut(preprocessed_r[0])
     
     # ***** Ask the user to draw the boxes around the jaws ***** 
     
-    teeth_boxes = []
-    for i in range(2): # number_samples
-        teeth_boxes_row = []
-        teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'upper'))
-        teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'lower'))    
-        teeth_boxes_row = np.asarray(teeth_boxes_row)
-        teeth_boxes_row = np.hstack(teeth_boxes_row)
-        print_boxes_on_teeth(teeth_boxes_row, radiographs[i])
-        teeth_boxes.append(teeth_boxes_row)
+    #teeth_boxes = []
+    #for i in range(2): # number_samples
+    #    teeth_boxes_row = []
+    #    teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'upper'))
+    #    teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'lower'))    
+    #    teeth_boxes_row = np.asarray(teeth_boxes_row)
+    #    teeth_boxes_row = np.hstack(teeth_boxes_row)
+    #    print_boxes_on_teeth(teeth_boxes_row, radiographs[i])
+    #    teeth_boxes.append(teeth_boxes_row)
+    #
+    #teeth_boxes = np.asarray(teeth_boxes)
+    #save_boxes(teeth_boxes)
     
-    teeth_boxes = np.asarray(teeth_boxes)
-    save_boxes(teeth_boxes)
+    #from skimage.filters import threshold_minimum
+    #import matplotlib.pyplot as plt
+    #image = preprocessed_r[5]
+    ##image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    #
+    #thresh_min = threshold_minimum(image)
+    #binary_min = image > thresh_min+80
+    #
+    #fig, ax = plt.subplots(2, 2, figsize=(10, 10))
+    #
+    #ax[0, 0].imshow(image, cmap=plt.cm.gray)
+    #ax[0, 0].set_title('Original')
+    #
+    #ax[0, 1].hist(image.ravel(), bins=256)
+    #ax[0, 1].set_title('Histogram')
+    #
+    #ax[1, 0].imshow(binary_min, cmap=plt.cm.gray)
+    #ax[1, 0].set_title('Thresholded (min)')
+    #
+    #ax[1, 1].hist(image.ravel(), bins=256)
+    #ax[1, 1].axvline(thresh_min, color='r')
+    #
+    #for a in ax[:, 0]:
+    #    a.axis('off')
+    #plt.show()
     
     
             

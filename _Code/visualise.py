@@ -46,6 +46,23 @@ def render_landmark_over_image(img, landmark):
     cv2.imshow('Rendered image', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+#def render_landmark_over_image(img, landmark):
+#    
+#    #points = tooth_from_vector_to_matrix(landmark)
+#    img = np.ones((1000, 600, 3), np.uint8) * 255
+#    mean_shape = scale_for_print(landmark,1100)
+#    points = translate(mean_shape,np.array([300,500]))
+#    
+#    for i in range(len(points) - 1):
+#        #cv2.line(img, (int(points[i, 1]), int(points[i, 0])), (int(points[i + 1, 1]), int(points[i + 1, 0])), (0, 255, 0))
+#        cv2.line(img, (int(points[i, 1]), int(points[i, 0])),
+#                 (int(points[(i + 1) % 40, 1]), int(points[(i + 1) % 40, 0])),
+#                 (0, 0, 0), 2)
+#    img = __fit_on_screen(img)
+#    cv2.imshow('Rendered image', img)
+#    cv2.waitKey(0)
+#    cv2.destroyAllWindows()
     
 def render_landmarks(data_collector):
     """
@@ -99,26 +116,26 @@ def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
     # white background
     img = np.ones((1000, 600, 3), np.uint8) * 255
     mean_shape = scale_for_print(mean_shape,1100)
-    points = translate(mean_shape,np.array([300,500]))
+    points = translate(mean_shape,np.array([400,300]))
     
 
     for i in range(len(points)):
-        cv2.line(img, (int(points[i, 0]), int(points[i, 1])),
-                 (int(points[(i + 1) % 40, 0]), int(points[(i + 1) % 40, 1])),
+        cv2.line(img, (int(points[i, 1]), int(points[i, 0])),
+                 (int(points[(i + 1) % 40, 1]), int(points[(i + 1) % 40, 0])),
                  (0, 0, 0), 2)
     ## center of mean shape
-    cv2.circle(img, (300, 500), 10, (255, 255, 255))
+    cv2.circle(img, (400,300), 10, (255, 255, 255))
 
     # plot aligned shapes in different colors
     colors = __get_colors(len(aligned_shapes))
     
     for ind, aligned_shape in enumerate(aligned_shapes):
         aligned_shape =  scale_for_print(aligned_shape,1100)
-        points = translate(aligned_shape,np.array([300,500]))
+        points = translate(aligned_shape,np.array([400,300]))
         #points = tooth_from_vector_to_matrix(aligned_shape)
         for i in range(len(points)):
-            cv2.line(img, (int(points[i, 0]), int(points[i, 1])),
-                     (int(points[(i + 1) % 40, 0]), int(points[(i + 1) % 40, 1])),
+            cv2.line(img, (int(points[i, 1]), int(points[i, 0])),
+                     (int(points[(i + 1) % 40, 1]), int(points[(i + 1) % 40, 0])),
                      colors[ind])
 
     # show

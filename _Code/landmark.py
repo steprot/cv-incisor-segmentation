@@ -172,7 +172,6 @@ def scale(element, value):
  
 def align_teeth_to_mean_shape(elem, mean):
     t, s, theta = get_aligning_parameters(elem, mean)
-   
     rotated_element = rotate(elem, theta)
     scaled = scale(rotated_element, s)
     
