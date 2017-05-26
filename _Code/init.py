@@ -127,7 +127,7 @@ def mouse_callback_function(ev, x, y, flags, param):
     elif ev == cv2.EVENT_MOUSEMOVE and drawing:
         point2tmp = (x, y)
         
-def print_boxes_on_teeth(boxes, radiograph):
+def print_boxes_on_tooth(boxes, radiograph):
     offset = 10
     img = radiograph.copy()
     lx = boxes[0]
@@ -195,10 +195,20 @@ def read_boxes_from_file():
     
 def get_mean_boxes(boxes):
     mean = np.mean(boxes, axis=0)
-    print(mean.shape)
     return mean 
     
-def print_mean_boxes_on_teeth(boxes, image):
+def get_larget_boxes(boxes): 
+    uminx = boxes[:,0].min()
+    uminy = boxes[:,1].min()
+    umaxx = boxes[:,2].max()
+    umaxy = boxes[:,3].max()
+    lminx = boxes[:,4].min()
+    lminy = boxes[:,5].min()
+    lmaxx = boxes[:,6].max()
+    lmaxy = boxes[:,7].max()
+    return [uminx, uminy, umaxx, umaxy, lminx, lminy, lmaxx, lmaxy]
+        
+def print_boxes_on_teeth(boxes, image):
     img = image.copy()
     cv2.rectangle(img, (int(boxes[0]), int(boxes[1])), (int(boxes[2]), int(boxes[3])), (0, 255, 0), 1)
     cv2.rectangle(img, (int(boxes[4]), int(boxes[5])), (int(boxes[6]), int(boxes[7])), (255, 0, 0), 1)
