@@ -71,6 +71,7 @@ def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=Fa
     """
     h, w = image.shape
 
+    print(largest_boxes)
     # [b1, a1]---------------
     # -----------------------
     # -----------------------
@@ -92,6 +93,7 @@ def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=Fa
         a1 = int(largest_boxes[5])
         a2 = int(largest_boxes[7])
     search_region = [(b1, a1), (b2, a2)]
+    print('search_region', search_region)
 
     best_score = 100000
     best_score_bbox = [(-1, -1), (-1, -1)]
@@ -101,7 +103,9 @@ def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=Fa
             winW = int(width * wscale)
             winH = int(height * hscale)
             for (x, y, window) in slide(image, search_region, 36, (winW, winH)):
+                print('x, y', x, y)
                 # if the window does not meet our desired window size, ignore it
+                print(window.shape[0], winH, window.shape[1], winW)
                 if window.shape[0] != winH or window.shape[1] != winW:
                     continue
 

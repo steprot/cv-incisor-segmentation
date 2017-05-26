@@ -153,37 +153,49 @@ def print_boxes_on_tooth(boxes, radiograph):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     return
-    
+
 def save_boxes(boxes):
     #directory = '../_Data/Radiographs/'
     #dir_path = os.path.join(os.getcwd(), directory)
     
     text_file = open("boxes.txt", "w")
-    offs = 10
+    offs = 0
     
-    for i in range(boxes.shape[0]):
-        ulx = boxes[i][0]
-        urx = boxes[i][2]
-        uwidth = urx - ulx
-        uwidth = int(uwidth / 4)
-        uwidth2 = 2 * uwidth
-        llx = boxes[i][4]
-        lrx = boxes[i][6]
-        lwidth = lrx - llx
-        lwidth = int(lwidth / 4)
-        lwidth2 = 2 * lwidth
-    
-        text_file.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(
-            (ulx - offs), boxes[i][1], (ulx + uwidth + offs), boxes[i][3],
-            (ulx + uwidth - offs), boxes[i][1], (ulx + uwidth2 + offs), boxes[i][3],
-            (ulx + uwidth2 - offs), boxes[i][1], (urx - uwidth + offs), boxes[i][3], 
-            (urx - uwidth - offs), boxes[i][1], (urx + offs), boxes[i][3],
-            (llx - offs), boxes[i][5], (llx + lwidth + offs), boxes[i][7], 
-            (llx + lwidth - offs), boxes[i][5], (llx + lwidth2 + offs), boxes[i][7], 
-            (llx + lwidth2 - offs), boxes[i][5], (lrx - lwidth + offs), boxes[i][7], 
-            (lrx - lwidth - offs), boxes[i][5], (lrx + offs), boxes[i][7]             ))
+    for i in range(boxes.shape[0]):    
+        text_file.write("{} {} {} {} {} {} {} {}\n".format((boxes[i][0] - offs), boxes[i][1], (boxes[i][2] + offs), boxes[i][3], (boxes[i][4] - offs), boxes[i][5], (boxes[i][6] + offs), boxes[i][7]))
         
     text_file.close()
+    
+#def save_boxes_detailed(boxes):
+#    #directory = '../_Data/Radiographs/'
+#    #dir_path = os.path.join(os.getcwd(), directory)
+#    
+#    text_file = open("boxes.txt", "w")
+#    offs = 10
+#    
+#    for i in range(boxes.shape[0]):
+#        ulx = boxes[i][0]
+#        urx = boxes[i][2]
+#        uwidth = urx - ulx
+#        uwidth = int(uwidth / 4)
+#        uwidth2 = 2 * uwidth
+#        llx = boxes[i][4]
+#        lrx = boxes[i][6]
+#        lwidth = lrx - llx
+#        lwidth = int(lwidth / 4)
+#        lwidth2 = 2 * lwidth
+#    
+#        text_file.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(
+#            (ulx - offs), boxes[i][1], (ulx + uwidth + offs), boxes[i][3],
+#            (ulx + uwidth - offs), boxes[i][1], (ulx + uwidth2 + offs), boxes[i][3],
+#            (ulx + uwidth2 - offs), boxes[i][1], (urx - uwidth + offs), boxes[i][3], 
+#            (urx - uwidth - offs), boxes[i][1], (urx + offs), boxes[i][3],
+#            (llx - offs), boxes[i][5], (llx + lwidth + offs), boxes[i][7], 
+#            (llx + lwidth - offs), boxes[i][5], (llx + lwidth2 + offs), boxes[i][7], 
+#            (llx + lwidth2 - offs), boxes[i][5], (lrx - lwidth + offs), boxes[i][7], 
+#            (lrx - lwidth - offs), boxes[i][5], (lrx + offs), boxes[i][7]             ))
+#        
+#    text_file.close()
 
 def read_boxes_from_file():
     with open('boxes.txt') as f:

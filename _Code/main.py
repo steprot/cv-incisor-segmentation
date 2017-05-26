@@ -170,29 +170,32 @@ if __name__ == '__main__':
     
     # ***** Ask the user to draw the boxes around the jaws ***** 
     
-    teeth_boxes = []
-    for i in range(2): # number_samples
-        teeth_boxes_row = []
-        teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'upper'))
-        teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'lower'))    
-        teeth_boxes_row = np.asarray(teeth_boxes_row)
-        teeth_boxes_row = np.hstack(teeth_boxes_row)
-        print_boxes_on_tooth(teeth_boxes_row, radiographs[i])
-        teeth_boxes.append(teeth_boxes_row)
+    #teeth_boxes = []
+    #for i in range(number_samples): # number_samples
+    #    teeth_boxes_row = []
+    #    teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'upper'))
+    #    teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'lower'))    
+    #    teeth_boxes_row = np.asarray(teeth_boxes_row)
+    #    teeth_boxes_row = np.hstack(teeth_boxes_row)
+    #    print_boxes_on_tooth(teeth_boxes_row, radiographs[i])
+    #    teeth_boxes.append(teeth_boxes_row)
+    #
+    #teeth_boxes = np.asarray(teeth_boxes) # dimension is n_samples*8
+    #save_boxes(teeth_boxes)
     
-    teeth_boxes = np.asarray(teeth_boxes) # dimension is n_samples*8
-    save_boxes(teeth_boxes)
-    mean_box = get_mean_boxes(teeth_boxes) # dimension is 1x8
-    
-    largest_b = get_larget_boxes(teeth_boxes)
-    
-    for i in range(2):
-        print_boxes_on_teeth(largest_b, radiographs[i])
+    #mean_box = get_mean_boxes(teeth_boxes) # dimension is 1x8
+
+    #largest_b = get_larget_boxes(teeth_boxes)
+    #
+    #for i in range(2):
+    #    print_boxes_on_teeth(largest_b, radiographs[i])
         
-    #boxes_from_file = read_boxes_from_file()   
+    boxes_from_file = read_boxes_from_file()   
+    largest_b = get_larget_boxes(boxes_from_file)
+    for i in range(number_samples):
+        print_boxes_on_teeth(largest_b, radiographs[i])
     
-    print
-    estimate(mean_shape[0], 1, edges[0], largest_b)
+    #estimate(mean_shape[0], 1, preprocessed_r[0], largest_b)
 
     
     #from skimage.filters import threshold_minimum
