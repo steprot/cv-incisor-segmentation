@@ -128,26 +128,28 @@ def mouse_callback_function(ev, x, y, flags, param):
         point2tmp = (x, y)
         
 def print_boxes_on_teeth(boxes, radiograph):
+    offset = 10
+    img = radiograph.copy()
     lx = boxes[0]
     rx = boxes[2]
     width = rx - lx
     width = int(width / 4)
     width2 = 2 * width
-    cv2.rectangle(radiograph, (lx - 10, boxes[1]), (lx + width + 10, boxes[3]), (0, 255, 0), 1)
-    cv2.rectangle(radiograph, (lx + width - 10, boxes[1]), (lx + width2 + 10, boxes[3]), (255, 0, 0), 1)
-    cv2.rectangle(radiograph, (lx + width2 - 10, boxes[1]), (rx - width + 10, boxes[3]), (0, 0, 255), 1)
-    cv2.rectangle(radiograph, (rx - width - 10, boxes[1]), (rx + 10, boxes[3]), (0, 255, 0), 1)
+    cv2.rectangle(img, (lx - offset, boxes[1]), (lx + width + offset, boxes[3]), (0, 255, 0), 1)
+    cv2.rectangle(img, (lx + width - offset, boxes[1]), (lx + width2 + offset, boxes[3]), (255, 0, 0), 1)
+    cv2.rectangle(img, (lx + width2 - offset, boxes[1]), (rx - width + offset, boxes[3]), (0, 0, 255), 1)
+    cv2.rectangle(img, (rx - width - offset, boxes[1]), (rx + offset, boxes[3]), (0, 255, 0), 1)
     
     lx = boxes[4]
     rx = boxes[6]
     width = rx - lx
     width = int(width / 4)
     width2 = 2 * width
-    cv2.rectangle(radiograph, (lx - 10, boxes[5]), (lx + width + 10, boxes[7]), (0, 255, 0), 1)
-    cv2.rectangle(radiograph, (lx + width - 10, boxes[5]), (lx + width2 + 10, boxes[7]), (255, 0, 0), 1)
-    cv2.rectangle(radiograph, (lx + width2 - 10, boxes[5]), (rx - width + 10, boxes[7]), (0, 0, 255), 1)
-    cv2.rectangle(radiograph, (rx - width - 10, boxes[5]), (rx + 10, boxes[7]), (0, 255, 0), 1)
-    cv2.imshow('Radiograph with boxes', radiograph)
+    cv2.rectangle(img, (lx - offset, boxes[5]), (lx + width + offset, boxes[7]), (0, 255, 0), 1)
+    cv2.rectangle(img, (lx + width - offset, boxes[5]), (lx + width2 + offset, boxes[7]), (255, 0, 0), 1)
+    cv2.rectangle(img, (lx + width2 - offset, boxes[5]), (rx - width + offset, boxes[7]), (0, 0, 255), 1)
+    cv2.rectangle(img, (rx - width - offset, boxes[5]), (rx + offset, boxes[7]), (0, 255, 0), 1)
+    cv2.imshow('Radiograph with boxes', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     return
@@ -182,6 +184,25 @@ def save_boxes(boxes):
             (lrx - lwidth - offs), boxes[i][5], (lrx + offs), boxes[i][7]             ))
         
     text_file.close()
+
+def read_boxes_from_file():
+    pass 
+    
+def get_mean_boxes(boxes):
+    mean = np.mean(boxes, axis=0)
+    print(mean.shape)
+    return mean 
+    
+def print_mean_boxes_on_teeth(boxes, image):
+    img = image.copy()
+    cv2.rectangle(img, (int(boxes[0]), int(boxes[1])), (int(boxes[2]), int(boxes[3])), (0, 255, 0), 1)
+    cv2.rectangle(img, (int(boxes[4]), int(boxes[5])), (int(boxes[6]), int(boxes[7])), (255, 0, 0), 1)
+    cv2.imshow('Radiograph with boxes', img)
+    cv2.waitKey(0)
+    return
+    
+   
+    
         
 '''
     MANUAL INIT ***************************************
