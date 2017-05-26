@@ -156,20 +156,17 @@ if __name__ == '__main__':
     # ***** Do pre-processing of the images *****
     # radiographs contains the raw radiographs images
     radiographs = load_radiographs(number_samples,False)
-    #preprocessed_r = []
-    #for i in range(len(radiographs)):
-    #    preprocessed_r.append(preprocess_radiograph(radiographs[i]))
-    #    #cv2.imshow("preprocessed in main", preprocessed_r[i])
-    #    #cv2.waitKey(0)
-    #edges = []
-    #for i in range(len(preprocessed_r)):
-    #    # Finding the edges 
-    #    edges.append(togradient_sobel(preprocessed_r[i]))
-    #    #cv2.imshow('Edges', edges[i])
-    #    #cv2.waitKey(0)
-        
-    #estimate(mean_shape[0],1,np.asarray(preprocessed_r))
-    #getcut(preprocessed_r[0])
+    preprocessed_r = []
+    for i in range(len(radiographs)):
+        preprocessed_r.append(preprocess_radiograph(radiographs[i]))
+        #cv2.imshow("preprocessed in main", preprocessed_r[i])
+        #cv2.waitKey(0)
+    edges = []
+    for i in range(len(preprocessed_r)):
+        # Finding the edges 
+        edges.append(togradient_sobel(preprocessed_r[i]))
+        #cv2.imshow('Edges', edges[i])
+        #cv2.waitKey(0)
     
     # ***** Ask the user to draw the boxes around the jaws ***** 
     
@@ -191,10 +188,11 @@ if __name__ == '__main__':
     
     for i in range(2):
         print_boxes_on_teeth(largest_b, radiographs[i])
+        
+    #boxes_from_file = read_boxes_from_file()   
     
-    #lines = read_boxes_from_file()
-    #print(lines.shape)
-    #print(lines)
+    estimate(mean_shape[0], 1, np.asarray(preprocessed_r), largest_b)
+
     
     #from skimage.filters import threshold_minimum
     #import matplotlib.pyplot as plt

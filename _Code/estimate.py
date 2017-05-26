@@ -118,31 +118,43 @@ def best_seg(mean, evecs, image, width, height, is_upper, mean_boxes, show=False
     return (best_score_bbox)
 
 
-def estimate(model,toothnr,preprocessed_r):
+def estimate(model,toothnr,preprocessed_r,coord):
     """ 
     model - The shape we want to fit.
     toothnr - which incisor are we looking for?
     
     """
     display = False
-    img = load_radiographs(1,True)
     
+    #if toothnr < 5:
+    #    # We calculated the average hight of upper teeth and it was around 315,
+    #    # the average width around: 380
+    #    width = 380
+    #    height = 315 
+    #    isupper = True   
+    #else:
+    #    # We calculated the average hight of upper teeth and it was around 260,
+    #    # the average width around: 280
+    #    width = 280
+    #    height = 260
+    #    isupper = False
+        
     if toothnr < 5:
         # We calculated the average hight of upper teeth and it was around 315,
         # the average width around: 380
-        width = 380
-        height = 315 
-        upper = True   
+        width = coord[2]-coord[0]
+        height = coord[3]-coord[1] 
+        isupper = True   
     else:
         # We calculated the average hight of upper teeth and it was around 260,
         # the average width around: 280
-        width = 280
-        height = 260
-        upper = False
+        width = coord[6]-coord[4]
+        height = coord[7]-coord[5]
+        isupper = False
         
     # Create the appearance model for the four upper/lower teeth
     #radiographs = load_radiographs(11,False) 
-    data = load_database(preprocessed_r, upper, width, height)
+    data = getcut(preprocessed_r, coord[1], coord[0], coord[3], coord[2])
     pca_res = PCA(n_components=8) 
                            # Instead of setting th nr of components, we make sure 
                            # that we capture 99% of the variance 
@@ -169,7 +181,7 @@ def estimate(model,toothnr,preprocessed_r):
     
     #------
     # Find the region of the radiograph that matches best with the appearance model
-    img = preprocess_radiograph(img) 
-    #[(a, b), (c, d)]= best_seg(mean, eigen_vec, img, width, height, upper, False)
+    img = preprocessed_r[0] 
+    [(a, b), (c, d)]= best_seg(mean, eigen_vec, img, width, height, isupper, False)
     # TO BE CONTINUED!!!!!
     
