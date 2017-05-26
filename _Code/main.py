@@ -191,7 +191,8 @@ if __name__ == '__main__':
         
     #boxes_from_file = read_boxes_from_file()   
     
-    estimate(mean_shape[0], 1, np.asarray(preprocessed_r), largest_b)
+    print
+    estimate(mean_shape[0], 1, edges[0], largest_b)
 
     
     #from skimage.filters import threshold_minimum

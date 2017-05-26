@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Estimate model on radiograph
     - automatic initialization of the location of an incisor, before the
     iterative fitting procedure is started. """
@@ -7,6 +8,7 @@ import sys
 import cv2
 import numpy as np
 from sklearn.decomposition import PCA
+from init import print_boxes_on_teeth
 
 from preprocessing import load_radiographs, preprocess_radiograph
 
@@ -42,8 +44,9 @@ def getcut(img,a1,b1,a2,b2):
     crp = img[a1 :a2, b1:b2]
     #crp = img[b1:b2, a1 :a2]
     cv2.imshow("cut it damn",crp)
+    return crp
     
-def best_seg(mean, evecs, image, width, height, is_upper, mean_boxes, show=False):
+def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=False):
     
     # ------------------------------------------------
     # THIS REALLY SUCKS AND ALSO DOESNT FREAKING WORK
@@ -72,43 +75,50 @@ def best_seg(mean, evecs, image, width, height, is_upper, mean_boxes, show=False
     # -----------------------
     # -----------------------
     # -----------------------
-    # ---------------[b2, a2]
-    
+    # ----------------[b2 a2]
+
     if is_upper:
-        b1 = int(w/2 - w/10)
-        b2 = int(w/2 + w/10)
-        a1 = int(mean_boxes[1]) 
-        a2 = int(mean_boxes[3])
+        #b1 = int(w/2 - w/10)
+        #b2 = int(w/2 + w/10)
+        b1 = int(largest_boxes[0])
+        b2 = int(largest_boxes[2])
+        a1 = int(largest_boxes[1]) 
+        a2 = int(largest_boxes[3])
     else:
-        b1 = int(w/2 - w/12)
-        b2 = int(w/2 + w/12)
-        a1 = int(mean_boxes[5])
-        a2 = int(mean_boxes[7])
+        #b1 = int(w/2 - w/12)
+        #b2 = int(w/2 + w/12)
+        b1 = int(largest_boxes[4])
+        b2 = int(largest_boxes[6])
+        a1 = int(largest_boxes[5])
+        a2 = int(largest_boxes[7])
     search_region = [(b1, a1), (b2, a2)]
 
     best_score = 100000
     best_score_bbox = [(-1, -1), (-1, -1)]
-    best_score_img = np.zeros((500, 400))
+    best_score_img = np.zeros((width, height))
     for wscale in np.arange(0.8, 1.3, 0.1): # start 0.8 stop 1.3 step 0.1 -- Try different scales for width
         for hscale in np.arange(0.7, 1.3, 0.1): # start 0.7 stop 1.3 step 0.1 -- Try different scales for hight
             winW = int(width * wscale)
             winH = int(height * hscale)
-            for (x, y, window) in slide(image, search_region, step_size=36, window_size=(winW, winH)):
+            for (x, y, window) in slide(image, search_region, 36, (winW, winH)):
                 # if the window does not meet our desired window size, ignore it
                 if window.shape[0] != winH or window.shape[1] != winW:
                     continue
 
                 reCut = cv2.resize(window, (width, height))
+                cv2.imshow('recut', reCut)
 
                 X = reCut.flatten()
                 Y = project(evecs, X, mean)
                 Xacc = reconstruct(evecs, Y, mean)
 
                 score = np.linalg.norm(Xacc - X)
+                print(score)
                 if score < best_score:
                     best_score = score
                     best_score_bbox = [(x, y), (x + winW, y + winH)]
                     best_score_img = reCut
+                    cv2.imshow('IF recut', reCut)
 
                 #if show:
                 #    window = [(x, y), (x + winW, y + winH)]
@@ -167,7 +177,7 @@ def estimate(model,toothnr,preprocessed_r,coord):
             # components_
             # mean_
             # n_components_
-    pca_res.fit(data)
+    pca_res.fit(np.asarray(data))
     eigen_vec= pca_res.components_
     mean  = pca_res.mean_
     # -----
@@ -181,7 +191,10 @@ def estimate(model,toothnr,preprocessed_r,coord):
     
     #------
     # Find the region of the radiograph that matches best with the appearance model
-    img = preprocessed_r[0] 
-    [(a, b), (c, d)]= best_seg(mean, eigen_vec, img, width, height, isupper, False)
+    [(a, b), (c, d)] = best_seg(mean, eigen_vec, data, isupper, coord, width, height, False)
+    
+    print([a, b, c, d])
+    print_boxes_on_teeth([a, b, c, d], preprocessed_r)
     # TO BE CONTINUED!!!!!
+
     
