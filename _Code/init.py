@@ -186,7 +186,12 @@ def save_boxes(boxes):
     text_file.close()
 
 def read_boxes_from_file():
-    pass 
+    with open('boxes.txt') as f:
+        lines = []
+        for line in f:
+            lines.append([int(s) for s in line.split() if s.isdigit()])
+    lines = np.asarray(lines)
+    return lines
     
 def get_mean_boxes(boxes):
     mean = np.mean(boxes, axis=0)
