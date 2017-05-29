@@ -7,7 +7,7 @@ import fnmatch
 from landmark import Landmarks, translate_to_origin, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector, get_tooth_centroid
 from sklearn.decomposition import PCA
 from preprocessing import load_radiographs, preprocess_radiograph, togradient_sobel
-from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes, render_landmark_over_image, __get_colors
+from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes, render_landmark_over_image, __get_colors, render_model_over_image
 from estimate import estimate
 from init import print_boxes_on_teeth, get_box_per_jaw, save_boxes, get_mean_boxes, print_boxes_on_tooth, read_boxes_from_file, get_largest_boxes
 from fitter import get_detailed_boxes, fit_asm_model_to_box
@@ -171,19 +171,19 @@ if __name__ == '__main__':
     
     # ***** Ask the user to draw the boxes around the jaws ***** 
     
-    #teeth_boxes = []
-    #for i in range(number_samples): # number_samples
-    #    teeth_boxes_row = []
-    #    teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'upper'))
-    #    teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'lower'))    
-    #    teeth_boxes_row = np.asarray(teeth_boxes_row)
-    #    teeth_boxes_row = np.hstack(teeth_boxes_row)
-    #    print_boxes_on_tooth(teeth_boxes_row, radiographs[i])
-    #    teeth_boxes.append(teeth_boxes_row)
-    #
-    #teeth_boxes = np.asarray(teeth_boxes) # dimension is n_samples*8
-    #save_boxes(teeth_boxes)
+    teeth_boxes = []
+    for i in range(1): # number_samples
+        teeth_boxes_row = []
+        teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'upper'))
+        teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'lower'))    
+        teeth_boxes_row = np.asarray(teeth_boxes_row)
+        teeth_boxes_row = np.hstack(teeth_boxes_row)
+        print_boxes_on_tooth(teeth_boxes_row, radiographs[i])
+        teeth_boxes.append(teeth_boxes_row)
     
+    teeth_boxes = np.asarray(teeth_boxes) # dimension is n_samples*8
+    #save_boxes(teeth_boxes)
+    #
     #mean_box = get_mean_boxes(teeth_boxes) # dimension is 1x8
 
     #largest_b = get_larget_boxes(teeth_boxes)
@@ -201,19 +201,6 @@ if __name__ == '__main__':
     #for i in range(number_samples):
     #    print_boxes_on_teeth(largest_b, radiographs[i])
     
-	
-    #detailed_boxes = get_detailed_boxes(largest_b)
-    ## print(detailed_boxes)
-    ## print(detailed_boxes.shape)
-    ## print(mean_shape.shape)
-    #
-    #colors = __get_colors(number_teeth)
-    #img = radiographs[1]
-    #for i in range(number_teeth):
-    #    img = fit_asm_model_to_box(mean_shape[i], detailed_boxes[i], img, 1000, colors[i])
-    #
-
-	
     """  
     IMPORTANT NOTES REGARDING ESTIMATE
     - you have to spcify which tooth are you looking for
@@ -223,7 +210,25 @@ if __name__ == '__main__':
     toothnr = 1
     #rad_nr = 9
     for rad_nr in range(14):
+        pass
         estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,upper)
         #estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower)
+	
+    #detailed_boxes = get_detailed_boxes(largest_b)
+    
+    ## print(detailed_boxes)
+    ## print(detailed_boxes.shape)
+    ## print(mean_shape.shape)
+    #
+    
+    #colors = __get_colors(number_teeth)
+    #new_points = []
+    #for i in range(8):
+    #    img, newpoints = fit_asm_model_to_box(mean_shape[i], detailed_boxes[i], radiographs[0], 1000, colors[i], edges[0])
+    #    render_model_over_image(newpoints, radiographs[0])
+    #    new_points.append(newpoints)
+    #cv2.imshow('poo', edges[0])
+    #cv2.waitKey(0) 
+	
 
     

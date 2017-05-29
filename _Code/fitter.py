@@ -31,9 +31,9 @@ def get_detailed_boxes(boxes):
     
     return np.asarray(box)
     
-def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color):
+def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color, edge_img):
     # Moving the model and centering it in the middle of the box 
-    print(toothbox)
+    #print(toothbox)
     toothmodel = toothmodel * fact
     points = tooth_from_vector_to_matrix(toothmodel)
     # Swap X and Y
@@ -92,6 +92,102 @@ def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color):
 
     # Show the image 
     cv2.imshow('Model over radiograph ', img)
-    cv2.waitKey(0)    
+    cv2.waitKey(0) 
+    cv2.destroyAllWindows()
     
-    return img 
+    newpoints = iterate(points, edge_img, img)
+    
+    return img, newpoints
+    
+def iterate(points, edge_img, pre_img):
+    new_points = points
+    print(points)
+    for i in range(len(points)):
+        newpoint = get_max_along_normal(points, i, edge_img, pre_img)
+        new_points[i] = newpoint
+        #i += 1
+    return new_points  
+        
+def get_max_along_normal(points, i, edge_img, pre_img):
+    # Get the normal to the point 
+    px = points[i][0] 
+    py = points[i][1]
+    
+    normal = get_normal_to_point(points, i)
+    (ih, iw) = edge_img.shape
+    
+#    #find extremes of the normal line in the whole image (they will be on the border)
+#    minR = -px / normal[0]
+#    if py + minR*normal[1] < 0:
+#        minR = -py / normal[1]
+#    elif py + minR*normal[1] > ih:
+#        minR = (ih - py) / normal[1]
+#    maxR = (iw - px) / normal[0]
+#    if py + maxR*normal[1] < 0:
+#        maxR = -py / normal[1]
+#    elif py + maxR*normal[1] > iw:
+#        maxR = (iw - py) / normal[1]
+#
+#    tmp = maxR
+#    maxR = max(minR, maxR)
+#    minR = min(minR, tmp)
+#    
+#    # Print the normal line edges on the Image 
+    img = pre_img.copy()
+    print(img.shape)
+#    #cv2.circle(img, (int(normal[0]*minR + px), int(normal[1]*minR + py)), 2, (0, 0, 255), 5)
+#    #cv2.circle(img, (int(normal[0]*maxR + px), int(normal[1]*maxR + py)), 2, (0, 0, 255), 5)
+#    #cv2.imshow('Img', img)
+#    #cv2.waitKey(0) 
+    
+    max_pt = (px, py)
+    max_edge = 0     
+    
+    search = 6
+    cv2.circle(img, (int(px), int(py)), 1, (0, 0, 255), 2)
+    
+    #for t in drange(-search if -search > minR else minR, search if search < maxR else maxR , .5):
+    for t in drange(-search, search, 0.5):
+        x = int(normal[0]*t + px)
+        y = int(normal[1]*t + py)
+        if x < 0 or x > iw or y < 0 or y > ih:
+            continue
+        cv2.circle(img, (int(x), int(y)), 1, (150, 150, 150), 2)
+        #cv2.circle(edge_img, (int(x), int(y)), 1, (150, 150, 150), 2)
+        #cv2.imshow('Img', edge_img)
+        print(edge_img[x, y])
+        print(1.15*max_edge)
+        if edge_img[x, y] > 1.15*max_edge:
+            max_edge = edge_img[x, y]
+            max_pt = (x, y)
+    
+    cv2.circle(img, (int(max_pt[0]), int(max_pt[1])), 2, (0, 0, 255), 2)
+    cv2.imshow('Img', img)
+    cv2.waitKey(0) 
+    cv2.destroyAllWindows()   
+    
+    return np.asarray(max_pt)
+    
+        
+def drange(start, stop, step):
+    r = start
+    while r < stop:
+        yield r
+        r += step
+        
+def get_normal_to_point(points, i):
+    dx = 0
+    dy = 0
+    m = 0
+    if i == 0: #first point
+        dx = points[1][0] - points[0][0]
+        dy = points[1][1] - points[0][1]
+    elif i == len(points)-1: #last point
+        dx = points[-1][0] - points[-2][0]
+        dy = points[-1][1] - points[-2][1]
+    else:
+        dx = points[i+1][0] - points[i-1][0]
+        dy = points[i+1][1] - points[i-1][1]
+    m = math.sqrt(dx**2 + dy**2)
+    
+    return (-dy/m, dx/m) 
