@@ -121,6 +121,7 @@ def togradient_sobel(img):
     abs_grad_y = cv2.convertScaleAbs(sobely)
     
     return cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
+    #return cv2.addWeighted(sobelx, 0.1, sobely, 0.1, 0)
     
     
 def adaptive_median(img, window, threshold):

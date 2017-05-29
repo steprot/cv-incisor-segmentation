@@ -209,7 +209,7 @@ def get_mean_boxes(boxes):
     mean = np.mean(boxes, axis=0)
     return mean 
     
-def get_larget_boxes(boxes): 
+def get_largest_boxes(boxes): 
     uminx = boxes[:,0].min()
     uminy = boxes[:,1].min()
     umaxx = boxes[:,2].max()
@@ -223,7 +223,7 @@ def get_larget_boxes(boxes):
 def print_boxes_on_teeth(boxes, image):
     img = image.copy()
     cv2.rectangle(img, (int(boxes[0]), int(boxes[1])), (int(boxes[2]), int(boxes[3])), (0, 255, 0), 1)
-    cv2.rectangle(img, (int(boxes[4]), int(boxes[5])), (int(boxes[6]), int(boxes[7])), (255, 0, 0), 1)
+    #cv2.rectangle(img, (int(boxes[4]), int(boxes[5])), (int(boxes[6]), int(boxes[7])), (255, 0, 0), 1)
     cv2.imshow('Radiograph with boxes', img)
     cv2.waitKey(0)
     return

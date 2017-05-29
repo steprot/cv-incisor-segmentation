@@ -9,7 +9,7 @@ from sklearn.decomposition import PCA
 from preprocessing import load_radiographs, preprocess_radiograph, togradient_sobel
 from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes, render_landmark_over_image
 from estimate import estimate
-from init import print_boxes_on_teeth, get_box_per_jaw, save_boxes, get_mean_boxes, print_boxes_on_tooth, read_boxes_from_file, get_larget_boxes
+from init import print_boxes_on_teeth, get_box_per_jaw, save_boxes, get_mean_boxes, print_boxes_on_tooth, read_boxes_from_file, get_largest_boxes
 from fitter import sharpe_boxes, init_fitting
 
 def getcut(img):
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     radiographs = load_radiographs(number_samples,False)
 
     """ Be careful when printing, the order is  k[i,1],k[i,0] not the other way around!"""
-    plot_procrustes(mean_shape[0],aligned_shape[0],0,False )       
+    #plot_procrustes(mean_shape[0],aligned_shape[0],0,False )       
     
     # ***** Do pre-processing of the images *****
     # radiographs contains the raw radiographs images
@@ -191,38 +191,26 @@ if __name__ == '__main__':
     #    print_boxes_on_teeth(largest_b, radiographs[i])
         
     boxes_from_file = read_boxes_from_file()   
-    largest_b = get_larget_boxes(boxes_from_file)
-    for i in range(number_samples):
-        print_boxes_on_teeth(largest_b, radiographs[i])
+    largest_b = get_largest_boxes(boxes_from_file)
+    upper = []
+    lower = []
+    for i in range(len(boxes_from_file)):
+        upper.append([boxes_from_file[i][0], boxes_from_file[i][1],boxes_from_file[i][2],boxes_from_file[i][3] ])
+        lower.append([boxes_from_file[i][4], boxes_from_file[i][5],boxes_from_file[i][6],boxes_from_file[i][7] ])
+    #for i in range(number_samples):
+    #    print_boxes_on_teeth(largest_b, radiographs[i])
     
-    #estimate(mean_shape[0], 1, preprocessed_r[0], largest_b)
+    
+    """  
+    IMPORTANT NOTES REGARDING ESTIMATE
+    - you have to spcify which tooth are you looking for
+    - you have to spacify if it is upper or lower (as last parameter input upper/lower) -> this can be made dynamic
+    
+    """
+    toothnr = 0
+    #rad_nr = 9
+    for rad_nr in range(14):
+        estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,upper)
+    #estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower)
 
     
-    #from skimage.filters import threshold_minimum
-    #import matplotlib.pyplot as plt
-    #image = preprocessed_r[5]
-    ##image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    #
-    #thresh_min = threshold_minimum(image)
-    #binary_min = image > thresh_min+80
-    #
-    #fig, ax = plt.subplots(2, 2, figsize=(10, 10))
-    #
-    #ax[0, 0].imshow(image, cmap=plt.cm.gray)
-    #ax[0, 0].set_title('Original')
-    #
-    #ax[0, 1].hist(image.ravel(), bins=256)
-    #ax[0, 1].set_title('Histogram')
-    #
-    #ax[1, 0].imshow(binary_min, cmap=plt.cm.gray)
-    #ax[1, 0].set_title('Thresholded (min)')
-    #
-    #ax[1, 1].hist(image.ravel(), bins=256)
-    #ax[1, 1].axvline(thresh_min, color='r')
-    #
-    #for a in ax[:, 0]:
-    #    a.axis('off')
-    #plt.show()
-    
-    
-            

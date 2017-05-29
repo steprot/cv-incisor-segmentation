@@ -3,26 +3,27 @@
     - automatic initialization of the location of an incisor, before the
     iterative fitting procedure is started. """
 
-import math
-import sys
+#import math
+#import sys
 import cv2
 import numpy as np
-from sklearn.decomposition import PCA
-from init import print_boxes_on_teeth
+#from sklearn.decomposition import PCA
+#from init import print_boxes_on_teeth
 
-from preprocessing import load_radiographs, preprocess_radiograph
-
-def normalize_image(img):
-    """Normalize an image such that it min=0 , max=255 and type is np.uint8
-    """
-    return (img*(255./(np.max(img)-np.min(img)))+np.min(img)).astype(np.uint8)
+#from preprocessing import load_radiographs, preprocess_radiograph
  
  
 def project(W, X, mu):
     """Project X on the space spanned by the vectors in W.
     mu is the average image.
     """
-    return np.dot(X - mu.T, W)
+    #print('X,mu,W',X.shape,mu.shape,W.shape)
+    #print('muuu trans',mu.T.shape)
+    
+    Xnew = X - mu.T
+    
+    
+    return np.dot(Xnew, W)
 
 
 def reconstruct(W, Y, mu):
@@ -35,7 +36,10 @@ def slide(image, seg, step, window):
     # Maybe change it a bit later if we have time so it would return one element and call it n times
     for y in range(seg[0][1], seg[1][1] - window[1], step) + [seg[1][1] - window[1]]:
         for x in range(seg[0][0], seg[1][0] - window[0], step) + [seg[1][0] - window[0]]:
+            #print 'in slide: window, [0],[1]',window, window[0],window[1]
+            #print 'im shape',image.shape
             yield (x, y, image[y:y + window[1], x:x + window[0]])
+
 
 def getcut(img,a1,b1,a2,b2):
     
@@ -45,7 +49,21 @@ def getcut(img,a1,b1,a2,b2):
     #crp = img[b1:b2, a1 :a2]
     cv2.imshow("cut it damn",crp)
     return crp
+ 
+def load_database(radiographs, is_upper,four_incisor_bbox,rewidth,reheight):
     
+    #smallImages = []
+    smallImages = np.zeros((14, rewidth * reheight))
+    #radiographs = [preprocess_radiograph(radiograph) for radiograph in radiographs]
+    for ind, radiograph in enumerate(radiographs):
+        this_box = four_incisor_bbox[ind-1]
+        print this_box, this_box[1]
+        cutImage = radiograph[this_box[1]:this_box[3], this_box[0]:this_box[2]]
+        result = cv2.resize(cutImage, (rewidth, reheight), interpolation=cv2.INTER_NEAREST)
+        smallImages[ind] = result.flatten()
+    #smallImages = np.asarray(smallImages)
+    return smallImages
+         
 def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=False):
     
     # ------------------------------------------------
@@ -71,12 +89,7 @@ def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=Fa
     """
     h, w = image.shape
 
-    print(largest_boxes)
-    # [b1, a1]---------------
-    # -----------------------
-    # -----------------------
-    # -----------------------
-    # ----------------[b2 a2]
+    #print(largest_boxes)
 
     if is_upper:
         #b1 = int(w/2 - w/10)
@@ -93,97 +106,127 @@ def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=Fa
         a1 = int(largest_boxes[5])
         a2 = int(largest_boxes[7])
     search_region = [(b1, a1), (b2, a2)]
-    print('search_region', search_region)
+    #print('search_region', search_region)
 
-    best_score = 100000
+    best_score = float("inf")
     best_score_bbox = [(-1, -1), (-1, -1)]
     best_score_img = np.zeros((width, height))
-    for wscale in np.arange(0.8, 1.3, 0.1): # start 0.8 stop 1.3 step 0.1 -- Try different scales for width
-        for hscale in np.arange(0.7, 1.3, 0.1): # start 0.7 stop 1.3 step 0.1 -- Try different scales for hight
+    for wscale in np.arange(0.8, 1.4, 0.1): # start 0.8 stop 1.3 step 0.1 -- Try different scales for width
+        for hscale in np.arange(0.7, 1.1, 0.1): # start 0.7 stop 1.3 step 0.1 -- Try different scales for hight
             winW = int(width * wscale)
             winH = int(height * hscale)
-            for (x, y, window) in slide(image, search_region, 36, (winW, winH)):
-                print('x, y', x, y)
+            #print('winw winH image',winW,winH)
+            for (x, y, window) in slide(image, search_region, step=36, window=(winW, winH)):
+                #print('x, y, window', x, y, window)
                 # if the window does not meet our desired window size, ignore it
-                print(window.shape[0], winH, window.shape[1], winW)
+                #print(' new w, rescaled w, new h , riscaled h',window.shape[0], winH, window.shape[1], winW)
                 if window.shape[0] != winH or window.shape[1] != winW:
                     continue
 
                 reCut = cv2.resize(window, (width, height))
-                cv2.imshow('recut', reCut)
+                #cv2.imshow('recut', reCut)
+                #print('recut shape', reCut.shape)
 
+                #X = reCut
                 X = reCut.flatten()
+                #print('X shape',X.shape)
                 Y = project(evecs, X, mean)
                 Xacc = reconstruct(evecs, Y, mean)
 
                 score = np.linalg.norm(Xacc - X)
-                print(score)
+                print('score',score)
                 if score < best_score:
                     best_score = score
-                    best_score_bbox = [(x, y), (x + winW, y + winH)]
+                    best_score_bbox = [x, y, x + winW, y + winH]
                     best_score_img = reCut
-                    cv2.imshow('IF recut', reCut)
-
-                #if show:
-                #    window = [(x, y), (x + winW, y + winH)]
-                #    Plotter.plot_autoinit(image, window, score, jaw_split, search_region, best_score_bbox,
-                #                          title="wscale="+str(wscale)+" hscale="+str(hscale))
+                    #cv2.imshow('IF recut', reCut)
+        print best_score
+        if show:
+            cv2.imshow('IF recut', best_score_img)
+            #best_coord = [x, y, x + winW, y + winH]
+            #img = image.copy()
+            #cv2.rectangle(img, (int(best_coord[0]), int(best_coord[1])), (int(best_coord[2]), int(best_coord[3])), (0, 255, 0), 1)
+            #cv2.imshow('Radiograph with best box', img)
+            #cv2.waitKey(0)
 
     return (best_score_bbox)
 
+def pca(X, nb_components):
+    """Do a PCA analysis on X
 
-def estimate(model,toothnr,preprocessed_r,coord):
+    Args:
+        X: np.array containing the samples
+            shape = (nb samples, nb dimensions of each sample)
+        nb_components: the nb components we're interested in
+
+    Returns:
+        The ``nb_components`` largest evals and evecs of the covariance matrix and
+        the average sample.
+
+    """
+    #print(X.shape)
+    dim = X.shape
+    if (nb_components <= 0) or (nb_components > dim[0]):
+        nb_components = dim[0]
+
+    mu = np.average(X, axis=0)
+    X = np.add(X, -mu.transpose(), out=X, casting="unsafe")
+    #X -= mu.transpose()
+
+    eigenvalues, eigenvectors = np.linalg.eig(np.dot(X, np.transpose(X)))
+    eigenvectors = np.dot(np.transpose(X), eigenvectors)
+
+    eig = zip(eigenvalues, np.transpose(eigenvectors))
+    eig = map(lambda x: (x[0] * np.linalg.norm(x[1]),
+                         x[1] / np.linalg.norm(x[1])), eig)
+
+    eig = sorted(eig, reverse=True, key=lambda x: abs(x[0]))
+    eig = eig[:nb_components]
+
+    eigenvalues, eigenvectors = map(np.array, zip(*eig))
+
+    return eigenvalues, np.transpose(eigenvectors), mu
+
+
+def estimate(rad_nr,model,toothnr,preprocessed_r,coord,allcoord):
     """ 
     model - The shape we want to fit.
     toothnr - which incisor are we looking for?
+    preprocessed_r - all the radiographs
+    coord - coordonates of the largest drawn box
+    allcoord - coordonates of all upper/lower incisors
+    
+    *** Need to generalize this so if we don't have a hand drawn box it would still work ***
     
     """
-    display = False
-    
-    #if toothnr < 5:
-    #    # We calculated the average hight of upper teeth and it was around 315,
-    #    # the average width around: 380
-    #    width = 380
-    #    height = 315 
-    #    isupper = True   
-    #else:
-    #    # We calculated the average hight of upper teeth and it was around 260,
-    #    # the average width around: 280
-    #    width = 280
-    #    height = 260
-    #    isupper = False
-        
+
     if toothnr < 5:
-        # We calculated the average hight of upper teeth and it was around 315,
-        # the average width around: 380
         width = coord[2]-coord[0]
         height = coord[3]-coord[1] 
         isupper = True   
     else:
-        # We calculated the average hight of upper teeth and it was around 260,
-        # the average width around: 280
         width = coord[6]-coord[4]
         height = coord[7]-coord[5]
         isupper = False
         
     # Create the appearance model for the four upper/lower teeth
     #radiographs = load_radiographs(11,False) 
-    data = getcut(preprocessed_r, coord[1], coord[0], coord[3], coord[2])
-    pca_res = PCA(n_components=8) 
-                           # Instead of setting th nr of components, we make sure 
-                           # that we capture 99% of the variance 
-                           # this gives eigenvectors with different length! for each incisor so 
-                           # it was better to set the nr to a fixed value, 8 cover around 99%
-        # From pca_res we can obtain :
-            # components_
-            # explained_variance_
-            # explained_variance_ratio_
-            # components_
-            # mean_
-            # n_components_
-    pca_res.fit(np.asarray(data))
-    eigen_vec= pca_res.components_
-    mean  = pca_res.mean_
+    #data = getcut(preprocessed_r, coord[1], coord[0], coord[3], coord[2])
+    
+    #all_cut = []
+    #for i in range(len(preprocessed_r)):
+    #    data = getcut(preprocessed_r[i], coord[1], coord[0], coord[3], coord[2])
+    #    print(data.shape)
+    #    all_cut.append(data)   
+    #all_cut = np.asarray(all_cut)
+    
+    data = load_database(np.asarray(preprocessed_r), isupper,allcoord,width, height)
+    [_, eigen_vec, mean] = pca(data, 2)
+    #pca_res = PCA(n_components=5) 
+    #pca_res.fit(np.asarray(data))
+    #eigen_vec= pca_res.components_
+    #mean  = pca_res.mean_
+    
     # -----
     # Visualize the appearance model
     # cv2.imshow('img',np.hstack( (mean.reshape(height,width),
@@ -195,10 +238,14 @@ def estimate(model,toothnr,preprocessed_r,coord):
     
     #------
     # Find the region of the radiograph that matches best with the appearance model
-    [(a, b), (c, d)] = best_seg(mean, eigen_vec, data, isupper, coord, width, height, False)
+    best_coord = best_seg(mean, eigen_vec, preprocessed_r[rad_nr], isupper, coord, width, height, True)
     
-    print([a, b, c, d])
-    print_boxes_on_teeth([a, b, c, d], preprocessed_r)
-    # TO BE CONTINUED!!!!!
+    print(best_coord)
+    
+    img = preprocessed_r[rad_nr].copy()
+    cv2.rectangle(img, (int(best_coord[0]), int(best_coord[1])), (int(best_coord[2]), int(best_coord[3])), (255, 0, 0), 5)
+    cv2.imshow('Radiograph with best box', img)
+    cv2.waitKey(0)
+
 
     
