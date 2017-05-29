@@ -200,7 +200,19 @@ if __name__ == '__main__':
     #for i in range(number_samples):
     #    print_boxes_on_teeth(largest_b, radiographs[i])
     
+	
+	detailed_boxes = get_detailed_boxes(teeth_boxes[0])
+    # print(detailed_boxes)
+    # print(detailed_boxes.shape)
+    # print(mean_shape.shape)
     
+    colors = __get_colors(number_teeth)
+    img = radiographs[1]
+    for i in range(number_teeth):
+        img = fit_asm_model_to_box(mean_shape[i], detailed_boxes[i], img, 1000, colors[i])
+    
+
+	
     """  
     IMPORTANT NOTES REGARDING ESTIMATE
     - you have to spcify which tooth are you looking for
