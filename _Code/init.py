@@ -128,7 +128,7 @@ def mouse_callback_function(ev, x, y, flags, param):
         point2tmp = (x, y)
         
 def print_boxes_on_tooth(boxes, radiograph):
-    offset = 10
+    offset = 0
     img = radiograph.copy()
     lx = boxes[0]
     rx = boxes[2]

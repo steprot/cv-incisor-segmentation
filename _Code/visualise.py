@@ -34,7 +34,6 @@ def print_landmarks_over_radiographs(teeth_landmarks):
         # Got the next sample   
         i += 1
 
-
 def render_landmark_over_image(img, landmark):
     
     points = tooth_from_vector_to_matrix(landmark)
@@ -46,6 +45,13 @@ def render_landmark_over_image(img, landmark):
     cv2.imshow('Rendered image', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    
+def render_model_over_image(points, img):    
+    print(points)
+    for i in range(len(points) - 1):
+        cv2.line(img, (int(points[i, 0]), int(points[i, 1])), (int(points[i + 1, 0]), int(points[i + 1, 1])), (0, 255, 0))
+    cv2.imshow('Rendered image', img)
+    cv2.waitKey(0)
 
 #def render_landmark_over_image(img, landmark):
 #    
