@@ -92,17 +92,17 @@ def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=Fa
     #print(largest_boxes)
 
     if is_upper:
-        #b1 = int(w/2 - w/10)
-        #b2 = int(w/2 + w/10)
-        b1 = int(largest_boxes[0])
-        b2 = int(largest_boxes[2])
+        b1 = int(w/2 - w/10)
+        b2 = int(w/2 + w/10)
+        #b1 = int(largest_boxes[0])
+        #b2 = int(largest_boxes[2])
         a1 = int(largest_boxes[1]) 
         a2 = int(largest_boxes[3])
     else:
-        #b1 = int(w/2 - w/12)
-        #b2 = int(w/2 + w/12)
-        b1 = int(largest_boxes[4])
-        b2 = int(largest_boxes[6])
+        b1 = int(w/2 - w/12)
+        b2 = int(w/2 + w/12)
+        #b1 = int(largest_boxes[4])
+        #b2 = int(largest_boxes[6])
         a1 = int(largest_boxes[5])
         a2 = int(largest_boxes[7])
     search_region = [(b1, a1), (b2, a2)]
@@ -111,8 +111,8 @@ def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=Fa
     best_score = float("inf")
     best_score_bbox = [(-1, -1), (-1, -1)]
     best_score_img = np.zeros((width, height))
-    for wscale in np.arange(0.8, 1.4, 0.1): # start 0.8 stop 1.3 step 0.1 -- Try different scales for width
-        for hscale in np.arange(0.7, 1.1, 0.1): # start 0.7 stop 1.3 step 0.1 -- Try different scales for hight
+    for wscale in np.arange(0.7, 1.3, 0.1): # start 0.8 stop 1.3 step 0.1 -- Try different scales for width
+        for hscale in np.arange(0.7, 1.3, 0.1): # start 0.7 stop 1.3 step 0.1 -- Try different scales for hight
             winW = int(width * wscale)
             winH = int(height * hscale)
             #print('winw winH image',winW,winH)
@@ -221,7 +221,7 @@ def estimate(rad_nr,model,toothnr,preprocessed_r,coord,allcoord):
     #all_cut = np.asarray(all_cut)
     
     data = load_database(np.asarray(preprocessed_r), isupper,allcoord,width, height)
-    [_, eigen_vec, mean] = pca(data, 10)
+    [_, eigen_vec, mean] = pca(data, 6)
     #pca_res = PCA(n_components=5) 
     #pca_res.fit(np.asarray(data))
     #eigen_vec= pca_res.components_

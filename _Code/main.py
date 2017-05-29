@@ -7,10 +7,10 @@ import fnmatch
 from landmark import Landmarks, translate_to_origin, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector, get_tooth_centroid
 from sklearn.decomposition import PCA
 from preprocessing import load_radiographs, preprocess_radiograph, togradient_sobel
-from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes, render_landmark_over_image
+from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes, render_landmark_over_image, __get_colors
 from estimate import estimate
 from init import print_boxes_on_teeth, get_box_per_jaw, save_boxes, get_mean_boxes, print_boxes_on_tooth, read_boxes_from_file, get_largest_boxes
-from fitter import sharpe_boxes, init_fitting
+from fitter import get_detailed_boxes, fit_asm_model_to_box
 
 def getcut(img):
     """ this is a bad isea, get the parameters from the hand draw shapes """
@@ -168,6 +168,7 @@ if __name__ == '__main__':
         #cv2.imshow('Edges', edges[i])
         #cv2.waitKey(0)
     
+    
     # ***** Ask the user to draw the boxes around the jaws ***** 
     
     #teeth_boxes = []
@@ -201,16 +202,16 @@ if __name__ == '__main__':
     #    print_boxes_on_teeth(largest_b, radiographs[i])
     
 	
-	detailed_boxes = get_detailed_boxes(teeth_boxes[0])
-    # print(detailed_boxes)
-    # print(detailed_boxes.shape)
-    # print(mean_shape.shape)
-    
-    colors = __get_colors(number_teeth)
-    img = radiographs[1]
-    for i in range(number_teeth):
-        img = fit_asm_model_to_box(mean_shape[i], detailed_boxes[i], img, 1000, colors[i])
-    
+    #detailed_boxes = get_detailed_boxes(largest_b)
+    ## print(detailed_boxes)
+    ## print(detailed_boxes.shape)
+    ## print(mean_shape.shape)
+    #
+    #colors = __get_colors(number_teeth)
+    #img = radiographs[1]
+    #for i in range(number_teeth):
+    #    img = fit_asm_model_to_box(mean_shape[i], detailed_boxes[i], img, 1000, colors[i])
+    #
 
 	
     """  
@@ -219,10 +220,10 @@ if __name__ == '__main__':
     - you have to spacify if it is upper or lower (as last parameter input upper/lower) -> this can be made dynamic
     
     """
-    toothnr = 7
+    toothnr = 1
     #rad_nr = 9
     for rad_nr in range(14):
-        #estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,upper)
-        estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower)
+        estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,upper)
+        #estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower)
 
     
