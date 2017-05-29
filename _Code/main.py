@@ -207,10 +207,10 @@ if __name__ == '__main__':
     - you have to spacify if it is upper or lower (as last parameter input upper/lower) -> this can be made dynamic
     
     """
-    toothnr = 0
+    toothnr = 7
     #rad_nr = 9
     for rad_nr in range(14):
-        estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,upper)
-    #estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower)
+        #estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,upper)
+        estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower)
 
     

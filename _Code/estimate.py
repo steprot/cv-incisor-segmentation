@@ -221,7 +221,7 @@ def estimate(rad_nr,model,toothnr,preprocessed_r,coord,allcoord):
     #all_cut = np.asarray(all_cut)
     
     data = load_database(np.asarray(preprocessed_r), isupper,allcoord,width, height)
-    [_, eigen_vec, mean] = pca(data, 2)
+    [_, eigen_vec, mean] = pca(data, 10)
     #pca_res = PCA(n_components=5) 
     #pca_res.fit(np.asarray(data))
     #eigen_vec= pca_res.components_
