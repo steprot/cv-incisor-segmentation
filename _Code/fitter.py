@@ -134,12 +134,7 @@ def get_max_along_normal(points, i, edge_img, pre_img):
 #    
 #    # Print the normal line edges on the Image 
     img = pre_img.copy()
-    print(img.shape)
-#    #cv2.circle(img, (int(normal[0]*minR + px), int(normal[1]*minR + py)), 2, (0, 0, 255), 5)
-#    #cv2.circle(img, (int(normal[0]*maxR + px), int(normal[1]*maxR + py)), 2, (0, 0, 255), 5)
-#    #cv2.imshow('Img', img)
-#    #cv2.waitKey(0) 
-    
+    print('img.shape', img.shape)
     max_pt = (px, py)
     max_edge = 0     
     
@@ -150,14 +145,24 @@ def get_max_along_normal(points, i, edge_img, pre_img):
     for t in drange(-search, search, 0.5):
         x = int(normal[0]*t + px)
         y = int(normal[1]*t + py)
+        print('iw, ih, t', iw, ih, t)
+        print('normal[0], normal[1]', normal[0], normal[1])
         if x < 0 or x > iw or y < 0 or y > ih:
             continue
         cv2.circle(img, (int(x), int(y)), 1, (150, 150, 150), 2)
-        #cv2.circle(edge_img, (int(x), int(y)), 1, (150, 150, 150), 2)
-        #cv2.imshow('Img', edge_img)
-        print(edge_img[x, y])
-        print(1.15*max_edge)
-        if edge_img[x, y] > 1.15*max_edge:
+        print('x, y', x, y)
+        #print('x, y, edge_img(x, y) ', x, y, edge_img[x, y])
+        #print('1.15*maxedge ', 15 + max_edge)
+        average_edge = (edge_img[x, y] + \
+                        edge_img[x+1, y+1] + \
+                        edge_img[x+1, y] + \
+                        edge_img[x+1, y-1] + \
+                        edge_img[x, y-1] + \
+                        edge_img[x-1, y-1] + \
+                        edge_img[x-1, y] + \
+                        edge_img[x-1, y+1] + \
+                        edge_img[x, y+1] ) / 9
+        if average_edge > 1.15*max_edge:
             max_edge = edge_img[x, y]
             max_pt = (x, y)
     
@@ -167,7 +172,19 @@ def get_max_along_normal(points, i, edge_img, pre_img):
     cv2.destroyAllWindows()   
     
     return np.asarray(max_pt)
-    
+
+def smooth_model(points):
+    for i in range(len(points)-1):
+        if i == 0:
+            points[i][0] = (points[i][0] + points[i+1][0]) / 2
+            points[i][1] = (points[i][1] + points[i+1][1]) / 2
+        elif i == len(points)-1: 
+            points[i][0] = (points[i][0] + points[i-1][0]) / 2
+            points[i][1] = (points[i][1] + points[i-1][1]) / 2
+        else:
+            points[i][0] = (points[i][0] + points[i+1][0] +  points[i-1][0]) / 3
+            points[i][1] = (points[i][1] + points[i+1][1] +  points[i-1][1]) / 3
+    return points
         
 def drange(start, stop, step):
     r = start

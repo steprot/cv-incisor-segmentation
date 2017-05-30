@@ -10,7 +10,7 @@ from preprocessing import load_radiographs, preprocess_radiograph, togradient_so
 from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes, render_landmark_over_image, __get_colors, render_model_over_image
 from estimate import estimate
 from init import print_boxes_on_teeth, get_box_per_jaw, save_boxes, get_mean_boxes, print_boxes_on_tooth, read_boxes_from_file, get_largest_boxes
-from fitter import get_detailed_boxes, fit_asm_model_to_box
+from fitter import get_detailed_boxes, fit_asm_model_to_box, smooth_model
 
 def getcut(img):
     """ this is a bad isea, get the parameters from the hand draw shapes """
@@ -172,7 +172,7 @@ if __name__ == '__main__':
     # ***** Ask the user to draw the boxes around the jaws ***** 
     
     #teeth_boxes = []
-    #for i in range(1): # number_samples
+    #for i in range(number_samples): # number_samples
     #    teeth_boxes_row = []
     #    teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'upper'))
     #    teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'lower'))    
@@ -224,27 +224,20 @@ if __name__ == '__main__':
 	
     print 'Estimates ALLLLLL:' , estimates
     
+    print('estimates . shape', estimates.shape)
+    print('largest_b . shape', largest_b.shape)
+    
+    # Detailed boxes is 8*4, and must be computed for each sample 
     detailed_boxes = get_detailed_boxes(largest_b)
-    
-    #print('estimates . shape', estimates.shape)
-    #print('largest_b . shape', largest_b.shape)
-    #print('detailed_boxes . shape', detailed_boxes.shape)
-    
-
-    
-    ## print(detailed_boxes)
-    ## print(detailed_boxes.shape)
-    ## print(mean_shape.shape)
-    #
     
     colors = __get_colors(number_teeth)
     new_points = []
-    for i in range(8):
+    for i in range(2, 3):
         img, newpoints = fit_asm_model_to_box(mean_shape[i], detailed_boxes[i], radiographs[0], 1000, colors[i], edges[0])
+        newpoints = smooth_model(newpoints)
         render_model_over_image(newpoints, radiographs[0])
         new_points.append(newpoints)
-    cv2.imshow('print this ', edges[0])
+    cv2.imshow('poo', edges[0])
     cv2.waitKey(0) 
-	
 
     
