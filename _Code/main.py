@@ -171,17 +171,17 @@ if __name__ == '__main__':
     
     # ***** Ask the user to draw the boxes around the jaws ***** 
     
-    teeth_boxes = []
-    for i in range(1): # number_samples
-        teeth_boxes_row = []
-        teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'upper'))
-        teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'lower'))    
-        teeth_boxes_row = np.asarray(teeth_boxes_row)
-        teeth_boxes_row = np.hstack(teeth_boxes_row)
-        print_boxes_on_tooth(teeth_boxes_row, radiographs[i])
-        teeth_boxes.append(teeth_boxes_row)
-    
-    teeth_boxes = np.asarray(teeth_boxes) # dimension is n_samples*8
+    #teeth_boxes = []
+    #for i in range(1): # number_samples
+    #    teeth_boxes_row = []
+    #    teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'upper'))
+    #    teeth_boxes_row.append(get_box_per_jaw(radiographs[i], i, 'lower'))    
+    #    teeth_boxes_row = np.asarray(teeth_boxes_row)
+    #    teeth_boxes_row = np.hstack(teeth_boxes_row)
+    #    print_boxes_on_tooth(teeth_boxes_row, radiographs[i])
+    #    teeth_boxes.append(teeth_boxes_row)
+    #
+    #teeth_boxes = np.asarray(teeth_boxes) # dimension is n_samples*8
     #save_boxes(teeth_boxes)
     #
     #mean_box = get_mean_boxes(teeth_boxes) # dimension is 1x8
@@ -198,6 +198,7 @@ if __name__ == '__main__':
     for i in range(len(boxes_from_file)):
         upper.append([boxes_from_file[i][0], boxes_from_file[i][1],boxes_from_file[i][2],boxes_from_file[i][3] ])
         lower.append([boxes_from_file[i][4], boxes_from_file[i][5],boxes_from_file[i][6],boxes_from_file[i][7] ])
+
     #for i in range(number_samples):
     #    print_boxes_on_teeth(largest_b, radiographs[i])
     
@@ -207,28 +208,43 @@ if __name__ == '__main__':
     - you have to spacify if it is upper or lower (as last parameter input upper/lower) -> this can be made dynamic
     
     """
-    toothnr = 1
-    #rad_nr = 9
+    toothnr = 0
+ #   #rad_nr = 9
+    estimates = []
     for rad_nr in range(14):
-        pass
-        estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,upper)
-        #estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower)
+        e = estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,upper,False)
+        #e.extend(estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower, False))
+	estimates.append(e)
+    print 'Estimates upper:' , estimates
+    
+    toothnr = 6
+    for rad_nr in range(14):
+        estimates[rad_nr].extend( estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower,False))
+        #e.extend(estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower, False))
 	
-    #detailed_boxes = get_detailed_boxes(largest_b)
+    print 'Estimates ALLLLLL:' , estimates
+    
+    detailed_boxes = get_detailed_boxes(largest_b)
+    
+    #print('estimates . shape', estimates.shape)
+    #print('largest_b . shape', largest_b.shape)
+    #print('detailed_boxes . shape', detailed_boxes.shape)
+    
+
     
     ## print(detailed_boxes)
     ## print(detailed_boxes.shape)
     ## print(mean_shape.shape)
     #
     
-    #colors = __get_colors(number_teeth)
-    #new_points = []
-    #for i in range(8):
-    #    img, newpoints = fit_asm_model_to_box(mean_shape[i], detailed_boxes[i], radiographs[0], 1000, colors[i], edges[0])
-    #    render_model_over_image(newpoints, radiographs[0])
-    #    new_points.append(newpoints)
-    #cv2.imshow('poo', edges[0])
-    #cv2.waitKey(0) 
+    colors = __get_colors(number_teeth)
+    new_points = []
+    for i in range(8):
+        img, newpoints = fit_asm_model_to_box(mean_shape[i], detailed_boxes[i], radiographs[0], 1000, colors[i], edges[0])
+        render_model_over_image(newpoints, radiographs[0])
+        new_points.append(newpoints)
+    cv2.imshow('print this ', edges[0])
+    cv2.waitKey(0) 
 	
 
     

@@ -57,7 +57,7 @@ def load_database(radiographs, is_upper,four_incisor_bbox,rewidth,reheight):
     #radiographs = [preprocess_radiograph(radiograph) for radiograph in radiographs]
     for ind, radiograph in enumerate(radiographs):
         this_box = four_incisor_bbox[ind-1]
-        print this_box, this_box[1]
+        #print this_box, this_box[1]
         cutImage = radiograph[this_box[1]:this_box[3], this_box[0]:this_box[2]]
         result = cv2.resize(cutImage, (rewidth, reheight), interpolation=cv2.INTER_NEAREST)
         smallImages[ind] = result.flatten()
@@ -134,13 +134,13 @@ def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=Fa
                 Xacc = reconstruct(evecs, Y, mean)
 
                 score = np.linalg.norm(Xacc - X)
-                print('score',score)
+                #print('score',score)
                 if score < best_score:
                     best_score = score
                     best_score_bbox = [x, y, x + winW, y + winH]
                     best_score_img = reCut
                     #cv2.imshow('IF recut', reCut)
-        print best_score
+        #print best_score
         if show:
             cv2.imshow('IF recut', best_score_img)
             #best_coord = [x, y, x + winW, y + winH]
@@ -188,7 +188,7 @@ def pca(X, nb_components):
     return eigenvalues, np.transpose(eigenvectors), mu
 
 
-def estimate(rad_nr,model,toothnr,preprocessed_r,coord,allcoord):
+def estimate(rad_nr,model,toothnr,preprocessed_r,coord,allcoord,show):
     """ 
     model - The shape we want to fit.
     toothnr - which incisor are we looking for?
@@ -238,14 +238,15 @@ def estimate(rad_nr,model,toothnr,preprocessed_r,coord,allcoord):
     
     #------
     # Find the region of the radiograph that matches best with the appearance model
-    best_coord = best_seg(mean, eigen_vec, preprocessed_r[rad_nr], isupper, coord, width, height, True)
+    best_coord = best_seg(mean, eigen_vec, preprocessed_r[rad_nr], isupper, coord, width, height, False)
     
-    print(best_coord)
+    #print(best_coord)
     
-    img = preprocessed_r[rad_nr].copy()
-    cv2.rectangle(img, (int(best_coord[0]), int(best_coord[1])), (int(best_coord[2]), int(best_coord[3])), (255, 0, 0), 5)
-    cv2.imshow('Radiograph with best box', img)
-    cv2.waitKey(0)
-
+    if show == True:
+        img = preprocessed_r[rad_nr].copy()
+        cv2.rectangle(img, (int(best_coord[0]), int(best_coord[1])), (int(best_coord[2]), int(best_coord[3])), (255, 0, 0), 5)
+        cv2.imshow('Radiograph with best box', img)
+        cv2.waitKey(0)
+    return best_coord
 
     
