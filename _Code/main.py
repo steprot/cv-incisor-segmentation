@@ -230,12 +230,13 @@ if __name__ == '__main__':
     
     colors = __get_colors(number_teeth)
     new_points = []
-    for i in range(2, 3):
+    for i in range(number_teeth):
         img, newpoints = fit_asm_model_to_box(mean_shape[i], detailed_boxes[i], radiographs[0], 1000, colors[i], edges[0])
         newpoints = smooth_model(newpoints)
         render_model_over_image(newpoints, radiographs[0])
         new_points.append(newpoints)
-    cv2.imshow('Show tooth edges', edges[0])
+    cv2.imshow('edges', edges[0])
     cv2.waitKey(0) 
+
 
     

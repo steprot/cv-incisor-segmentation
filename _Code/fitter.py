@@ -101,40 +101,26 @@ def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color, edge_img
     
 def iterate(points, edge_img, pre_img):
     new_points = points
-    print(points)
+    #print(points)
     for i in range(len(points)):
         newpoint = get_max_along_normal(points, i, edge_img, pre_img)
         new_points[i] = newpoint
         #i += 1
     return new_points  
         
-def get_max_along_normal(points, i, edge_img, pre_img):
+def get_max_along_normal(points, i, edge_img, radiograph):
     # Get the normal to the point 
     px = points[i][0] 
     py = points[i][1]
     
+    
+    #edge_img = edge_pic
     normal = get_normal_to_point(points, i)
     (ih, iw) = edge_img.shape
-    
-#    #find extremes of the normal line in the whole image (they will be on the border)
-#    minR = -px / normal[0]
-#    if py + minR*normal[1] < 0:
-#        minR = -py / normal[1]
-#    elif py + minR*normal[1] > ih:
-#        minR = (ih - py) / normal[1]
-#    maxR = (iw - px) / normal[0]
-#    if py + maxR*normal[1] < 0:
-#        maxR = -py / normal[1]
-#    elif py + maxR*normal[1] > iw:
-#        maxR = (iw - py) / normal[1]
-#
-#    tmp = maxR
-#    maxR = max(minR, maxR)
-#    minR = min(minR, tmp)
-#    
+   
 #    # Print the normal line edges on the Image 
-    img = pre_img.copy()
-    print('img.shape', img.shape)
+    img = radiograph.copy()
+    #print('img.shape', img.shape, 'edge_img.shape', edge_img.shape)
     max_pt = (px, py)
     max_edge = 0     
     
@@ -144,30 +130,35 @@ def get_max_along_normal(points, i, edge_img, pre_img):
     #for t in drange(-search if -search > minR else minR, search if search < maxR else maxR , .5):
     for t in drange(-search, search, 0.5):
         x = int(normal[0]*t + px)
-        y = int(normal[1]*t + py)
-        print('iw, ih, t', iw, ih, t)
-        print('normal[0], normal[1]', normal[0], normal[1])
-        if x < 0 or x > iw or y < 0 or y > ih:
+        y = int(normal[1]*t + py
+        
+        )
+        #print('iw, ih, t', iw, ih, t)
+        #print('normal[0], normal[1]', normal[0], normal[1])
+        if x < 1 or x >= iw - 1  or y < 1 or y >= iw - 1:
             continue
         cv2.circle(img, (int(x), int(y)), 1, (150, 150, 150), 2)
-        print('x, y', x, y)
-        #print('x, y, edge_img(x, y) ', x, y, edge_img[x, y])
+        #print('x, y, edge_img(x, y) ', x, y, edge_img[y, x])
         #print('1.15*maxedge ', 15 + max_edge)
-        average_edge = (edge_img[x, y] + \
-                        edge_img[x+1, y+1] + \
-                        edge_img[x+1, y] + \
-                        edge_img[x+1, y-1] + \
-                        edge_img[x, y-1] + \
-                        edge_img[x-1, y-1] + \
-                        edge_img[x-1, y] + \
-                        edge_img[x-1, y+1] + \
-                        edge_img[x, y+1] ) / 9
+        average_edge = (edge_img[y, x] + \
+                        edge_img[(y+1), (x+1)] + \
+                        edge_img[(y+1), x] + \
+                        edge_img[(y+1), (x-1)] + \
+                        edge_img[y, (x-1)] + \
+                        edge_img[(y-1), (x-1)] + \
+                        edge_img[(y-1), x] + \
+                        edge_img[(y-1), (x+1)] + \
+                        edge_img[y, (x+1)] ) / 9
         if average_edge > 1.15*max_edge:
-            max_edge = edge_img[x, y]
+            cv2.circle(edge_img, (int(x), int(y)), 3, (0, 0, 250), 3)
+            max_edge = edge_img[y, x]
             max_pt = (x, y)
-    
-    cv2.circle(img, (int(max_pt[0]), int(max_pt[1])), 2, (0, 0, 255), 2)
+            
+    # Print the final point of the model 
+    cv2.circle(img, (int(max_pt[0]), int(max_pt[1])), 2, (0, 100, 255), 2)
+    #cv2.circle(edge_img, (int(px), int(py)), 2, (200, 200, 200), 2)
     cv2.imshow('Img', img)
+    #cv2.imshow('Edge_img', edge_img)
     cv2.waitKey(0) 
     cv2.destroyAllWindows()   
     
