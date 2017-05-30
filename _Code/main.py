@@ -212,7 +212,7 @@ if __name__ == '__main__':
  #   #rad_nr = 9
     estimates = []
     for rad_nr in range(14):
-        e = estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,upper,False)
+        e = estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,upper,True)
         #e.extend(estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower, False))
 	estimates.append(e)
     print 'Estimates upper:' , estimates
@@ -237,7 +237,7 @@ if __name__ == '__main__':
         newpoints = smooth_model(newpoints)
         render_model_over_image(newpoints, radiographs[0])
         new_points.append(newpoints)
-    cv2.imshow('poo', edges[0])
+    cv2.imshow('Show tooth edges', edges[0])
     cv2.waitKey(0) 
 
     
