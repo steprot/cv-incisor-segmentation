@@ -213,14 +213,12 @@ if __name__ == '__main__':
     estimates = []
     for rad_nr in range(14):
         e = estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,upper,True)
-        #e.extend(estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower, False))
 	estimates.append(e)
     print 'Estimates upper:' , estimates
     
     toothnr = 6
     for rad_nr in range(14):
         estimates[rad_nr].extend( estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower,False))
-        #e.extend(estimate(rad_nr,mean_shape[toothnr], toothnr, preprocessed_r,largest_b,lower, False))
 	
     print 'Estimates ALLLLLL:' , estimates
     
