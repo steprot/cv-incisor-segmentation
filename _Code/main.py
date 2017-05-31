@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import cv2
 import numpy as np
 import landmark as lm
 from sklearn.decomposition import PCA
@@ -26,7 +27,6 @@ def load_landmarks(number_teeth,number_samples, directory, mirrored):
         landmark = []
         while j <= number_samples: # For the same tooth but for the different persons
             # Specify the name where to read the landmarks from
-            print(index+j)
             directory = path + str(index + j) + '-' + str(i) + '.txt'
             dir_path = os.path.join(os.getcwd(), directory)     
             l = lm.Landmarks(dir_path).as_vector()
@@ -175,12 +175,9 @@ if __name__ == '__main__':
     
     directory = 'original/landmarks'
     teeth_landmarks = load_landmarks(number_teeth,number_samples, directory, False)
-    print(teeth_landmarks.shape)
     directory = 'mirrored/landmarks'
     teeth_mirrored = load_landmarks(number_teeth,number_samples, directory, True)
     teeth_landmarks = np.concatenate((teeth_landmarks, teeth_mirrored), axis=1)
-    print(teeth_mirrored.shape)
-    print(teeth_landmarks.shape)
     # Double the number of samples 
     number_samples *= 2
      
@@ -194,8 +191,7 @@ if __name__ == '__main__':
     
     # ***** Do the Generalized Procrustes Analysis on the landmarks ***** 
     
-    mean_shape, aligned_shape = procrustes(around_origin_scaled,number_teeth, mean_shape)
-    
+    mean_shape, aligned_shape = procrustes(around_origin_scaled,number_teeth, mean_shape) 
     
     # ***** Do PCA *****
     print('* Starting PCA *')
@@ -225,7 +221,19 @@ if __name__ == '__main__':
     
     print('* Starting preprocessing *')
     # radiographs contains the raw radiographs images
-    radiographs = pp.load_radiographs(number_samples,False)
+    radiographs = pp.load_radiographs(number_samples/2, False)
+    
+    mirrored = []
+    for i in range(len(radiographs)):
+        (ih, iw, c) = radiographs[i].shape
+        image = radiographs[i].copy()
+        for j in range(ih):
+            image[j,:] = image[j,::-1]
+        mirrored.append(image)
+        
+    radiographs.append(mirrored)
+    print(len(radiographs))   # ************************************* TILL HERE 
+    
     # Preprocess the images
     preprocessed_r = []
     for i in range(len(radiographs)):
