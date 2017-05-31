@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-import cv2
-import cv2.cv as cv
 import os
 import numpy as np
-import fnmatch
 import landmark as lm
 from sklearn.decomposition import PCA
 import preprocessing as pp
@@ -123,7 +120,7 @@ def hand_draw_box(number_samples,radiographs):
     bx.save_boxes(teeth_boxes)
     print('* Boxes saved *')   
 
-def perfect_fit_box(mean_shape,preprocessed_r,largest_b,box_param,toothnr):
+def perfect_fit_box(mean_shape,preprocessed_r,largest_b,box_param,toothnr,nr):
     """  
     IMPORTANT NOTES REGARDING ESTIMATE
     - you have to spcify which tooth are you looking for
@@ -131,13 +128,13 @@ def perfect_fit_box(mean_shape,preprocessed_r,largest_b,box_param,toothnr):
     """
     toothnr = 0
     estimates = []
-    for rad_nr in range(number_samples): # number_samples
+    for rad_nr in range(nr): # number_samples
         e = estimate(rad_nr, mean_shape[toothnr], toothnr, preprocessed_r, largest_b, box_param, False)
 	estimates.append(e)
 	print('    Box for radiograph ' + str(rad_nr + 1) + ' done')    
     return estimates   
     
-def fit_model(estimates,number_samples,number_teeth,mean_shape,radiographs,edges):
+def fit_model(estimates,nr,number_teeth,mean_shape,radiographs,edges):
     detailed_boxes = []
     for i in range(number_samples):
         detailed_boxes.append(fit.get_detailed_boxes(estimates[i]))
@@ -148,7 +145,7 @@ def fit_model(estimates,number_samples,number_teeth,mean_shape,radiographs,edges
     colors = visual.__get_colors(number_teeth)
     new_points = []
     # Loop over every image 
-    for j in range(number_samples): # number_samples
+    for j in range(nr): # number_samples
         # Loop over every tooth 
         for i in range(number_teeth):
             # Apply the model over the boxes 
@@ -251,13 +248,13 @@ if __name__ == '__main__':
     
     # ***** Sharp the boxes ***** 
     print('* Finding upper refined boxes *')
-    estimates = perfect_fit_box(mean_shape,preprocessed_r,largest_b,upper,0)
+    estimates = perfect_fit_box(mean_shape,preprocessed_r,largest_b,upper,0,1)
     print('* Finding lower refined boxes *')
-    e2 = perfect_fit_box(mean_shape,preprocessed_r,largest_b,lower,5)
+    e2 = perfect_fit_box(mean_shape,preprocessed_r,largest_b,lower,5,1)
     
     for i in range(len(estimates)):
         estimates[i].extend(e2[i])
     print('* Found boxes for the teeth *') 
     
     # ***** Apply and fit the model over the image ***** 
-    fit_model(estimates,2,number_teeth,mean_shape,radiographs,edges)
+    fit_model(estimates,1,number_teeth,mean_shape,radiographs,edges)
