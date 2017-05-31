@@ -131,11 +131,35 @@ def perfect_fit_box(mean_shape,preprocessed_r,largest_b,box_param,toothnr):
     """
     toothnr = 0
     estimates = []
-    for rad_nr in range(2): # number_samples
+    for rad_nr in range(number_samples): # number_samples
         e = estimate(rad_nr, mean_shape[toothnr], toothnr, preprocessed_r, largest_b, box_param, False)
 	estimates.append(e)
 	print('    Box for radiograph ' + str(rad_nr + 1) + ' done')    
     return estimates   
+    
+def fit_model(estimates,number_samples,number_teeth,mean_shape,radiographs,edges):
+    detailed_boxes = []
+    for i in range(number_samples):
+        detailed_boxes.append(fit.get_detailed_boxes(estimates[i]))
+    detailed_boxes = np.asarray(detailed_boxes)
+    #print(detailed_boxes)
+
+    # Get colours to print the teeth over the imgages 
+    colors = visual.__get_colors(number_teeth)
+    new_points = []
+    # Loop over every image 
+    for j in range(number_samples): # number_samples
+        # Loop over every tooth 
+        for i in range(number_teeth):
+            # Apply the model over the boxes 
+            img, newpoints = fit.fit_asm_model_to_box(mean_shape[i], detailed_boxes[j][i], radiographs[j], 1000, colors[i], edges[j])
+            # Smooth the obtained points 
+            newpoints = fit.smooth_model(newpoints)
+            visual.render_model_over_image(newpoints, radiographs[j], i+1, colors[i], False)
+            new_points.append(newpoints)
+        visual.savefinalimage(radiographs[j], j + 1)
+        print('* Fitting completed for image ' + str(j + 1) + ' *')
+    
     
 if __name__ == '__main__':
     
@@ -236,24 +260,4 @@ if __name__ == '__main__':
     print('* Found boxes for the teeth *') 
     
     # ***** Apply and fit the model over the image ***** 
-    detailed_boxes = []
-    for i in range(2):
-        detailed_boxes.append(fit.get_detailed_boxes(estimates[i]))
-    detailed_boxes = np.asarray(detailed_boxes)
-    #print(detailed_boxes)
-
-    # Get colours to print the teeth over the imgages 
-    colors = visual.__get_colors(number_teeth)
-    new_points = []
-    # Loop over every image 
-    for j in range(2): # number_samples
-        # Loop over every tooth 
-        for i in range(number_teeth):
-            # Apply the model over the boxes 
-            img, newpoints = fit.fit_asm_model_to_box(mean_shape[i], detailed_boxes[j][i], radiographs[j], 1000, colors[i], edges[j])
-            # Smooth the obtained points 
-            newpoints = fit.smooth_model(newpoints)
-            visual.render_model_over_image(newpoints, radiographs[j], i+1, colors[i], False)
-            new_points.append(newpoints)
-        visual.savefinalimage(radiographs[j], j + 1)
-        print('* Fitting completed for image ' + str(j + 1) + ' *')
+    fit_model(estimates,2,number_teeth,mean_shape,radiographs,edges)
