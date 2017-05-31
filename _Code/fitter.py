@@ -106,6 +106,7 @@ def iterate(points, edge_img, pre_img):
         newpoint = get_max_along_normal(points, i, edge_img, pre_img)
         new_points[i] = newpoint
         #i += 1
+    cv2.waitKey(0) 
     return new_points  
         
 def get_max_along_normal(points, i, edge_img, radiograph):
@@ -157,9 +158,10 @@ def get_max_along_normal(points, i, edge_img, radiograph):
     # Print the final point of the model 
     cv2.circle(img, (int(max_pt[0]), int(max_pt[1])), 2, (0, 100, 255), 2)
     #cv2.circle(edge_img, (int(px), int(py)), 2, (200, 200, 200), 2)
-    cv2.imshow('Img', img)
+    ''' DEcomment next line it if you want to see the intermediate steps ''' 
+    # cv2.imshow('Img', img)
     #cv2.imshow('Edge_img', edge_img)
-    cv2.waitKey(0) 
+    #cv2.waitKey(0) 
     cv2.destroyAllWindows()   
     
     return np.asarray(max_pt)

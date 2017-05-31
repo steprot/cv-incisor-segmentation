@@ -55,17 +55,21 @@ def render_model_over_image(points, img, incisor_nr, color, save):
         color; the color with which print 
         save; boolean, if true it saves the image in the folder  
     '''   
-    print(points)
     for i in range(len(points) - 1):
         cv2.line(img, (int(points[i, 0]), int(points[i, 1])), (int(points[i + 1, 0]), int(points[i + 1, 1])), color)
-    cv2.imshow('Rendered image', img)
     if save: 
         # Specify the name where to print the Procrustes images 
-        directory = '../Plot/Final/finalresult' + str(incisor_nr)+'.png'
+        directory = '../Plot/Final/finalresult' + str("%02d" % (incisor_nr))+'.png'
         dir_path = os.path.join(os.getcwd(), directory)
         cv2.imwrite(dir_path, img)
-    cv2.imshow('Rendered image', img)
+    cv2.imshow('finalresult' + str("%02d" % (incisor_nr))+'.png', img)
     cv2.waitKey(0)
+    
+def savefinalimage(img, i):
+    directory = '../Plot/Final/finalresult' + str("%02d" % (i))+'.png'
+    dir_path = os.path.join(os.getcwd(), directory)
+    cv2.imwrite(dir_path, img)
+    return
 
 #def render_landmark_over_image(img, landmark):
 #    
@@ -158,11 +162,11 @@ def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
 
     # Show
     img = __fit_on_screen(img)
-    cv2.imshow('Procrustes result for incisor ' + str(incisor_nr), img)
+    cv2.imshow('Procrustes result for incisor ' + str("%02d" % (incisor_nr+1)), img)
     cv2.waitKey(0)
     if save:
         # Specify the name where to print the Procrustes images 
-        directory = '../Plot/Procrustes/' + str(incisor_nr)+'.png'
+        directory = '../Plot/Procrustes/' + str("%02d" % (incisor_nr+1)) +'.png'
         dir_path = os.path.join(os.getcwd(), directory)
         cv2.imwrite(dir_path, img)
     cv2.destroyAllWindows()

@@ -4,12 +4,12 @@ import cv2.cv as cv
 import os
 import numpy as np
 import fnmatch
-from landmark import Landmarks, translate_to_origin, scale_to_unit, tooth_from_vector_to_matrix, align_teeth_to_mean_shape, tooth_from_matrix_to_vector, get_tooth_centroid
+import landmark as lm
 from sklearn.decomposition import PCA
 import preprocessing as pp
 import boxes as bx
 import fitter as fit
-from visualise import render_landmarks, print_landmarks_over_radiographs,plot_procrustes, render_landmark_over_image, __get_colors, render_model_over_image
+import visualise as visual
 from estimate import estimate
 
 def getcut(img):
@@ -52,7 +52,7 @@ if __name__ == '__main__':
             directory = '../_Data/Landmarks/original/landmarks' + str(j) + '-' + str(i) + '.txt'
             dir_path = os.path.join(os.getcwd(), directory)
             
-            l = Landmarks(dir_path).as_vector()
+            l = lm.Landmarks(dir_path).as_vector()
             # print(l)
             landmark.append(np.array(l))
 
@@ -67,14 +67,14 @@ if __name__ == '__main__':
      
      
     # ***** Print the teeth_landmarks over radiographs ***** 
-    #print_landmarks_over_radiographs(teeth_landmarks)
+    #visual.print_landmarks_over_radiographs(teeth_landmarks)
     
     # ***** Scale landmarks ***** 
     scaled = []
     for i in range(number_teeth):
         scaled_row = []
         for j in range(number_samples):
-            scaled_row.append(np.array(tooth_from_matrix_to_vector(scale_to_unit(tooth_from_vector_to_matrix(teeth_landmarks[i,j]), get_tooth_centroid(teeth_landmarks[i,j])))))
+            scaled_row.append(np.array(lm.tooth_from_matrix_to_vector(lm.scale_to_unit(lm.tooth_from_vector_to_matrix(teeth_landmarks[i,j]), lm.get_tooth_centroid(teeth_landmarks[i,j])))))
         scaled.append(np.array(scaled_row))
     scaled =  np.array(scaled)
     
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     for i in range(0, number_teeth): 
         around_origin_row = []
         for j in range(0, number_samples):
-            around_origin_row.append(tooth_from_matrix_to_vector(np.array(translate_to_origin(scaled[i,j]))))
+            around_origin_row.append(lm.tooth_from_matrix_to_vector(np.array(lm.translate_to_origin(scaled[i,j]))))
         around_origin_scaled.append(np.array(around_origin_row))
     around_origin_scaled = np.array(around_origin_scaled) # shape of around_origin is 8xnx80
     
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     # ***** Compute the mean_centroids from the landmarks *****
     mean_centroids = [] # Contains the centroids of the mean shape
     for i in range(0, number_teeth):
-        mean_centroids.append(get_tooth_centroid(mean_shape[i]))
+        mean_centroids.append(lm.get_tooth_centroid(mean_shape[i]))
     mean_centroids = np.array(mean_centroids)
     
     print('* Starting Procrustes Analysis *')
@@ -112,7 +112,7 @@ if __name__ == '__main__':
         aligned_shape = np.copy(around_origin_scaled) # we don't need the copy, we will update it in the for loops with the aligned shapes
         for i in range(0, number_teeth):
             for j in range(0, number_samples):
-                aligned_shape[i,j] = align_teeth_to_mean_shape(around_origin_scaled[i,j], mean_shape[i] )
+                aligned_shape[i,j] = lm.align_teeth_to_mean_shape(around_origin_scaled[i,j], mean_shape[i] )
         
         #Calculate new mean
         new_mean_shape = [] # Matrix of nr_teeth x 80
@@ -122,8 +122,8 @@ if __name__ == '__main__':
         
         # Scaling and translating new mean shapes
         for i in range(0, number_teeth):
-            new_mean_shape[i] = scale_to_unit(new_mean_shape[i], get_tooth_centroid((new_mean_shape[i])))
-            new_mean_shape[i] = tooth_from_matrix_to_vector(translate_to_origin(new_mean_shape[i]))
+            new_mean_shape[i] = lm.scale_to_unit(new_mean_shape[i], lm.get_tooth_centroid((new_mean_shape[i])))
+            new_mean_shape[i] = lm.tooth_from_matrix_to_vector(lm.translate_to_origin(new_mean_shape[i]))
         
         # Terminating condition
         if (mean_shape - new_mean_shape < 1e-10).all():
@@ -161,7 +161,7 @@ if __name__ == '__main__':
     # ***** Print the ASM of the landmarks *****
     """ Be careful when printing, the order is  k[i,1],k[i,0] not the other way around!"""
     #for i in range(number_teeth):
-    #    plot_procrustes(mean_shape[i],aligned_shape[i], i+1, False)       
+    #    visual.plot_procrustes(mean_shape[i],aligned_shape[i], i+1, True)       
     
     
     # ***** Do pre-processing of the images *****
@@ -228,40 +228,42 @@ if __name__ == '__main__':
     toothnr = 0
     #rad_nr = 9
     estimates = []
-    for rad_nr in range(14):
-        e = estimate(rad_nr, mean_shape[toothnr], toothnr, preprocessed_r, largest_b, upper, True)
+    print('* Finding upper refined boxes *')
+    for rad_nr in range(2): # number_samples
+        e = estimate(rad_nr, mean_shape[toothnr], toothnr, preprocessed_r, largest_b, upper, False)
 	estimates.append(e)
-    
+	print('    Upper box for radiograph ' + str(rad_nr + 1) + ' done')
     print('* Found boxes for the upper teeth *')
-    print('Estimates upper:', estimates)
+    #print('Estimates upper:', estimates)
     
     toothnr = 6
-    for rad_nr in range(14):
+    print('* Finding lower refined boxes *')
+    for rad_nr in range(2): # number_samples
         estimates[rad_nr].extend(estimate(rad_nr, mean_shape[toothnr], toothnr, preprocessed_r, largest_b, lower, False))
-	
+        print('    Lower box for radiograph ' + str(rad_nr + 1) + ' done')
     print('* Found boxes for the lower teeth *')
-    print('Estimates ALLLLLL:', estimates)
-    
-    print('estimates.len', len(estimates))
-    print('largest_b.len', len(largest_b))
+    #print('Estimates all:', estimates)
     
     
     # ***** Apply and fit the model over the image ***** 
-    
-    # Detailed boxes is 8*4, and must be computed for each sample 
-    detailed_boxes = fit.get_detailed_boxes(largest_b)
-    
+    detailed_boxes = []
+    for i in range(2):
+        detailed_boxes.append(fit.get_detailed_boxes(estimates[i]))
+    detailed_boxes = np.asarray(detailed_boxes)
+    #print(detailed_boxes)
+
     # Get colours to print the teeth over the imgages 
-    colors = __get_colors(number_teeth)
+    colors = visual.__get_colors(number_teeth)
     new_points = []
     # Loop over every image 
-    for j in range(number_samples):
+    for j in range(2): # number_samples
         # Loop over every tooth 
         for i in range(number_teeth):
             # Apply the model over the boxes 
-            img, newpoints = fit.fit_asm_model_to_box(mean_shape[i], detailed_boxes[i], radiographs[j], 1000, colors[i], edges[j])
+            img, newpoints = fit.fit_asm_model_to_box(mean_shape[i], detailed_boxes[j][i], radiographs[j], 1000, colors[i], edges[j])
             # Smooth the obtained points 
             newpoints = fit.smooth_model(newpoints)
-            render_model_over_image(newpoints, radiographs[j], i+1, colors[i], True)
+            visual.render_model_over_image(newpoints, radiographs[j], i+1, colors[i], False)
             new_points.append(newpoints)
-    
+        visual.savefinalimage(radiographs[j], j + 1)
+        print('* Fitting completed for image ' + str(j + 1) + ' *')
