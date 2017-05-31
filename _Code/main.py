@@ -120,23 +120,26 @@ def hand_draw_box(number_samples,radiographs):
     bx.save_boxes(teeth_boxes)
     print('* Boxes saved *')   
 
-def perfect_fit_box(mean_shape,preprocessed_r,largest_b,box_param,toothnr,nr):
+def build_model(mean_shape,preprocessed_r,largest_b,box_param,toothnr,nr):
+    
+    return
+
+def perfect_fit_box(mean_shape,preprocessed_r,largest_b,box_param,toothnr,nr,build_model):
     """  
     IMPORTANT NOTES REGARDING ESTIMATE
     - you have to spcify which tooth are you looking for
     - you have to spacify if it is upper or lower (as last parameter input upper/lower) -> this can be made dynamic
     """
-    toothnr = 0
     estimates = []
     for rad_nr in range(nr): # number_samples
-        e = estimate(rad_nr, mean_shape[toothnr], toothnr, preprocessed_r, largest_b, box_param, False)
+        e = estimate(rad_nr, mean_shape[toothnr], toothnr, preprocessed_r, largest_b, box_param, False,build_model)
 	estimates.append(e)
 	print('    Box for radiograph ' + str(rad_nr + 1) + ' done')    
     return estimates   
     
 def fit_model(estimates,nr,number_teeth,mean_shape,radiographs,edges):
     detailed_boxes = []
-    for i in range(number_samples):
+    for i in range(nr):
         detailed_boxes.append(fit.get_detailed_boxes(estimates[i]))
     detailed_boxes = np.asarray(detailed_boxes)
     #print(detailed_boxes)
@@ -248,13 +251,13 @@ if __name__ == '__main__':
     
     # ***** Sharp the boxes ***** 
     print('* Finding upper refined boxes *')
-    estimates = perfect_fit_box(mean_shape,preprocessed_r,largest_b,upper,0,1)
+    estimates = perfect_fit_box(mean_shape,preprocessed_r,largest_b,upper,0,2,False)
     print('* Finding lower refined boxes *')
-    e2 = perfect_fit_box(mean_shape,preprocessed_r,largest_b,lower,5,1)
+    e2 = perfect_fit_box(mean_shape,preprocessed_r,largest_b,lower,5,2,False)
     
     for i in range(len(estimates)):
         estimates[i].extend(e2[i])
     print('* Found boxes for the teeth *') 
     
     # ***** Apply and fit the model over the image ***** 
-    fit_model(estimates,1,number_teeth,mean_shape,radiographs,edges)
+    fit_model(estimates,2,number_teeth,mean_shape,radiographs,edges)

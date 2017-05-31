@@ -6,6 +6,7 @@ iterative fitting procedure is started.
 '''
 import cv2
 import numpy as np
+import pickle
  
 def project(W, X, mu):
     '''
@@ -154,7 +155,8 @@ def pca(X, nb_components):
     return eigenvalues, np.transpose(eigenvectors), mu
 
 
-def estimate(rad_nr,model,toothnr,preprocessed_r,coord,allcoord,show):
+
+def estimate(rad_nr,model,toothnr,preprocessed_r,coord,allcoord,show,b_model):
     """ 
     model - The shape we want to fit.
     toothnr - which incisor are we looking for?
@@ -166,17 +168,43 @@ def estimate(rad_nr,model,toothnr,preprocessed_r,coord,allcoord,show):
     
     """
 
-    if toothnr < 5:
+    if toothnr < 4:
         width = coord[2]-coord[0]
         height = coord[3]-coord[1] 
-        isupper = True   
+        isupper = True 
+        if b_model:
+            data = load_database(np.asarray(preprocessed_r), isupper,allcoord,width, height)
+            [_, eigen_vec, mean] = pca(data, 10)
+            
+            filename = 'eigen_vec_upper.sav'
+            pickle.dump(eigen_vec, open(filename, 'wb'))
+    
+            filename = 'mean_upper.sav'
+            pickle.dump(mean, open(filename, 'wb'))        
+            
+            print "outputed to file"
+        else: 
+            eigen_vec = pickle.load(open('eigen_vec_upper.sav', 'rb'))
+            mean = pickle.load(open('mean_upper.sav', 'rb'))  
     else:
         width = coord[6]-coord[4]
         height = coord[7]-coord[5]
         isupper = False
+        if b_model:
+            data = load_database(np.asarray(preprocessed_r), isupper,allcoord,width, height)
+            [_, eigen_vec, mean] = pca(data, 10)
+            
+            filename = 'eigen_vec_lower.sav'
+            pickle.dump(eigen_vec, open(filename, 'wb'))
     
-    data = load_database(np.asarray(preprocessed_r), isupper,allcoord,width, height)
-    [_, eigen_vec, mean] = pca(data, 10)
+            filename = 'mean_lower.sav'
+            pickle.dump(mean, open(filename, 'wb'))        
+            
+            print "outputed to file"
+        else: 
+            eigen_vec = pickle.load(open('eigen_vec_lower.sav', 'rb'))
+            mean = pickle.load(open('mean_lower.sav', 'rb')) 
+        
     #pca_res = PCA(n_components=5) 
     #pca_res.fit(np.asarray(data))
     #eigen_vec= pca_res.components_
