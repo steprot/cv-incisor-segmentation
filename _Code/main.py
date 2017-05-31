@@ -13,8 +13,12 @@ from estimate import estimate
     Main function of the project.
 '''
 
-def load_landmarks(number_teeth,number_samples, directory):
+def load_landmarks(number_teeth,number_samples, directory, mirrored):
     i = 1
+    if mirrored:
+        index = 14
+    else:
+        index = 0
     teeth_landmarks = [] # 3D array: 8*number_samples*80
     path ='../_Data/Landmarks/' + str(directory)
     while i <= number_teeth: # For all the different teeth 
@@ -22,9 +26,9 @@ def load_landmarks(number_teeth,number_samples, directory):
         landmark = []
         while j <= number_samples: # For the same tooth but for the different persons
             # Specify the name where to read the landmarks from
-            directory = path + str(j) + '-' + str(i) + '.txt'
-            dir_path = os.path.join(os.getcwd(), directory)
-            
+            print(index+j)
+            directory = path + str(index + j) + '-' + str(i) + '.txt'
+            dir_path = os.path.join(os.getcwd(), directory)     
             l = lm.Landmarks(dir_path).as_vector()
             # print(l)
             landmark.append(np.array(l))
@@ -170,10 +174,15 @@ if __name__ == '__main__':
     number_samples = 14
     
     directory = 'original/landmarks'
-    teeth_landmarks = load_landmarks(number_teeth,number_samples, directory)
-    #directory = 'mirrored/landmarks'
-    #teeth_landmarks.extend(load_landmarks(number_teeth,number_samples, directory))
-    print('* Landmarks loaded *')
+    teeth_landmarks = load_landmarks(number_teeth,number_samples, directory, False)
+    print(teeth_landmarks.shape)
+    directory = 'mirrored/landmarks'
+    teeth_mirrored = load_landmarks(number_teeth,number_samples, directory, True)
+    teeth_landmarks = np.concatenate((teeth_landmarks, teeth_mirrored), axis=1)
+    print(teeth_mirrored.shape)
+    print(teeth_landmarks.shape)
+    # Double the number of samples 
+    number_samples *= 2
      
      
     # ***** Print the teeth_landmarks over radiographs ***** 
