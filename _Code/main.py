@@ -120,19 +120,18 @@ def hand_draw_box(number_samples,radiographs):
     bx.save_boxes(teeth_boxes)
     print('* Boxes saved *')   
 
-def build_model(mean_shape,preprocessed_r,largest_b,box_param,toothnr,nr):
-    
-    return
-
-def perfect_fit_box(mean_shape,preprocessed_r,largest_b,box_param,toothnr,nr,build_model):
+def perfect_fit_box(isupper,preprocessed_r,largest_b,box_param,nr,build_model):
     """  
-    IMPORTANT NOTES REGARDING ESTIMATE
-    - you have to spcify which tooth are you looking for
-    - you have to spacify if it is upper or lower (as last parameter input upper/lower) -> this can be made dynamic
+    isupper - upper incisiors (True), lower incisors (False)
+    preprocessed_r - preprocessed radiographs
+    largest_b - parameter of the largest hand drawn box which we will fine tune
+    box_param - array of hand drawn boxes either upper or lower 
+    nr - 1 if we want to find box only on one radiograph, else the number of radiographs
+    build_model - should the model be built (True) or loaded (False)
     """
     estimates = []
     for rad_nr in range(nr): # number_samples
-        e = estimate(rad_nr, mean_shape[toothnr], toothnr, preprocessed_r, largest_b, box_param, False,build_model)
+        e = estimate(preprocessed_r[rad_nr], isupper, preprocessed_r, largest_b, box_param, False,build_model)
 	estimates.append(e)
 	print('    Box for radiograph ' + str(rad_nr + 1) + ' done')    
     return estimates   
@@ -251,9 +250,9 @@ if __name__ == '__main__':
     
     # ***** Sharp the boxes ***** 
     print('* Finding upper refined boxes *')
-    estimates = perfect_fit_box(mean_shape,preprocessed_r,largest_b,upper,0,2,False)
+    estimates = perfect_fit_box(True,preprocessed_r,largest_b,upper,2,False)
     print('* Finding lower refined boxes *')
-    e2 = perfect_fit_box(mean_shape,preprocessed_r,largest_b,lower,5,2,False)
+    e2 = perfect_fit_box(False,preprocessed_r,largest_b,lower,2,False)
     
     for i in range(len(estimates)):
         estimates[i].extend(e2[i])

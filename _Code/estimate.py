@@ -156,22 +156,21 @@ def pca(X, nb_components):
 
 
 
-def estimate(rad_nr,model,toothnr,preprocessed_r,coord,allcoord,show,b_model):
+def estimate(rad,isupper,preprocessed_r,coord,allcoord,show,b_model):
     """ 
-    model - The shape we want to fit.
-    toothnr - which incisor are we looking for?
+    rad - radiograph we want to find the best box on
+    isupper - is it upper or lower incisiors
     preprocessed_r - all the radiographs
     coord - coordonates of the largest drawn box
     allcoord - coordonates of all upper/lower incisors
-    
-    *** Need to generalize this so if we don't have a hand drawn box it would still work ***
+    show - print box if True
+    b_model - build model if True, load model else
     
     """
 
-    if toothnr < 4:
+    if isupper:
         width = coord[2]-coord[0]
         height = coord[3]-coord[1] 
-        isupper = True 
         if b_model:
             data = load_database(np.asarray(preprocessed_r), isupper,allcoord,width, height)
             [_, eigen_vec, mean] = pca(data, 10)
@@ -189,7 +188,6 @@ def estimate(rad_nr,model,toothnr,preprocessed_r,coord,allcoord,show,b_model):
     else:
         width = coord[6]-coord[4]
         height = coord[7]-coord[5]
-        isupper = False
         if b_model:
             data = load_database(np.asarray(preprocessed_r), isupper,allcoord,width, height)
             [_, eigen_vec, mean] = pca(data, 10)
@@ -211,12 +209,10 @@ def estimate(rad_nr,model,toothnr,preprocessed_r,coord,allcoord,show,b_model):
     #mean  = pca_res.mean_
 
     # Find the region of the radiograph that matches best with the appearance model
-    best_coord = best_seg(mean, eigen_vec, preprocessed_r[rad_nr], isupper, coord, width, height, False)
-    
-    #print(best_coord)
-    
+    best_coord = best_seg(mean, eigen_vec, rad, isupper, coord, width, height, False)
+
     if show == True:
-        img = preprocessed_r[rad_nr].copy()
+        img = preprocessed_r[rad].copy()
         cv2.rectangle(img, (int(best_coord[0]), int(best_coord[1])), (int(best_coord[2]), int(best_coord[3])), (255, 0, 0), 5)
         cv2.imshow('Radiograph with best box', img)
         cv2.waitKey(0)
