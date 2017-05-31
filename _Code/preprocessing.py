@@ -7,12 +7,12 @@ import fnmatch
 from scipy.ndimage import morphology
 
 
-def load_radiographs(number_samples,testing):
+def load_radiographs(number_samples, testing):
     '''
-        Load the radiograph images
-        Returns:
-            An array with the requested radiographs as 3-channel color images,
-            ordered the same as the given indices.
+    Load the radiograph images
+    Returns:
+        An array with the requested radiographs as 3-channel color images,
+        ordered the same as the given indices.
     '''
     images = []
     if testing:
@@ -34,27 +34,24 @@ def load_radiographs(number_samples,testing):
 
 def preprocess_radiograph(img):
     '''
-        Enhances a dental x-ray image by
-            1. applying a bilateral filter,
-            2. combining the top- and bottom-hat transformations
-            3. applying CLAHE
-        Args:
-            img: A dental x-ray image.
-        Returns:
-            The enhanced radiograph as a grayscale image.
+    Enhances a dental x-ray image by:
+        making it in greyscale. 
+        applying the median filter, applying a bilateral filter,
+        combining the top- and bottom-hat transformations, applying CLAHE
+    Parameters:
+        img; the radiograph 
+        The enhanced radiograph as a grayscale image.
     '''
     #cv2.imshow('Initial Radiograph', img)
     #cv2.waitKey(0)
-    
     img = img.copy()
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
-    # RISOLVERE QUESTA FUNZIONE 
+
     #img = adaptive_median(img, 3, 5)
     
     # using only the median filter instead of the adaptive median filter. 
     img = cv2.medianBlur(img, 3)
-    
+
     img = bilateral_filter(img)
     
     img_top = top_hat_transform(img)
@@ -71,48 +68,47 @@ def preprocess_radiograph(img):
     
 def bilateral_filter(img):
     '''
-        Applies a bilateral filter to the given image.
-        This filter is highly effective in noise removal while keeping edges sharp.
-        Args: img: A grayscale dental x-ray image.
-        Returns: The filtered image.
+    Applies a bilateral filter to the given image.
+    This filter is highly effective in noise removal while keeping edges sharp.
+    Parameters:
+        img; a grayscale image of the radiograph after median filter
     '''
     return cv2.bilateralFilter(img, 9, 175, 175)
     
 def top_hat_transform(img):
     '''
-        Calculates the top-hat transformation of a given image.
-        This transformation enhances the brighter structures in the image.
-        Args: img: A grayscale dental x-ray image.
-        Returns: The top-hat transformation of the input image.
+    Calculates the top-hat transformation of a given image.
+    This transformation enhances the brighter structures in the image.
+    Parameters:
+        img; a grayscale image of the radiograph after median filter and bilateral filter
     '''
     return morphology.white_tophat(img, size=400)
 
 
 def bottom_hat_transform(img):
     '''
-        Calculates the bottom-hat transformation of a given image.
-        This transformation enhances the darker structures in the image.
-        Args: img: A grayscale dental x-ray image.
-        Returns: The top-hat transformation of the input image.
+    Calculates the bottom-hat transformation of a given image.
+    This transformation enhances the darker structures in the image.
+    Parameters:
+        img; a grayscale image of the radiograph after median filter and bilateral filter
     '''
     return morphology.black_tophat(img, size=80)
     
 def clahe(img): # Contrast Limited Adaptive Histogram Equalization
     '''
-        Creates a CLAHE object and applies it to the given image.
-        Args: img: A grayscale dental x-ray image.
-        Returns: The result of applying CLAHE to the given image.
+    Creates a CLAHE object and applies it to the given image.
+    Parameters:
+        img; a grayscale image of the radiograph already processed
     '''
-    
     clahe_obj = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(16, 16))
     return clahe_obj.apply(img)
 
 
 def togradient_sobel(img):
     '''
-        Applies the Sobel Operator.
-        Args: img: A grayscale dental x-ray image.
-        Returns: An image with the detected edges bright on a darker background.
+    Applies the Sobel Operator and returns the image with the edges. 
+    Parameters:
+        img; the preprocessed greyscale image.
     '''
     img = cv2.GaussianBlur(img,(3,3),0)
     sobelx = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
@@ -122,7 +118,6 @@ def togradient_sobel(img):
     
     return cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
     #return cv2.addWeighted(sobelx, 0.1, sobely, 0.1, 0)
-    
     
 def adaptive_median(img, window, threshold):
     '''
@@ -186,7 +181,10 @@ def adaptive_median(img, window, threshold):
 
 def med(target_array, array_length):
     '''
-        Computes the median of a sublist.
+    Computes the median of a sublist.
+    Parameters: 
+        target_array; the list from which return the median
+        array_length; length of the list.
     '''
     sorted_array = np.sort(target_array)
     median = sorted_array[array_length/2]
@@ -194,13 +192,11 @@ def med(target_array, array_length):
     
 def resize(image, width, height):
     '''
-        Resizes the given image to the given width and height.
-        Args:
-            image: The radiograph to resize.
-            width (int): The new width for the image.
-            height (int): The new height for the image.
-        Returns:
-            The given image resized to the given width and height, and the scaling factor.
+    Resizes the given image to the given width and height. The scaling factor is returned. 
+    Parameters:
+        image: The radiograph to resize.
+        width (int): The new width for the image.
+        height (int): The new height for the image.
     '''
     #find minimum scale to fit image on screen
     scale = min(float(width) / image.shape[1], float(height) / image.shape[0])

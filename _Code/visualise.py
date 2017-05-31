@@ -1,11 +1,10 @@
 import colorsys
 import math
-import time
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-from landmark import tooth_from_vector_to_matrix, tooth_from_matrix_to_vector
+import landmark as lm
 import os
 
 SCREEN_H = 800
@@ -15,12 +14,12 @@ SCREEN_W = 1200
 number_teeth = 8 
 number_samples = 14
 
-'''
+def print_landmarks_over_radiographs(teeth_landmarks):
+    '''
     Prints teeth's landmark points over the radiographs.
     Parameters: 
          teeth_landmarks; 3D table containing the 80 landmark points per tooth, per sample.
-'''
-def print_landmarks_over_radiographs(teeth_landmarks):
+    '''
     i = 0
     while i < number_samples:
         j = 0
@@ -36,7 +35,7 @@ def print_landmarks_over_radiographs(teeth_landmarks):
 
 def render_landmark_over_image(img, landmark):
     
-    points = tooth_from_vector_to_matrix(landmark)
+    points = lm.tooth_from_vector_to_matrix(landmark)
     
     for i in range(len(points) - 1):
         cv2.line(img, (int(points[i, 1]), int(points[i, 0])), (int(points[i + 1, 1]), int(points[i + 1, 0])), (0, 255, 0))
@@ -46,16 +45,31 @@ def render_landmark_over_image(img, landmark):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     
-def render_model_over_image(points, img):    
+def render_model_over_image(points, img, incisor_nr, color, save): 
+    '''
+    Render the model (stored differently from the landmarks, over an image)
+    Parameters:
+        points; the model to display
+        img: image over which display the model
+        incisor_nr; number of the tooth corresponding to the model 
+        color; the color with which print 
+        save; boolean, if true it saves the image in the folder  
+    '''   
     print(points)
     for i in range(len(points) - 1):
-        cv2.line(img, (int(points[i, 0]), int(points[i, 1])), (int(points[i + 1, 0]), int(points[i + 1, 1])), (0, 255, 0))
+        cv2.line(img, (int(points[i, 0]), int(points[i, 1])), (int(points[i + 1, 0]), int(points[i + 1, 1])), color)
+    cv2.imshow('Rendered image', img)
+    if save: 
+        # Specify the name where to print the Procrustes images 
+        directory = '../Plot/Final/finalresult' + str(incisor_nr)+'.png'
+        dir_path = os.path.join(os.getcwd(), directory)
+        cv2.imwrite(dir_path, img)
     cv2.imshow('Rendered image', img)
     cv2.waitKey(0)
 
 #def render_landmark_over_image(img, landmark):
 #    
-#    #points = tooth_from_vector_to_matrix(landmark)
+#    #points = lm.tooth_from_vector_to_matrix(landmark)
 #    img = np.ones((1000, 600, 3), np.uint8) * 255
 #    mean_shape = scale_for_print(landmark,1100)
 #    points = translate(mean_shape,np.array([300,500]))
@@ -71,9 +85,9 @@ def render_model_over_image(points, img):
 #    cv2.destroyAllWindows()
     
 def render_landmarks(data_collector):
-    """
-            Method visualizes landmark points in a given data_collector of type DataCollector
-    """
+    '''
+    Method visualizes landmark points in a given data_collector of type DataCollector
+    '''
 
     points = data_collector.as_matrix()
     max_y = points[:, 0].max()
@@ -96,8 +110,8 @@ def scale_for_print(array,value):
     
 def translate(trans,centroid):
     """
-        Translates the landmark points so that the centre of gravitiy of this
-        shape is at 'centroid'.
+    Translates the landmark points so that the centre of gravitiy of this
+    shape is at 'centroid'.
     """
     i = 0
     points = []
@@ -110,26 +124,24 @@ def translate(trans,centroid):
                         
 def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
     '''
-        Plots the result of the procrustes analysis.
-    
-        Args:
-            mean_shape - one for each tooth
-            aligned_shapes - 14 for each tooth
-            incisor_nr - index of tooth
-            save(bool) - whether to save the plot.
+    Plots the result of the procrustes analysis.
+    Parameters:
+        mean_shape; mean shape for each tooth
+        aligned_shapes; 14 for each tooth
+        incisor_nr; index of tooth
+        save(bool); whether to save the plot.
     '''
     
     # white background
     img = np.ones((1000, 600, 3), np.uint8) * 255
     mean_shape = scale_for_print(mean_shape,1100)
     points = translate(mean_shape,np.array([400,300]))
-    
 
     for i in range(len(points)):
         cv2.line(img, (int(points[i, 1]), int(points[i, 0])),
                  (int(points[(i + 1) % 40, 1]), int(points[(i + 1) % 40, 0])),
                  (0, 0, 0), 2)
-    ## center of mean shape
+    # center of mean shape
     cv2.circle(img, (400,300), 10, (255, 255, 255))
 
     # plot aligned shapes in different colors
@@ -138,18 +150,21 @@ def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
     for ind, aligned_shape in enumerate(aligned_shapes):
         aligned_shape =  scale_for_print(aligned_shape,1100)
         points = translate(aligned_shape,np.array([400,300]))
-        #points = tooth_from_vector_to_matrix(aligned_shape)
+        #points = lm.tooth_from_vector_to_matrix(aligned_shape)
         for i in range(len(points)):
             cv2.line(img, (int(points[i, 1]), int(points[i, 0])),
                      (int(points[(i + 1) % 40, 1]), int(points[(i + 1) % 40, 0])),
                      colors[ind])
 
-    # show
+    # Show
     img = __fit_on_screen(img)
     cv2.imshow('Procrustes result for incisor ' + str(incisor_nr), img)
     cv2.waitKey(0)
     if save:
-        cv2.imwrite('Plot/Procrustes/'+str(incisor_nr)+'.png', img)
+        # Specify the name where to print the Procrustes images 
+        directory = '../Plot/Procrustes/' + str(incisor_nr)+'.png'
+        dir_path = os.path.join(os.getcwd(), directory)
+        cv2.imwrite(dir_path, img)
     cv2.destroyAllWindows()
 
 
@@ -185,7 +200,7 @@ def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
 #
 #def render_landmark(landmark):
 #        
-#    points = tooth_from_vector_to_matrix(landmark)
+#    points = lm.tooth_from_vector_to_matrix(landmark)
 #    
 #    max_y = points[:, 0].max()
 #    min_y = points[:, 0].min()
@@ -200,29 +215,18 @@ def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
 #    cv2.imshow('Rendered shape', img)
 #    cv2.waitKey(0)
 #    cv2.destroyAllWindows()
-#        
-#
-#def print_image(img, title="Radiograph"):
-#    '''
-#        Shows the given image.
-#    '''
-#    cv2.imshow(title, img)
-#    cv2.waitKey(0)
-#    cv2.destroyAllWindows()
-#
-#
+
 def __get_colors(num_colors):
-    """Get a list with ``num_colors`` different colors.
-
-    Args:
+    '''
+    Get a list with ``num_colors`` different colors.
+    Parameters:
         num_colors (int): The number of colors needed.
-
     Returns:
         list: ``num_colors`` different rgb-colors ([0,255], [0,255], [0,255])
 
     .. _Code based on:
         http://stackoverflow.com/a/9701141
-    """
+    '''
     colors = []
     for i in np.arange(0., 360., 360. / num_colors):
         hue = i/360.
@@ -232,15 +236,11 @@ def __get_colors(num_colors):
     return [(int(r*255), int(g*255), int(b*255)) for (r, g, b) in colors]
     
 def __fit_on_screen(image):
-    """Rescales the given image such that it fits on the screen.
-
-    Args:
-        image: The image to rescale.
-
-    Returns:
-        The rescaled image.
-
-    """
+    '''
+    Rescales the given image such that it fits on the screen.
+    Parameters:
+        image: The image to rescale
+    '''
     # find minimum scale to fit image on screen
     scale = min(float(SCREEN_W) / image.shape[1], float(SCREEN_H) / image.shape[0])
     return cv2.resize(image, (int(image.shape[1] * scale), int(image.shape[0] * scale)))

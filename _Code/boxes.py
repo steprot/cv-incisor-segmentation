@@ -26,8 +26,6 @@ drawing = False
 #    cv2.namedWindow(window_title)
 #    cv2.setMouseCallback(window_title, mouse_callback_function)
 #    
-#    # MISSING THE ERROR HANDLING ****************************************************************************************************
-#    
 #    while condition:
 #        # show the image, with the rectangle if present 
 #        rect_cpy = radiograph.copy()
@@ -55,17 +53,21 @@ drawing = False
 #    return boxes
 
 def get_box_per_jaw(radiograph, i, where):
+    '''
+    Displays the image, and ask the user to print a box over the 'where' jaw.
+    Parameters: 
+        radiograph; image to show
+        i; index of the tooth
+        where; says if the box to draw is around upper or lower teeth
+    '''
     # grab references to the global variables
     global point1, point2, box_coordinates, condition, point2tmp, drawing
     
     window_title = 'Sample ' + str(i) + ': draw a box around the ' + where + ' teeth' 
     
-    
     # Setup the mouse callback function
     cv2.namedWindow(window_title)
     cv2.setMouseCallback(window_title, mouse_callback_function)
-    
-    # MISSING THE ERROR HANDLING ****************************************************************************************************
     
     while condition:
         # show the image, with the rectangle if present 
@@ -88,6 +90,10 @@ def get_box_per_jaw(radiograph, i, where):
     return box
       
 def reset_global_variable():
+    '''
+    Function to reset the global variables and clean the memory for the 
+    next coming calls. Also restart the drawing over the image. 
+    '''
     global point1, point2, point2tmp, box_coordinates, condition, drawing
     point1 = (0,0)
     point2 = (0,0)
@@ -96,6 +102,12 @@ def reset_global_variable():
     condition = True
             
 def mouse_callback_function(ev, x, y, flags, param):
+    '''
+    Callback for the mouse movements.
+    Takes the coordinates of the boxes, when there is a click down the first 
+    point is taken, the second one when it is released. Whenever there is 
+    a move, store it in point2tmp
+    '''
     # grab references to the global variables
     global point1, point2, box_coordinates, condition, point2tmp, drawing 
     
@@ -128,8 +140,17 @@ def mouse_callback_function(ev, x, y, flags, param):
         point2tmp = (x, y)
         
 def print_boxes_on_tooth(boxes, radiograph):
+    ''' 
+    Given the boxes and the radiograph, the function prints a box around 
+    each tooth. The dimension are obtained dividing the boxes in 4 equal
+    parts. 
+    An offset to wide or reduce the width of the boxes is applicable.
+    ''' 
+    # Offset to change the width of the boxes 
     offset = 0
     img = radiograph.copy()
+    
+    # For the upper boxes 
     lx = boxes[0]
     rx = boxes[2]
     width = rx - lx
@@ -140,6 +161,7 @@ def print_boxes_on_tooth(boxes, radiograph):
     cv2.rectangle(img, (lx + width2 - offset, boxes[1]), (rx - width + offset, boxes[3]), (0, 0, 255), 1)
     cv2.rectangle(img, (rx - width - offset, boxes[1]), (rx + offset, boxes[3]), (0, 255, 0), 1)
     
+    # For the lower boxes 
     lx = boxes[4]
     rx = boxes[6]
     width = rx - lx
@@ -149,22 +171,44 @@ def print_boxes_on_tooth(boxes, radiograph):
     cv2.rectangle(img, (lx + width - offset, boxes[5]), (lx + width2 + offset, boxes[7]), (255, 0, 0), 1)
     cv2.rectangle(img, (lx + width2 - offset, boxes[5]), (rx - width + offset, boxes[7]), (0, 0, 255), 1)
     cv2.rectangle(img, (rx - width - offset, boxes[5]), (rx + offset, boxes[7]), (0, 255, 0), 1)
+    
+    # Show the image
     cv2.imshow('Radiograph with boxes', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     return
 
+def print_boxes_on_teeth(boxes, image):
+    '''
+    Prints the boxes (not detailed) around the upper and lower jaws.
+    Parameters:
+        boxes; boxes coordinates
+        image; radiograph
+    '''
+    img = image.copy()
+    cv2.rectangle(img, (int(boxes[0]), int(boxes[1])), (int(boxes[2]), int(boxes[3])), (0, 255, 0), 1)
+    cv2.rectangle(img, (int(boxes[4]), int(boxes[5])), (int(boxes[6]), int(boxes[7])), (255, 0, 0), 1)
+    cv2.imshow('Radiograph with boxes', img)
+    cv2.waitKey(0)
+    return
+    
 def save_boxes(boxes):
+    '''
+    Given all the boxes, it saves them in a text file, each line a list 
+    of the coordinates for the upper and lower jaws. 
+    An offset to wide or reduce the width of the boxes is applicable.
+    '''
     #directory = '../_Data/Radiographs/'
     #dir_path = os.path.join(os.getcwd(), directory)
-    
     text_file = open("boxes.txt", "w")
+    # Offset to change the width of the boxes 
     offs = 0
     
     for i in range(boxes.shape[0]):    
-        text_file.write("{} {} {} {} {} {} {} {}\n".format((boxes[i][0] - offs), boxes[i][1], (boxes[i][2] + offs), boxes[i][3], (boxes[i][4] - offs), boxes[i][5], (boxes[i][6] + offs), boxes[i][7]))
-        
+        text_file.write("{} {} {} {} {} {} {} {}\n".format((boxes[i][0] - offs), boxes[i][1], (boxes[i][2] + offs), boxes[i][3],\
+                                                            (boxes[i][4] - offs), boxes[i][5], (boxes[i][6] + offs), boxes[i][7]))
     text_file.close()
+    return 
     
 #def save_boxes_detailed(boxes):
 #    #directory = '../_Data/Radiographs/'
@@ -198,6 +242,10 @@ def save_boxes(boxes):
 #    text_file.close()
 
 def read_boxes_from_file():
+    '''
+    Read the stored coordinates of the boxes from the file.
+    Returns: the boxes as list of coordinates
+    '''
     with open('boxes.txt') as f:
         lines = []
         for line in f:
@@ -206,10 +254,20 @@ def read_boxes_from_file():
     return lines
     
 def get_mean_boxes(boxes):
+    '''
+    Given all the coordinates of all the boxes, it
+    computes and returns the mean box for each jaw. 
+    '''
     mean = np.mean(boxes, axis=0)
     return mean 
     
 def get_largest_boxes(boxes): 
+    '''
+    Given all the coordinates of all the boxes, it finds the largest 
+    possible boxes for the upper and lower jaws. 
+    Parameters:
+        Boxes: matrix containg all the boxes for all the samples. 
+    '''
     uminx = boxes[:,0].min()
     uminy = boxes[:,1].min()
     umaxx = boxes[:,2].max()
@@ -218,94 +276,7 @@ def get_largest_boxes(boxes):
     lminy = boxes[:,5].min()
     lmaxx = boxes[:,6].max()
     lmaxy = boxes[:,7].max()
+    
+    # Return the largest boxes
     return [uminx, uminy, umaxx, umaxy, lminx, lminy, lmaxx, lmaxy]
-        
-def print_boxes_on_teeth(boxes, image):
-    img = image.copy()
-    cv2.rectangle(img, (int(boxes[0]), int(boxes[1])), (int(boxes[2]), int(boxes[3])), (0, 255, 0), 1)
-    #cv2.rectangle(img, (int(boxes[4]), int(boxes[5])), (int(boxes[6]), int(boxes[7])), (255, 0, 0), 1)
-    cv2.imshow('Radiograph with boxes', img)
-    cv2.waitKey(0)
-    return
     
-   
-    
-        
-'''
-    MANUAL INIT ***************************************
-'''
-
-#tooth = []
-#tmpTooth = []
-#dragging = False
-#start_point = (0, 0)
-#
-#def init(landmark, img):
-#    
-#    # print('img.shape', img.shape)
-#    oimgh = img.shape[0]
-#    img, scale = pp.resize(img, 1200, 800)
-#    imgh = img.shape[0]
-#    canvasimg = np.array(img)
-#    
-#    # transform model points to image coord
-#    points = landmark
-#    print(points.shape)
-#    print(points[:,0])
-#    min_x = abs(points[:,0].min())
-#    min_y = abs(points[:,1].min())
-#    points = [((point[0]+min_x)*scale, (point[1]+min_y)*scale) for point in points]
-#    tooth = points
-#    pimg = np.array([(int(p[0]*imgh), int(p[1]*imgh)) for p in points])
-#    cv2.polylines(img, [pimg], True, (0, 255, 0))
-#    
-#    # show gui
-#    cv2.imshow('choose', img)
-#    print('prima della setmousecallback')
-#    cv.SetMouseCallback('choose', __mouse, canvasimg)
-#    cv2.waitKey(0)
-#    cv2.destroyAllWindows()
-#
-#    centroid = np.mean(tooth, axis=0)
-#
-#    return centroid, np.array([[point[0]*oimgh, point[1]*oimgh] for point in tooth])
-#
-#
-#def __mouse(ev, x, y, flags, img):
-#    """This method handles the mouse-dragging.
-#    """
-#    global tooth
-#    global dragging
-#    global start_point
-#
-#    if ev == cv.CV_EVENT_LBUTTONDOWN:
-#        print('primo if')
-#        dragging = True
-#        start_point = (x, y)
-#    elif ev == cv.CV_EVENT_LBUTTONUP:
-#        print('secondo if')
-#        tooth = tmpTooth
-#        dragging = False
-#    elif ev == cv.CV_EVENT_MOUSEMOVE:
-#        print('terzo if')
-#        if dragging and tooth != []:
-#            print('quarto if')
-#            __move(x, y, img)
-#
-#def __move(x, y, img):
-#    '''
-#        Redraws the incisor on the radiograph while dragging.
-#    '''
-#    print('sono nella move')
-#    global tmpTooth
-#    imgh = img.shape[0]
-#    tmp = np.array(img)
-#    dx = (x-start_point[0])/float(imgh)
-#    dy = (y-start_point[1])/float(imgh)
-#
-#    points = [(p[0]+dx, p[1]+dy) for p in tooth]
-#    tmpTooth = points
-#
-#    pimg = np.array([(int(p[0]*imgh), int(p[1]*imgh)) for p in points])
-#    cv2.polylines(tmp, [pimg], True, (0, 255, 0))
-#    cv2.imshow('choose', tmp)

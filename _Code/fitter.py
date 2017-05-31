@@ -2,7 +2,7 @@ import math
 import sys
 import cv2
 import numpy as np
-from landmark import get_tooth_center, tooth_from_vector_to_matrix, get_tooth_centroid
+import landmark as lm
     
 def get_detailed_boxes(boxes):
     offset = 0
@@ -35,7 +35,7 @@ def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color, edge_img
     # Moving the model and centering it in the middle of the box 
     #print(toothbox)
     toothmodel = toothmodel * fact
-    points = tooth_from_vector_to_matrix(toothmodel)
+    points = lm.tooth_from_vector_to_matrix(toothmodel)
     # Swap X and Y
     for i in range(len(points)):
         tmp = points[i, 0]
@@ -44,7 +44,7 @@ def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color, edge_img
         
     box_center = np.asarray([(toothbox[2] + toothbox[0])/2, (toothbox[3] + toothbox[1])/2])
     #print('box_center' ,box_center)
-    tooth_center = np.asarray(get_tooth_center(points))
+    tooth_center = np.asarray(lm.get_tooth_center(points))
     #print('tooth_center', tooth_center)
     translation_vec = box_center - tooth_center
     #print(translation_vec)
@@ -60,7 +60,7 @@ def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color, edge_img
     hfactor = bheight/(hmax - hmin)
     wfactor = bwidth/(wmax - wmin)
     #print('hfactor and wfactor', hfactor, wfactor)
-    centroid = get_tooth_centroid(points)
+    centroid = lm.get_tooth_centroid(points)
     #print('centroid', centroid)
     ypoints = points[:,1]
     ypoints = (ypoints - centroid[1]).dot(hfactor) + centroid[1]  
@@ -70,7 +70,7 @@ def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color, edge_img
     #print('xpoints', xpoints)
     points = np.stack((xpoints, ypoints), axis=-1)
         
-    tooth_center = np.asarray(get_tooth_center(points))
+    tooth_center = np.asarray(lm.get_tooth_center(points))
     #print('tooth_center', tooth_center)
     translation_vec = box_center - tooth_center
     #print(translation_vec)

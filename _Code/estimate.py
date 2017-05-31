@@ -1,23 +1,26 @@
 # -*- coding: utf-8 -*-
-""" Estimate model on radiograph
-    - automatic initialization of the location of an incisor, before the
-    iterative fitting procedure is started. """
-
+'''
+Estimate model on radiograph
+- automatic initialization of the location of an incisor, before the
+iterative fitting procedure is started.
+'''
 import cv2
 import numpy as np
  
 def project(W, X, mu):
-    """Project X on the space spanned by the vectors in W.
+    '''
+    Project X on the space spanned by the vectors in W.
     mu is the average image.
-    """   
+    '''   
     Xnew = X - mu.T
     return np.dot(Xnew, W)
 
 
 def reconstruct(W, Y, mu):
-    """Reconstruct an image based on its PCA-coefficients Y, the evecs W
+    '''
+    Reconstruct an image based on its PCA-coefficients Y, the evecs W
     and the average mu.
-    """
+    '''
     return np.dot(Y, W.T) + mu.T
 
 def slide(image, seg, step, window):
@@ -28,12 +31,11 @@ def slide(image, seg, step, window):
 
 
 def getcut(img,a1,b1,a2,b2):
-    
     h, w = img.shape
     #print(img.shape)   
     crp = img[a1 :a2, b1:b2]
     #crp = img[b1:b2, a1 :a2]
-    cv2.imshow("cut it damn",crp)
+    cv2.imshow("Cropped image",crp)
     return crp
  
 def load_database(radiographs, is_upper,four_incisor_bbox,rewidth,reheight):
@@ -49,10 +51,6 @@ def load_database(radiographs, is_upper,four_incisor_bbox,rewidth,reheight):
     return smallImages
          
 def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=False):
-    
-    # ------------------------------------------------
-    # THIS REALLY SUCKS AND ALSO DOESNT FREAKING WORK
-    # ------------------------------------------------
     """Finds a bounding box around the four upper or lower incisors.
     A sliding window is moved over the given image. The window which matches best
     with the given appearance model is returned.
