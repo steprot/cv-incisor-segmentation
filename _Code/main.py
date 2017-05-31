@@ -106,12 +106,36 @@ def procrustes(around_origin_scaled,number_teeth, mean_shape):
         mean_shape = new_mean_shape
     return mean_shape, aligned_shape
     
+def hand_draw_box(number_samples,radiographs):
+    teeth_boxes = []
+    for i in range(number_samples): # number_samples
+        teeth_boxes_row = []
+        teeth_boxes_row.append(bx.get_box_per_jaw(radiographs[i], i+1, 'upper'))
+        teeth_boxes_row.append(bx.get_box_per_jaw(radiographs[i], i+1, 'lower'))    
+        teeth_boxes_row = np.asarray(teeth_boxes_row)
+        teeth_boxes_row = np.hstack(teeth_boxes_row)
+        # Print the detailed boxes on the image 
+        # bx.print_boxes_on_tooth(teeth_boxes_row, radiographs[i])
+        teeth_boxes.append(teeth_boxes_row)
     
-    
-    
-    
-    
-    
+    teeth_boxes = np.asarray(teeth_boxes) # dimension is n_samples*8
+    # If it is asked for the new boxes, then save them 
+    bx.save_boxes(teeth_boxes)
+    print('* Boxes saved *')   
+
+def perfect_fit_box(mean_shape,preprocessed_r,largest_b,box_param,toothnr):
+    """  
+    IMPORTANT NOTES REGARDING ESTIMATE
+    - you have to spcify which tooth are you looking for
+    - you have to spacify if it is upper or lower (as last parameter input upper/lower) -> this can be made dynamic
+    """
+    toothnr = 0
+    estimates = []
+    for rad_nr in range(2): # number_samples
+        e = estimate(rad_nr, mean_shape[toothnr], toothnr, preprocessed_r, largest_b, box_param, False)
+	estimates.append(e)
+	print('    Box for radiograph ' + str(rad_nr + 1) + ' done')    
+    return estimates   
     
 if __name__ == '__main__':
     
@@ -164,9 +188,9 @@ if __name__ == '__main__':
     """ Be careful when printing, the order is  k[i,1],k[i,0] not the other way around!"""
     #for i in range(number_teeth):
     #    visual.plot_procrustes(mean_shape[i],aligned_shape[i], i+1, True)       
-    
-    
+       
     # ***** Do pre-processing of the images *****
+    
     print('* Starting preprocessing *')
     # radiographs contains the raw radiographs images
     radiographs = pp.load_radiographs(number_samples,False)
@@ -174,38 +198,18 @@ if __name__ == '__main__':
     preprocessed_r = []
     for i in range(len(radiographs)):
         preprocessed_r.append(pp.preprocess_radiograph(radiographs[i]))
-        #cv2.imshow("preprocessed in main", preprocessed_r[i])
-        #cv2.waitKey(0)
     # Find the edges of the radiographs
     edges = []
     for i in range(len(preprocessed_r)):
         # Finding the edges 
         edges.append(pp.togradient_sobel(preprocessed_r[i]))
-        #cv2.imshow('Edges', edges[i])
-        #cv2.waitKey(0)
     print('* Preprocessing finished *')
 
     # ***** Ask the user to draw the boxes around the jaws ***** 
     if draw_handboxes: 
-        teeth_boxes = []
-        for i in range(number_samples): # number_samples
-            teeth_boxes_row = []
-            teeth_boxes_row.append(bx.get_box_per_jaw(radiographs[i], i+1, 'upper'))
-            teeth_boxes_row.append(bx.get_box_per_jaw(radiographs[i], i+1, 'lower'))    
-            teeth_boxes_row = np.asarray(teeth_boxes_row)
-            teeth_boxes_row = np.hstack(teeth_boxes_row)
-            # Print the detailed boxes on the image 
-            # bx.print_boxes_on_tooth(teeth_boxes_row, radiographs[i])
-            teeth_boxes.append(teeth_boxes_row)
-        
-        teeth_boxes = np.asarray(teeth_boxes) # dimension is n_samples*8
-        # If it is asked for the new boxes, then save them 
-        bx.save_boxes(teeth_boxes)
-        print('* Boxes saved *')
-
+        hand_draw_box(number_samples,radiographs)
     # mean_box = bx.get_mean_boxes(teeth_boxes) # dimension is 1x8
-    
-    
+
     # ***** Reading the boxes from file and get the largest one *****
     # Getting the largest boxes from the file     
     boxes_from_file = bx.read_boxes_from_file()   
@@ -222,30 +226,14 @@ if __name__ == '__main__':
     
     
     # ***** Sharp the boxes ***** 
-    """  
-    IMPORTANT NOTES REGARDING ESTIMATE
-    - you have to spcify which tooth are you looking for
-    - you have to spacify if it is upper or lower (as last parameter input upper/lower) -> this can be made dynamic
-    """
-    toothnr = 0
-    #rad_nr = 9
-    estimates = []
     print('* Finding upper refined boxes *')
-    for rad_nr in range(2): # number_samples
-        e = estimate(rad_nr, mean_shape[toothnr], toothnr, preprocessed_r, largest_b, upper, False)
-	estimates.append(e)
-	print('    Upper box for radiograph ' + str(rad_nr + 1) + ' done')
-    print('* Found boxes for the upper teeth *')
-    #print('Estimates upper:', estimates)
-    
-    toothnr = 6
+    estimates = perfect_fit_box(mean_shape,preprocessed_r,largest_b,upper,0)
     print('* Finding lower refined boxes *')
-    for rad_nr in range(2): # number_samples
-        estimates[rad_nr].extend(estimate(rad_nr, mean_shape[toothnr], toothnr, preprocessed_r, largest_b, lower, False))
-        print('    Lower box for radiograph ' + str(rad_nr + 1) + ' done')
-    print('* Found boxes for the lower teeth *')
-    #print('Estimates all:', estimates)
+    e2 = perfect_fit_box(mean_shape,preprocessed_r,largest_b,lower,5)
     
+    for i in range(len(estimates)):
+        estimates[i].extend(e2[i])
+    print('* Found boxes for the teeth *') 
     
     # ***** Apply and fit the model over the image ***** 
     detailed_boxes = []
