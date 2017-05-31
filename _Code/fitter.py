@@ -57,7 +57,7 @@ def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color, edge_img
     wmin = points[:,0].min()
     bheight =toothbox[3] - toothbox[1]
     bwidth = toothbox[2] - toothbox[0]
-    hfactor = bheight/(hmax - hmin)
+    hfactor = (bheight/(hmax - hmin))*0.9
     wfactor = bwidth/(wmax - wmin)
     #print('hfactor and wfactor', hfactor, wfactor)
     centroid = lm.get_tooth_centroid(points)
@@ -141,15 +141,11 @@ def get_max_along_normal(points, i, edge_img, radiograph):
         cv2.circle(img, (int(x), int(y)), 1, (150, 150, 150), 2)
         #print('x, y, edge_img(x, y) ', x, y, edge_img[y, x])
         #print('1.15*maxedge ', 15 + max_edge)
-        average_edge = (edge_img[y, x] + \
-                        edge_img[(y+1), (x+1)] + \
-                        edge_img[(y+1), x] + \
-                        edge_img[(y+1), (x-1)] + \
-                        edge_img[y, (x-1)] + \
-                        edge_img[(y-1), (x-1)] + \
-                        edge_img[(y-1), x] + \
-                        edge_img[(y-1), (x+1)] + \
-                        edge_img[y, (x+1)] ) / 9
+        
+        average_edge1 = float((edge_img[y, x] + edge_img[y, (x+1)] + edge_img[y, (x-1)]) / 3)
+        average_edge2 = float((edge_img[(y+1), x] + edge_img[(y+1), (x+1)] + edge_img[(y+1), (x-1)]) / 3)  
+        average_edge3 = float((edge_img[(y-1), x] + edge_img[(y-1), (x-1)] + edge_img[(y-1), (x+1)]) / 3)      
+        average_edge = (average_edge1 + average_edge2 + average_edge3) / 3
         if average_edge > 1.15*max_edge:
             cv2.circle(edge_img, (int(x), int(y)), 3, (0, 0, 250), 3)
             max_edge = edge_img[y, x]
