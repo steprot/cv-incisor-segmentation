@@ -41,7 +41,7 @@ def render_landmark_over_image(img, landmark):
         cv2.line(img, (int(points[i, 1]), int(points[i, 0])), (int(points[i + 1, 1]), int(points[i + 1, 0])), (0, 255, 0))
 
     img = __fit_on_screen(img)
-    cv2.imshow('Rendered image', img)
+    cv2.imshow('Rendered image', __fit_on_screen(img)) # SCREEN FITTING 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     
@@ -62,7 +62,7 @@ def render_model_over_image(points, img, incisor_nr, color, save):
         directory = '../Plot/Final/finalresult' + str("%02d" % (incisor_nr))+'.png'
         dir_path = os.path.join(os.getcwd(), directory)
         cv2.imwrite(dir_path, img)
-    cv2.imshow('finalresult' + str("%02d" % (incisor_nr))+'.png', img)
+    cv2.imshow('finalresult' + str("%02d" % (incisor_nr))+'.png', __fit_on_screen(img)) # SCREEN FITTING 
     cv2.waitKey(0)
     
 def savefinalimage(img, i):

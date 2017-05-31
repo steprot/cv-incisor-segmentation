@@ -3,6 +3,7 @@ import sys
 import cv2
 import numpy as np
 import landmark as lm
+from visualise import __fit_on_screen
     
 def get_detailed_boxes(boxes):
     offset = 0
@@ -91,7 +92,7 @@ def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color, edge_img
         #         (0, 255, 0), 2)
 
     # Show the image 
-    cv2.imshow('Model over radiograph ', img)
+    cv2.imshow('Model over radiograph ', __fit_on_screen(img)) # SCREEN FITTING 
     cv2.waitKey(0) 
     cv2.destroyAllWindows()
     
@@ -142,9 +143,9 @@ def get_max_along_normal(points, i, edge_img, radiograph):
         #print('x, y, edge_img(x, y) ', x, y, edge_img[y, x])
         #print('1.15*maxedge ', 15 + max_edge)
         
-        average_edge1 = float((edge_img[y, x] + edge_img[y, (x+1)] + edge_img[y, (x-1)]) / 3)
-        average_edge2 = float((edge_img[(y+1), x] + edge_img[(y+1), (x+1)] + edge_img[(y+1), (x-1)]) / 3)  
-        average_edge3 = float((edge_img[(y-1), x] + edge_img[(y-1), (x-1)] + edge_img[(y-1), (x+1)]) / 3)      
+        average_edge1 = float(int(edge_img[y, x]) + int(edge_img[y, (x+1)]) + int(edge_img[y, (x-1)]) / 3)
+        average_edge2 = float(int(edge_img[(y+1), x]) + int(edge_img[(y+1), (x+1)]) + int(edge_img[(y+1), (x-1)]) / 3)  
+        average_edge3 = float(int(edge_img[(y-1), x]) + int(edge_img[(y-1), (x-1)]) + int(edge_img[(y-1), (x+1)]) / 3)      
         average_edge = (average_edge1 + average_edge2 + average_edge3) / 3
         if average_edge > 1.15*max_edge:
             cv2.circle(edge_img, (int(x), int(y)), 3, (0, 0, 250), 3)
