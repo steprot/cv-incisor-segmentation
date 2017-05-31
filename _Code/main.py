@@ -81,7 +81,7 @@ def pre_procrustes(number_teeth,number_samples,teeth_landmarks):
     return around_origin_scaled, mean_shape
     
     
-def procrustes(around_origin_scaled,number_teeth, mean_shape):
+def procrustes(around_origin_scaled, number_teeth, mean_shape):
     while True:
         #Align shapes
         aligned_shape = np.copy(around_origin_scaled) # we don't need the copy, we will update it in the for loops with the aligned shapes
@@ -107,7 +107,8 @@ def procrustes(around_origin_scaled,number_teeth, mean_shape):
         mean_shape = new_mean_shape
     return mean_shape, aligned_shape
     
-def hand_draw_box(number_samples,radiographs):
+def hand_draw_box(number_samples, radiographs):
+    print('* Asking for hand drown boxes *')
     teeth_boxes = []
     for i in range(number_samples): # number_samples
         teeth_boxes_row = []
@@ -124,7 +125,7 @@ def hand_draw_box(number_samples,radiographs):
     bx.save_boxes(teeth_boxes)
     print('* Boxes saved *')   
 
-def perfect_fit_box(isupper,preprocessed_r,largest_b,box_param,nr,build_model):
+def perfect_fit_box(isupper, preprocessed_r, number_samples, largest_b, box_param, nr, build_model):
     """  
     isupper - upper incisiors (True), lower incisors (False)
     preprocessed_r - preprocessed radiographs
@@ -135,12 +136,12 @@ def perfect_fit_box(isupper,preprocessed_r,largest_b,box_param,nr,build_model):
     """
     estimates = []
     for rad_nr in range(nr): # number_samples
-        e = estimate(preprocessed_r[rad_nr], isupper, preprocessed_r, largest_b, box_param, False,build_model)
+        e = estimate(preprocessed_r[rad_nr], isupper, preprocessed_r, number_samples, largest_b, box_param, False, build_model)
 	estimates.append(e)
 	print('    Box for radiograph ' + str(rad_nr + 1) + ' done')    
     return estimates   
     
-def fit_model(estimates,nr,number_teeth,mean_shape,radiographs,edges):
+def fit_model(estimates, nr, number_teeth, mean_shape, radiographs, edges):
     detailed_boxes = []
     for i in range(nr):
         detailed_boxes.append(fit.get_detailed_boxes(estimates[i]))
@@ -163,12 +164,13 @@ def fit_model(estimates,nr,number_teeth,mean_shape,radiographs,edges):
         visual.savefinalimage(radiographs[j], j + 1)
         print('* Fitting completed for image ' + str(j + 1) + ' *')
     
-    
 if __name__ == '__main__':
     
     # Global variables 
     n_components = 8
     draw_handboxes = False 
+    
+    
     # ***** Read the landmarks ******
     number_teeth = 8 
     number_samples = 14
@@ -178,24 +180,21 @@ if __name__ == '__main__':
     directory = 'mirrored/landmarks'
     teeth_mirrored = load_landmarks(number_teeth,number_samples, directory, True)
     teeth_landmarks = np.concatenate((teeth_landmarks, teeth_mirrored), axis=1)
-    # Double the number of samples 
+    # Double the number of samples because of the mirrored ones 
     number_samples *= 2
-     
      
     # ***** Print the teeth_landmarks over radiographs ***** 
     #visual.print_landmarks_over_radiographs(teeth_landmarks)
     
     around_origin_scaled, mean_shape = pre_procrustes(number_teeth,number_samples,teeth_landmarks)
-    
     print('* Starting Procrustes Analysis *')
     
-    # ***** Do the Generalized Procrustes Analysis on the landmarks ***** 
     
+    # ***** Do the Generalized Procrustes Analysis on the landmarks ***** 
     mean_shape, aligned_shape = procrustes(around_origin_scaled,number_teeth, mean_shape) 
     
     # ***** Do PCA *****
     print('* Starting PCA *')
-    
     # Covariance matrix  
     reduced_dim = []
     for i in range(len(aligned_shape)):
@@ -217,38 +216,36 @@ if __name__ == '__main__':
     #for i in range(number_teeth):
     #    visual.plot_procrustes(mean_shape[i],aligned_shape[i], i+1, True)       
        
+       
     # ***** Do pre-processing of the images *****
-    
     print('* Starting preprocessing *')
     # radiographs contains the raw radiographs images
     radiographs = pp.load_radiographs(number_samples/2, False)
     
-    mirrored = []
-    for i in range(len(radiographs)):
-        (ih, iw, c) = radiographs[i].shape
-        image = radiographs[i].copy()
-        for j in range(ih):
-            image[j,:] = image[j,::-1]
-        mirrored.append(image)
-        
-    radiographs.append(mirrored)
-    print(len(radiographs))   # ************************************* TILL HERE 
+    mirrored = lm.get_mirrored_radiographs(radiographs, False)
+    for i in range(len(mirrored)):
+        radiographs.append(mirrored[i])
+    
     
     # Preprocess the images
     preprocessed_r = []
     for i in range(len(radiographs)):
         preprocessed_r.append(pp.preprocess_radiograph(radiographs[i]))
     # Find the edges of the radiographs
+    print('    Finished preprocessing')
+    print('    Finding edges')
     edges = []
     for i in range(len(preprocessed_r)):
         # Finding the edges 
         edges.append(pp.togradient_sobel(preprocessed_r[i]))
     print('* Preprocessing finished *')
 
+
     # ***** Ask the user to draw the boxes around the jaws ***** 
     if draw_handboxes: 
         hand_draw_box(number_samples,radiographs)
     # mean_box = bx.get_mean_boxes(teeth_boxes) # dimension is 1x8
+
 
     # ***** Reading the boxes from file and get the largest one *****
     # Getting the largest boxes from the file     
@@ -257,8 +254,8 @@ if __name__ == '__main__':
     upper = []
     lower = []
     for i in range(len(boxes_from_file)):
-        upper.append([boxes_from_file[i][0], boxes_from_file[i][1], boxes_from_file[i][2], boxes_from_file[i][3] ])
-        lower.append([boxes_from_file[i][4], boxes_from_file[i][5], boxes_from_file[i][6], boxes_from_file[i][7] ])
+        upper.append([boxes_from_file[i][0], boxes_from_file[i][1], boxes_from_file[i][2], boxes_from_file[i][3]])
+        lower.append([boxes_from_file[i][4], boxes_from_file[i][5], boxes_from_file[i][6], boxes_from_file[i][7]])
     print('* Largest box obtained *')
     
     #for i in range(number_samples):
@@ -267,13 +264,14 @@ if __name__ == '__main__':
     
     # ***** Sharp the boxes ***** 
     print('* Finding upper refined boxes *')
-    estimates = perfect_fit_box(True,preprocessed_r,largest_b,upper,2,False)
+    estimates = perfect_fit_box(True, preprocessed_r, number_samples, largest_b, upper, 2, False)
     print('* Finding lower refined boxes *')
-    e2 = perfect_fit_box(False,preprocessed_r,largest_b,lower,2,False)
+    e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, 2, False)
     
     for i in range(len(estimates)):
         estimates[i].extend(e2[i])
     print('* Found boxes for the teeth *') 
+    
     
     # ***** Apply and fit the model over the image ***** 
     fit_model(estimates,2,number_teeth,mean_shape,radiographs,edges)

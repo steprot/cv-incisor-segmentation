@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import cv2
 import numpy as np
 
 class Landmarks():
@@ -267,4 +268,18 @@ def matrix_to_list(data,number_teeth,number_samples):
     res =  np.array(res)
     return res
     
-    
+def get_mirrored_radiographs(radiographs, save):
+    mirrored = []
+    for i in range(len(radiographs)):
+        (ih, iw, c) = radiographs[i].shape
+        image = radiographs[i].copy()
+        for j in range(ih):
+            image[j,:] = image[j,::-1]
+        mirrored.append(image)
+        if save:
+            # Specify the name where to print the Procrustes images 
+            directory = '../Plot/Mirrored/mirrored' + str("%02d" % (i+1)) +'.tif'
+            dir_path = os.path.join(os.getcwd(), directory)
+            cv2.imwrite(dir_path, image)
+            
+    return mirrored

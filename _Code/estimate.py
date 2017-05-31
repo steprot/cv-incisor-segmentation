@@ -39,9 +39,9 @@ def getcut(img,a1,b1,a2,b2):
     cv2.imshow("Cropped image",crp)
     return crp
  
-def load_database(radiographs, is_upper,four_incisor_bbox,rewidth,reheight):
+def load_database(radiographs, is_upper, four_incisor_bbox, rewidth, reheight, number_samples):
 
-    smallImages = np.zeros((14, rewidth * reheight))
+    smallImages = np.zeros((number_samples, rewidth * reheight))
     #radiographs = [preprocess_radiograph(radiograph) for radiograph in radiographs]
     for ind, radiograph in enumerate(radiographs):
         this_box = four_incisor_bbox[ind] # Get the hand drawn box for current radiograph
@@ -156,7 +156,7 @@ def pca(X, nb_components):
 
 
 
-def estimate(rad,isupper,preprocessed_r,coord,allcoord,show,b_model):
+def estimate(rad, isupper, preprocessed_r, number_samples, coord, allcoord, show, b_model):
     """ 
     rad - radiograph we want to find the best box on
     isupper - is it upper or lower incisiors
@@ -169,10 +169,10 @@ def estimate(rad,isupper,preprocessed_r,coord,allcoord,show,b_model):
     """
 
     if isupper:
-        width = coord[2]-coord[0]
-        height = coord[3]-coord[1] 
+        width = coord[2] - coord[0]
+        height = coord[3] - coord[1] 
         if b_model:
-            data = load_database(np.asarray(preprocessed_r), isupper,allcoord,width, height)
+            data = load_database(np.asarray(preprocessed_r), isupper, allcoord, width, height, number_samples)
             [_, eigen_vec, mean] = pca(data, 10)
             
             filename = 'eigen_vec_upper.sav'
@@ -181,7 +181,7 @@ def estimate(rad,isupper,preprocessed_r,coord,allcoord,show,b_model):
             filename = 'mean_upper.sav'
             pickle.dump(mean, open(filename, 'wb'))        
             
-            print "outputed to file"
+            print('  Outputed to file')
         else: 
             eigen_vec = pickle.load(open('eigen_vec_upper.sav', 'rb'))
             mean = pickle.load(open('mean_upper.sav', 'rb'))  
@@ -189,7 +189,7 @@ def estimate(rad,isupper,preprocessed_r,coord,allcoord,show,b_model):
         width = coord[6]-coord[4]
         height = coord[7]-coord[5]
         if b_model:
-            data = load_database(np.asarray(preprocessed_r), isupper,allcoord,width, height)
+            data = load_database(np.asarray(preprocessed_r), isupper, allcoord, width, height, number_samples)
             [_, eigen_vec, mean] = pca(data, 10)
             
             filename = 'eigen_vec_lower.sav'
@@ -198,7 +198,7 @@ def estimate(rad,isupper,preprocessed_r,coord,allcoord,show,b_model):
             filename = 'mean_lower.sav'
             pickle.dump(mean, open(filename, 'wb'))        
             
-            print "outputed to file"
+            print('  Outputed to file')
         else: 
             eigen_vec = pickle.load(open('eigen_vec_lower.sav', 'rb'))
             mean = pickle.load(open('mean_lower.sav', 'rb')) 
@@ -217,5 +217,3 @@ def estimate(rad,isupper,preprocessed_r,coord,allcoord,show,b_model):
         cv2.imshow('Radiograph with best box', img)
         cv2.waitKey(0)
     return best_coord
-
-    

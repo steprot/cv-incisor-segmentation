@@ -115,7 +115,8 @@ def togradient_sobel(img):
     abs_grad_x = cv2.convertScaleAbs(sobelx)
     abs_grad_y = cv2.convertScaleAbs(sobely)
     
-    return cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
+    img = cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
+    return img
     #return cv2.addWeighted(sobelx, 0.1, sobely, 0.1, 0)
     
 def adaptive_median(img, window, threshold):
@@ -134,7 +135,7 @@ def adaptive_median(img, window, threshold):
         .. _Based on:
             https://github.com/sarnold/adaptive-median/blob/master/adaptive_median.py
     '''
-    #img = image.copy()
+    #img = image.copy()Top
     #img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
 
     # set filter window and image dimensions
