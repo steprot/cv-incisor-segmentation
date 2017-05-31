@@ -12,44 +12,20 @@ import fitter as fit
 import visualise as visual
 from estimate import estimate
 
-def getcut(img):
-    '''
-    This is a bad idea, get the parameters from the hand draw shapes
-    '''
-    h, w = img.shape
-    #print('img.shape', img.shape)
-    b1 = int(w/2 - w/10)
-    b2 = int(w/2 + w/10)
-    a1 = int(h/2 + h/7) - 350
-    a2 = int(h/2 + h/6) - 40
-    
-    crp = img[a1 :a2, b1:b2]
-    #crp = img[b1:b2, a1 :a2]
-    cv2.imshow("Cropped image",crp)
-
 '''
     Main function of the project.
 '''
-if __name__ == '__main__':
-    
-    # Global variables 
-    n_components = 8
-    draw_handboxes = False 
-    
-    # ***** Read the landmarks ******
-    number_teeth = 8 
-    number_samples = 14
-    teeth_landmarks = [] # 3D array: 8*number_samples*80
-        
+
+def load_landmarks(number_teeth,number_samples, directory):
     i = 1
+    teeth_landmarks = [] # 3D array: 8*number_samples*80
+    path ='../_Data/Landmarks/' + str(directory)
     while i <= number_teeth: # For all the different teeth 
         j = 1 
-        tooth_landmarks = np.zeros((number_samples, 80))
         landmark = []
         while j <= number_samples: # For the same tooth but for the different persons
-            
             # Specify the name where to read the landmarks from
-            directory = '../_Data/Landmarks/original/landmarks' + str(j) + '-' + str(i) + '.txt'
+            directory = path + str(j) + '-' + str(i) + '.txt'
             dir_path = os.path.join(os.getcwd(), directory)
             
             l = lm.Landmarks(dir_path).as_vector()
@@ -63,18 +39,17 @@ if __name__ == '__main__':
         i +=1
         
     teeth_landmarks = np.array(teeth_landmarks) # teeth_landmarks.shape is 8*n*80
-    print('* Landmarks loaded *')
-     
-     
-    # ***** Print the teeth_landmarks over radiographs ***** 
-    #visual.print_landmarks_over_radiographs(teeth_landmarks)
+    return teeth_landmarks
     
-    # ***** Scale landmarks ***** 
+    
+def pre_procrustes(number_teeth,number_samples,teeth_landmarks):
+        # ***** Scale landmarks ***** 
     scaled = []
     for i in range(number_teeth):
         scaled_row = []
         for j in range(number_samples):
-            scaled_row.append(np.array(lm.tooth_from_matrix_to_vector(lm.scale_to_unit(lm.tooth_from_vector_to_matrix(teeth_landmarks[i,j]), lm.get_tooth_centroid(teeth_landmarks[i,j])))))
+            scaled_row.append(np.array(lm.tooth_from_matrix_to_vector(lm.scale_to_unit(lm.tooth_from_vector_to_matrix(teeth_landmarks[i,j]), \
+                                                                      lm.get_tooth_centroid(teeth_landmarks[i,j])))))
         scaled.append(np.array(scaled_row))
     scaled =  np.array(scaled)
     
@@ -100,14 +75,13 @@ if __name__ == '__main__':
     mean_centroids = [] # Contains the centroids of the mean shape
     for i in range(0, number_teeth):
         mean_centroids.append(lm.get_tooth_centroid(mean_shape[i]))
-    mean_centroids = np.array(mean_centroids)
+    mean_centroids = np.array(mean_centroids)    
     
-    print('* Starting Procrustes Analysis *')
+    return around_origin_scaled, mean_shape
     
     
-    # ***** Do the Generalized Procrustes Analysis on the landmarks ***** 
+def procrustes(around_origin_scaled,number_teeth, mean_shape):
     while True:
-
         #Align shapes
         aligned_shape = np.copy(around_origin_scaled) # we don't need the copy, we will update it in the for loops with the aligned shapes
         for i in range(0, number_teeth):
@@ -130,6 +104,41 @@ if __name__ == '__main__':
             break
         
         mean_shape = new_mean_shape
+    return mean_shape, aligned_shape
+    
+    
+    
+    
+    
+    
+    
+    
+if __name__ == '__main__':
+    
+    # Global variables 
+    n_components = 8
+    draw_handboxes = False 
+    # ***** Read the landmarks ******
+    number_teeth = 8 
+    number_samples = 14
+    
+    directory = 'original/landmarks'
+    teeth_landmarks = load_landmarks(number_teeth,number_samples, directory)
+    #directory = 'mirrored/landmarks'
+    #teeth_landmarks.extend(load_landmarks(number_teeth,number_samples, directory))
+    print('* Landmarks loaded *')
+     
+     
+    # ***** Print the teeth_landmarks over radiographs ***** 
+    #visual.print_landmarks_over_radiographs(teeth_landmarks)
+    
+    around_origin_scaled, mean_shape = pre_procrustes(number_teeth,number_samples,teeth_landmarks)
+    
+    print('* Starting Procrustes Analysis *')
+    
+    # ***** Do the Generalized Procrustes Analysis on the landmarks ***** 
+    
+    mean_shape, aligned_shape = procrustes(around_origin_scaled,number_teeth, mean_shape)
     
     
     # ***** Do PCA *****
@@ -145,13 +154,6 @@ if __name__ == '__main__':
                            # that we capture 99% of the variance 
                            # this gives eigenvectors with different length! for each incisor so 
                            # it was better to set the nr to a fixed value, 8 covers around 99%
-        # From pca_res we can obtain :
-        # components_
-        # explained_variance_
-        # explained_variance_ratio_
-        # components_
-        # mean_
-        # n_components_
         pca_res.fit(aligned_shape[i])
         reduced_dim.append(pca_res.transform(aligned_shape[i])) # Reduce dimensionality of the training data
 
@@ -201,7 +203,7 @@ if __name__ == '__main__':
         bx.save_boxes(teeth_boxes)
         print('* Boxes saved *')
 
-    #mean_box = bx.get_mean_boxes(teeth_boxes) # dimension is 1x8
+    # mean_box = bx.get_mean_boxes(teeth_boxes) # dimension is 1x8
     
     
     # ***** Reading the boxes from file and get the largest one *****
