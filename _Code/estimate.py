@@ -7,6 +7,7 @@ iterative fitting procedure is started.
 import cv2
 import numpy as np
 import pickle
+import os
  
 def project(W, X, mu):
     '''
@@ -151,7 +152,7 @@ def pca(X, nb_components):
 
 
 
-def estimate(rad, isupper, preprocessed_r, number_samples, coord, allcoord, show, b_model):
+def estimate(rad, isupper, preprocessed_r, index, number_samples, coord, allcoord, show, b_model):
     ''' 
     rad - radiograph we want to find the best box on
     isupper - is it upper or lower incisiors
@@ -208,5 +209,8 @@ def estimate(rad, isupper, preprocessed_r, number_samples, coord, allcoord, show
         img = rad.copy()
         cv2.rectangle(img, (int(best_coord[0]), int(best_coord[1])), (int(best_coord[2]), int(best_coord[3])), (255, 0, 0), 5)
         cv2.imshow('Radiograph with best box', img)
+        directory = '../Plot/Boxes/box' + str("%02d" % (index))+'.png'
+        dir_path = os.path.join(os.getcwd(), directory)
+        cv2.imwrite(dir_path, img)
         cv2.waitKey(0)
     return best_coord

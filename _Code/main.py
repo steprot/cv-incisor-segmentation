@@ -131,7 +131,7 @@ def perfect_fit_box(isupper, preprocessed_r, number_samples, largest_b, box_para
     """
     estimates = []
     for rad_nr in range(nr): # number_samples
-        e = estimate(preprocessed_r[rad_nr], isupper, preprocessed_r, number_samples, largest_b, box_param, True, build_model)
+        e = estimate(preprocessed_r[rad_nr], isupper, preprocessed_r, rad_nr, number_samples, largest_b, box_param, True, build_model)
 	estimates.append(e)
 	print('    Box for radiograph ' + str(rad_nr + 1) + ' done')    
     return estimates   
@@ -182,7 +182,12 @@ def estimate_sse(number_teeth, number_samples, new_landmarks, teeth_landmarks):
             sse_sample += lm.sse_tooth(new_landmarks[j, :, i], teeth_landmarks[i, j, :])
         sse.append(sse_sample)
     return sse
-    
+
+   
+      
+         
+
+#   ************************************* MAIN **********************************************************************
 if __name__ == '__main__':
     
     # Global variables 
@@ -290,7 +295,7 @@ if __name__ == '__main__':
     print('* Finding upper refined boxes *')
     estimates = perfect_fit_box(True, preprocessed_r, number_samples, largest_b, upper, NR_INPUT, False)
     print('* Finding lower refined boxes *')
-    e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, NR_INPUT, False)
+    #e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, NR_INPUT, False)
     
     for i in range(len(estimates)):
         estimates[i].extend(e2[i])
