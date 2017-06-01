@@ -204,8 +204,8 @@ def estimate(rad, isupper, preprocessed_r, number_samples, coord, allcoord, show
     # Find the region of the radiograph that matches best with the appearance model
     best_coord = best_seg(mean, eigen_vec, rad, isupper, coord, width, height, False)
 
-    if show == True:
-        img = preprocessed_r[rad].copy()
+    if show:
+        img = rad.copy()
         cv2.rectangle(img, (int(best_coord[0]), int(best_coord[1])), (int(best_coord[2]), int(best_coord[3])), (255, 0, 0), 5)
         cv2.imshow('Radiograph with best box', img)
         cv2.waitKey(0)

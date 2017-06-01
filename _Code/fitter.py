@@ -92,8 +92,8 @@ def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color, edge_img
         #         (0, 255, 0), 2)
 
     # Show the image 
-    cv2.imshow('Model over radiograph ', img) # SCREEN FITTING 
-    cv2.waitKey(0) 
+    #cv2.imshow('Model over radiograph ', img) # SCREEN FITTING 
+    #cv2.waitKey(0) # DECOMMENT LATER 
     cv2.destroyAllWindows()
     
     newpoints = iterate(points, edge_img, img)

@@ -131,7 +131,7 @@ def perfect_fit_box(isupper, preprocessed_r, number_samples, largest_b, box_para
     """
     estimates = []
     for rad_nr in range(nr): # number_samples
-        e = estimate(preprocessed_r[rad_nr], isupper, preprocessed_r, number_samples, largest_b, box_param, False, build_model)
+        e = estimate(preprocessed_r[rad_nr], isupper, preprocessed_r, number_samples, largest_b, box_param, True, build_model)
 	estimates.append(e)
 	print('    Box for radiograph ' + str(rad_nr + 1) + ' done')    
     return estimates   
@@ -175,8 +175,6 @@ def fit_model(estimates, nr, number_teeth, mean_shape, radiographs, edges, save)
     return new_points
     
 def estimate_sse(number_teeth, number_samples, new_landmarks, teeth_landmarks):
-    print(new_landmarks.shape)
-    print(teeth_landmarks.shape)
     sse = []
     for j in range(number_samples): # number_samples 
         sse_sample = 0
@@ -285,12 +283,14 @@ if __name__ == '__main__':
     #for i in range(number_samples):
     #    bx.print_boxes_on_teeth(largest_b, radiographs[i])
     
+    ''' Number of inputs to estimate and fit '''
+    NR_INPUT = 28
     
     # ***** Sharp the boxes ***** 
     print('* Finding upper refined boxes *')
-    estimates = perfect_fit_box(True, preprocessed_r, number_samples, largest_b, upper, 3, False)
+    estimates = perfect_fit_box(True, preprocessed_r, number_samples, largest_b, upper, NR_INPUT, False)
     print('* Finding lower refined boxes *')
-    e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, 3, False)
+    e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, NR_INPUT, False)
     
     for i in range(len(estimates)):
         estimates[i].extend(e2[i])
@@ -298,14 +298,23 @@ if __name__ == '__main__':
     
     
     # ***** Apply and fit the model over the image ***** 
-    new_landmarks = fit_model(estimates, 3, number_teeth, mean_shape, radiographs, edges, False)
+    new_landmarks = fit_model(estimates, NR_INPUT, number_teeth, mean_shape, radiographs, edges, True)
     cv2.destroyAllWindows()
     
     # ***** Estimate error with the Sum of Squared Errors *****
     print('* Estimating SSE *')
-    sse = estimate_sse(number_teeth, 3, new_landmarks, teeth_landmarks)
-    print('Sum of Squared Errors for each sample: ')
+    sse = estimate_sse(number_teeth, NR_INPUT, new_landmarks, teeth_landmarks)
+    print('  Sum of Squared Errors for each sample: ')
     print(sse)
+    sse_average = np.average(sse)
+    print('  Average SSE, for the number of models:')
+    print(sse_average)
+    print('  Average point SSE, divided by the number of landmarks:')
+    print(sse_average/40)
+    err_perc = 100*sse_average/(40*radiographs[0].shape[1])
+    print('  Average point SSE, percentage error with respect to image width:')
+    print(sse_average/40)
+    
             
             
             
