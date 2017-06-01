@@ -2,6 +2,7 @@
 import os
 import cv2
 import numpy as np
+import math
 
 class Landmarks():
     
@@ -88,19 +89,7 @@ def tooth_from_matrix_to_vector(vector):
 #    """
 #    points = np.hstack(vector)
 #    return points
-                                                    
-#def compute_centroids(tooth):
-#    """ 
-#        Input: An array of all the samples for the tooth i
-#    
-#        Compute first a mean "shape" which is the mean of each point representing a 
-#        point in the the contour. Than get the mean of the x,y values to get the centroid
-#    """
-#    mean_tooth = np.mean(tooth, axis = 0)
-#    mean_tooth = tooth_from_vector_to_matrix(mean_tooth)
-#    centroid = np.mean(mean_tooth, axis = 0,)
-#    return centroid 
-    
+
 def get_tooth_centroid(points):
     """
         Returns the center of mass [x, y] of this shape.  
@@ -116,10 +105,10 @@ def get_tooth_center(points):
     return [horizontal_size, vertical_size]
 
 def translate_to_origin(landmarks):
-    """
+    '''
         Translates the landmark points so that the centre of gravitiy of this
         shape is at the origin.
-    """
+    '''
     i = 0
     points = []
     while i<len(landmarks)-1:
@@ -140,9 +129,9 @@ def scale_to_unit(tooth, centroid):
     return points
     
 def rotate(element, theta):
-    """
+    '''
         Shouldn't np.mean(element) be 0?
-    """
+    '''
     # create rotation matrix
     rotation_matrix = np.array([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
 
@@ -161,9 +150,9 @@ def rotate(element, theta):
     return rotated_element
     
 def scale(element, value):
-    """
+    '''
         Rescale element by given value
-    """
+    '''
     #centroid  = np.mean(element, axis=0)
     #Elem is already centered to 0 right??? If not, change code to something like this\/
     #points = (self.points - centroid).dot(factor) + centroid
@@ -269,6 +258,12 @@ def matrix_to_list(data, number_teeth, number_samples):
     return res
     
 def get_mirrored_radiographs(radiographs, save):
+    '''
+    Procude the mirrored images from the original ones.
+    Parameters:
+        radiographs; list of images
+        save (bool); whether to save the mirrored images or not. 
+    '''
     mirrored = []
     for i in range(len(radiographs)):
         (ih, iw, c) = radiographs[i].shape
@@ -282,3 +277,11 @@ def get_mirrored_radiographs(radiographs, save):
             dir_path = os.path.join(os.getcwd(), directory)
             cv2.imwrite(dir_path, image)  
     return mirrored
+    
+def sse_tooth(tooth1, tooth2):
+    i = 0
+    sse = 0
+    while i < len(tooth1):
+        sse += math.sqrt((tooth1[i] - tooth2[i+1])**2 + (tooth1[i] - tooth2[i+1])**2)
+        i += 2
+    return sse

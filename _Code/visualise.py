@@ -65,7 +65,7 @@ def render_model_over_image(points, img, incisor_nr, color, save):
     cv2.imshow('finalresult' + str("%02d" % (incisor_nr))+'.png', img) # SCREEN FITTING 
     cv2.waitKey(0)
     
-def savefinalimage(img, i):
+def save_final_image(img, i):
     directory = '../Plot/Final/finalresult' + str("%02d" % (i))+'.png'
     dir_path = os.path.join(os.getcwd(), directory)
     cv2.imwrite(dir_path, img)
@@ -149,7 +149,7 @@ def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
     cv2.circle(img, (400,300), 10, (255, 255, 255))
 
     # plot aligned shapes in different colors
-    colors = __get_colors(len(aligned_shapes))
+    colors = get_colors(len(aligned_shapes))
     
     for ind, aligned_shape in enumerate(aligned_shapes):
         aligned_shape =  scale_for_print(aligned_shape, 1100)
@@ -220,7 +220,7 @@ def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
 #    cv2.waitKey(0)
 #    cv2.destroyAllWindows()
 
-def __get_colors(num_colors):
+def get_colors(num_colors):
     '''
     Get a list with ``num_colors`` different colors.
     Parameters:

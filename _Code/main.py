@@ -2,6 +2,7 @@
 import os
 import cv2
 import numpy as np
+import math 
 import landmark as lm
 from sklearn.decomposition import PCA
 import preprocessing as pp
@@ -44,7 +45,7 @@ def load_landmarks(number_teeth, number_samples, directory, mirrored):
     
     
 def pre_procrustes(number_teeth, number_samples, teeth_landmarks):
-        # ***** Scale landmarks ***** 
+    # ***** Scale landmarks ***** 
     scaled = []
     for i in range(number_teeth):
         scaled_row = []
@@ -141,7 +142,7 @@ def perfect_fit_box(isupper, preprocessed_r, number_samples, largest_b, box_para
 	print('    Box for radiograph ' + str(rad_nr + 1) + ' done')    
     return estimates   
     
-def fit_model(estimates, nr, number_teeth, mean_shape, radiographs, edges):
+def fit_model(estimates, nr, number_teeth, mean_shape, radiographs, edges, save):
     detailed_boxes = []
     for i in range(nr):
         detailed_boxes.append(fit.get_detailed_boxes(estimates[i]))
@@ -149,10 +150,11 @@ def fit_model(estimates, nr, number_teeth, mean_shape, radiographs, edges):
     #print(detailed_boxes)
 
     # Get colours to print the teeth over the imgages 
-    colors = visual.__get_colors(number_teeth)
+    colors = visual.get_colors(number_teeth)
     new_points = []
     # Loop over every image 
     for j in range(nr): # number_samples
+        new_landmarks_sample = []
         # Loop over every tooth 
         for i in range(number_teeth):
             # Apply the model over the boxes 
@@ -160,10 +162,34 @@ def fit_model(estimates, nr, number_teeth, mean_shape, radiographs, edges):
             # Smooth the obtained points 
             newpoints = fit.smooth_model(newpoints)
             visual.render_model_over_image(newpoints, radiographs[j], i+1, colors[i], False)
-            new_points.append(newpoints)
-        ''' Comment next line out to not save the final result '''
-        visual.savefinalimage(radiographs[j], j + 1)
-        print('* Fitting completed for image ' + str(j + 1) + ' *')
+            
+            tmp = []
+            for i in (range(newpoints.shape[0])):
+                tmp.append(newpoints[i, 0])
+                tmp.append(newpoints[i, 1])
+            newpoints = np.asarray(tmp)
+            new_landmarks_sample.append(np.asarray(newpoints))
+            
+        if save:
+            visual.save_final_image(radiographs[j], j + 1)
+        print('    Fitting completed for image ' + str(j + 1)) 
+        
+        new_landmarks_sample = np.asarray(new_landmarks_sample)      
+        new_points.append(new_landmarks_sample.T)
+        
+    new_points = np.asarray(new_points)
+    return new_points
+    
+def estimate_sse(number_teeth, number_samples, new_landmarks, teeth_landmarks):
+    print(new_landmarks.shape)
+    print(teeth_landmarks.shape)
+    sse = []
+    for j in range(number_samples): # number_samples 
+        sse_sample = 0
+        for i in range(number_teeth):
+            sse_sample += lm.sse_tooth(new_landmarks[j, :, i], teeth_landmarks[i, j, :])
+        sse.append(sse_sample)
+    return sse
     
 if __name__ == '__main__':
     
@@ -183,6 +209,7 @@ if __name__ == '__main__':
     teeth_landmarks = np.concatenate((teeth_landmarks, teeth_mirrored), axis=1)
     # Double the number of samples because of the mirrored ones 
     number_samples *= 2
+    print('* Landamrks loaded *')
      
     # ***** Print the teeth_landmarks over radiographs ***** 
     #visual.print_landmarks_over_radiographs(teeth_landmarks)
@@ -268,9 +295,9 @@ if __name__ == '__main__':
     
     # ***** Sharp the boxes ***** 
     print('* Finding upper refined boxes *')
-    estimates = perfect_fit_box(True, preprocessed_r, number_samples, largest_b, upper, 14, True)
+    estimates = perfect_fit_box(True, preprocessed_r, number_samples, largest_b, upper, 3, False)
     print('* Finding lower refined boxes *')
-    e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, 14, True)
+    e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, 3, False)
     
     for i in range(len(estimates)):
         estimates[i].extend(e2[i])
@@ -278,4 +305,16 @@ if __name__ == '__main__':
     
     
     # ***** Apply and fit the model over the image ***** 
-    fit_model(estimates, 14, number_teeth, mean_shape, radiographs, edges)
+    new_landmarks = fit_model(estimates, 3, number_teeth, mean_shape, radiographs, edges, False)
+    cv2.destroyAllWindows()
+    
+    # ***** Estimate error with the Sum of Squared Errors *****
+    print('* Estimating SSE *')
+    sse = estimate_sse(number_teeth, 3, new_landmarks, teeth_landmarks)
+    print('Sum of Squared Errors for each sample: ')
+    print(sse)
+            
+            
+            
+            
+            
