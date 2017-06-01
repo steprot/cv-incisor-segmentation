@@ -11,10 +11,6 @@ import fitter as fit
 import visualise as visual
 from estimate import estimate
 
-'''
-    Main function of the project.
-'''
-
 def load_landmarks(number_teeth, number_samples, directory, mirrored):
     i = 1
     if mirrored:
@@ -42,7 +38,6 @@ def load_landmarks(number_teeth, number_samples, directory, mirrored):
         
     teeth_landmarks = np.array(teeth_landmarks) # teeth_landmarks.shape is 8*n*80
     return teeth_landmarks
-    
     
 def pre_procrustes(number_teeth, number_samples, teeth_landmarks):
     # ***** Scale landmarks ***** 
@@ -80,7 +75,6 @@ def pre_procrustes(number_teeth, number_samples, teeth_landmarks):
     mean_centroids = np.array(mean_centroids)    
     
     return around_origin_scaled, mean_shape
-    
     
 def procrustes(around_origin_scaled, number_teeth, mean_shape):
     while True:
@@ -253,7 +247,6 @@ if __name__ == '__main__':
     mirrored = lm.get_mirrored_radiographs(radiographs, False)
     for i in range(len(mirrored)):
         radiographs.append(mirrored[i])
-    
     
     ''' It is possible to do the saving of the preprocessed images with
         the pickle library in order to save time  '''

@@ -5,7 +5,6 @@ import os
 import numpy as np
 from scipy.ndimage import morphology
 
-
 def load_radiographs(number_samples, testing):
     '''
     Load the radiograph images
@@ -29,7 +28,6 @@ def load_radiographs(number_samples, testing):
             # Go to the next sample 
             i += 1  
     return images
-
 
 def preprocess_radiograph(img):
     '''

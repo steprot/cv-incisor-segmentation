@@ -2,7 +2,6 @@
 import cv2.cv as cv
 import cv2
 import numpy as np
-import os
 
 box_coordinates = []
 condition = True

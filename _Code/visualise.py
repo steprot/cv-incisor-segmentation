@@ -10,7 +10,6 @@ import os
 SCREEN_H = 800
 SCREEN_W = 1200
 
-
 number_teeth = 8 
 number_samples = 14
 
@@ -171,13 +170,12 @@ def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
         cv2.imwrite(dir_path, img)
     cv2.destroyAllWindows()
 
-
-#'''
+#def print_landmarks(tooth_landmarks):
+#    '''
 #    Prints the single tooth landmark points over a black image. 
 #    Parameter: 
 #        tooth_landmarks; array containing the 80 landmark points of the tooth. 
-#'''
-#def print_landmarks(tooth_landmarks):
+#    '''
 #    
 #    # Transform the array in a matrix 
 #    i = 0

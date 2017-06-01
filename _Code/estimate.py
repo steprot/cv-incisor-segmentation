@@ -16,7 +16,6 @@ def project(W, X, mu):
     Xnew = X - mu.T
     return np.dot(Xnew, W)
 
-
 def reconstruct(W, Y, mu):
     '''
     Reconstruct an image based on its PCA-coefficients Y, the evecs W
@@ -30,7 +29,6 @@ def slide(image, seg, step, window):
         for x in range(seg[0][0], seg[1][0] - window[0], step) + [seg[1][0] - window[0]]:
             yield (x, y, image[y:y + window[1], x:x + window[0]])
 
-
 def getcut(img, a1, b1, a2, b2):
     h, w = img.shape
     #print(img.shape)   
@@ -40,7 +38,6 @@ def getcut(img, a1, b1, a2, b2):
     return crp
  
 def load_database(radiographs, is_upper, four_incisor_bbox, rewidth, reheight, number_samples):
-
     smallImages = np.zeros((number_samples, rewidth * reheight))
     #radiographs = [preprocess_radiograph(radiograph) for radiograph in radiographs]
     for ind, radiograph in enumerate(radiographs):
@@ -71,7 +68,6 @@ def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=Fa
 
     """
     h, w = image.shape
-
     #print(largest_boxes)
 
     if is_upper:
@@ -131,7 +127,6 @@ def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=Fa
     return (best_score_bbox)
 
 def pca(X, nb_components):
-
     dim = X.shape
     if (nb_components <= 0) or (nb_components > dim[0]):
         nb_components = dim[0]
@@ -157,7 +152,7 @@ def pca(X, nb_components):
 
 
 def estimate(rad, isupper, preprocessed_r, number_samples, coord, allcoord, show, b_model):
-    """ 
+    ''' 
     rad - radiograph we want to find the best box on
     isupper - is it upper or lower incisiors
     preprocessed_r - all the radiographs
@@ -165,9 +160,7 @@ def estimate(rad, isupper, preprocessed_r, number_samples, coord, allcoord, show
     allcoord - coordonates of all upper/lower incisors
     show - print box if True
     b_model - build model if True, load model else
-    
-    """
-
+    '''
     if isupper:
         width = coord[2] - coord[0]
         height = coord[3] - coord[1] 
