@@ -107,12 +107,12 @@ def render_landmarks(data_collector):
     cv2.imshow('Rendered shape', img)
     cv2.waitKey(0)
 
-def scale_for_print(array,value):
+def scale_for_print(array, value):
     centroid = np.mean(array, axis=0)
     points = (array - centroid).dot(value) + centroid
     return points        
     
-def translate(trans,centroid):
+def translate(trans, centroid):
     """
     Translates the landmark points so that the centre of gravitiy of this
     shape is at 'centroid'.
@@ -120,7 +120,7 @@ def translate(trans,centroid):
     i = 0
     points = []
     while i<len(trans)-1:
-        points.append([trans[i],trans[i+1]])
+        points.append([trans[i], trans[i+1]])
         i = i+2
     points = points + centroid
     
@@ -139,7 +139,7 @@ def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
     # white background
     img = np.ones((1000, 600, 3), np.uint8) * 255
     mean_shape = scale_for_print(mean_shape,1100)
-    points = translate(mean_shape,np.array([400,300]))
+    points = translate(mean_shape, np.array([400,300]))
 
     for i in range(len(points)):
         cv2.line(img, (int(points[i, 1]), int(points[i, 0])),
@@ -152,8 +152,8 @@ def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
     colors = __get_colors(len(aligned_shapes))
     
     for ind, aligned_shape in enumerate(aligned_shapes):
-        aligned_shape =  scale_for_print(aligned_shape,1100)
-        points = translate(aligned_shape,np.array([400,300]))
+        aligned_shape =  scale_for_print(aligned_shape, 1100)
+        points = translate(aligned_shape, np.array([400,300]))
         #points = lm.tooth_from_vector_to_matrix(aligned_shape)
         for i in range(len(points)):
             cv2.line(img, (int(points[i, 1]), int(points[i, 0])),
@@ -162,11 +162,11 @@ def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
 
     # Show
     img = __fit_on_screen(img)
-    cv2.imshow('Procrustes result for incisor ' + str("%02d" % (incisor_nr+1)), img)
+    cv2.imshow('Procrustes result for incisor ' + str("%02d" % (incisor_nr + 1)), img)
     cv2.waitKey(0)
     if save:
         # Specify the name where to print the Procrustes images 
-        directory = '../Plot/Procrustes/' + str("%02d" % (incisor_nr+1)) +'.png'
+        directory = '../Plot/Procrustes/' + str("%02d" % (incisor_nr + 1)) +'.png'
         dir_path = os.path.join(os.getcwd(), directory)
         cv2.imwrite(dir_path, img)
     cv2.destroyAllWindows()

@@ -14,7 +14,7 @@ from estimate import estimate
     Main function of the project.
 '''
 
-def load_landmarks(number_teeth,number_samples, directory, mirrored):
+def load_landmarks(number_teeth, number_samples, directory, mirrored):
     i = 1
     if mirrored:
         index = 14
@@ -43,16 +43,16 @@ def load_landmarks(number_teeth,number_samples, directory, mirrored):
     return teeth_landmarks
     
     
-def pre_procrustes(number_teeth,number_samples,teeth_landmarks):
+def pre_procrustes(number_teeth, number_samples, teeth_landmarks):
         # ***** Scale landmarks ***** 
     scaled = []
     for i in range(number_teeth):
         scaled_row = []
         for j in range(number_samples):
-            scaled_row.append(np.array(lm.tooth_from_matrix_to_vector(lm.scale_to_unit(lm.tooth_from_vector_to_matrix(teeth_landmarks[i,j]), \
+            scaled_row.append(np.array(lm.tooth_from_matrix_to_vector(lm.scale_to_unit(lm.tooth_from_vector_to_matrix(teeth_landmarks[i, j]), \
                                                                       lm.get_tooth_centroid(teeth_landmarks[i,j])))))
         scaled.append(np.array(scaled_row))
-    scaled =  np.array(scaled)
+    scaled = np.array(scaled)
     
     
     # ***** Translate the scaled lendmarks around the origin *****
@@ -161,6 +161,7 @@ def fit_model(estimates, nr, number_teeth, mean_shape, radiographs, edges):
             newpoints = fit.smooth_model(newpoints)
             visual.render_model_over_image(newpoints, radiographs[j], i+1, colors[i], False)
             new_points.append(newpoints)
+        ''' Comment next line out to not save the final result '''
         visual.savefinalimage(radiographs[j], j + 1)
         print('* Fitting completed for image ' + str(j + 1) + ' *')
     
@@ -176,9 +177,9 @@ if __name__ == '__main__':
     number_samples = 14
     
     directory = 'original/landmarks'
-    teeth_landmarks = load_landmarks(number_teeth,number_samples, directory, False)
+    teeth_landmarks = load_landmarks(number_teeth, number_samples, directory, False)
     directory = 'mirrored/landmarks'
-    teeth_mirrored = load_landmarks(number_teeth,number_samples, directory, True)
+    teeth_mirrored = load_landmarks(number_teeth, number_samples, directory, True)
     teeth_landmarks = np.concatenate((teeth_landmarks, teeth_mirrored), axis=1)
     # Double the number of samples because of the mirrored ones 
     number_samples *= 2
@@ -186,12 +187,12 @@ if __name__ == '__main__':
     # ***** Print the teeth_landmarks over radiographs ***** 
     #visual.print_landmarks_over_radiographs(teeth_landmarks)
     
-    around_origin_scaled, mean_shape = pre_procrustes(number_teeth,number_samples,teeth_landmarks)
+    around_origin_scaled, mean_shape = pre_procrustes(number_teeth, number_samples, teeth_landmarks)
     print('* Starting Procrustes Analysis *')
     
     
     # ***** Do the Generalized Procrustes Analysis on the landmarks ***** 
-    mean_shape, aligned_shape = procrustes(around_origin_scaled,number_teeth, mean_shape) 
+    mean_shape, aligned_shape = procrustes(around_origin_scaled, number_teeth, mean_shape) 
     
     # ***** Do PCA *****
     print('* Starting PCA *')
@@ -227,6 +228,9 @@ if __name__ == '__main__':
         radiographs.append(mirrored[i])
     
     
+    ''' It is possible to do the saving of the preprocessed images with
+        the pickle library in order to save time  '''
+    
     # Preprocess the images
     preprocessed_r = []
     for i in range(len(radiographs)):
@@ -243,7 +247,7 @@ if __name__ == '__main__':
 
     # ***** Ask the user to draw the boxes around the jaws ***** 
     if draw_handboxes: 
-        hand_draw_box(number_samples,radiographs)
+        hand_draw_box(number_samples, radiographs)
     # mean_box = bx.get_mean_boxes(teeth_boxes) # dimension is 1x8
 
 
@@ -264,9 +268,9 @@ if __name__ == '__main__':
     
     # ***** Sharp the boxes ***** 
     print('* Finding upper refined boxes *')
-    estimates = perfect_fit_box(True, preprocessed_r, number_samples, largest_b, upper, 2, False)
+    estimates = perfect_fit_box(True, preprocessed_r, number_samples, largest_b, upper, 14, True)
     print('* Finding lower refined boxes *')
-    e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, 2, False)
+    e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, 14, True)
     
     for i in range(len(estimates)):
         estimates[i].extend(e2[i])
@@ -274,4 +278,4 @@ if __name__ == '__main__':
     
     
     # ***** Apply and fit the model over the image ***** 
-    fit_model(estimates,2,number_teeth,mean_shape,radiographs,edges)
+    fit_model(estimates, 14, number_teeth, mean_shape, radiographs, edges)

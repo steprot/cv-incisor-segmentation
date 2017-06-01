@@ -74,8 +74,8 @@ def tooth_from_matrix_to_vector(vector):
     x=len(vector)
 
     while i < x:
-        points.append(float(vector[i,0]))
-        points.append(float(vector[i,1]))
+        points.append(float(vector[i, 0]))
+        points.append(float(vector[i, 1]))
         i += 1 
     
     return points
@@ -113,7 +113,7 @@ def get_tooth_center(points):
     """
     vertical_size = points[:, 1].min() + (points[:, 1].max() - points[:, 1].min())/2
     horizontal_size = points[:, 0].min() + (points[:, 0].max() - points[:, 0].min())/2
-    return [horizontal_size,vertical_size]
+    return [horizontal_size, vertical_size]
 
 def translate_to_origin(landmarks):
     """
@@ -123,7 +123,7 @@ def translate_to_origin(landmarks):
     i = 0
     points = []
     while i<len(landmarks)-1:
-        points.append([landmarks[i],landmarks[i+1]])
+        points.append([landmarks[i], landmarks[i+1]])
         i = i+2
     centroid = np.mean(points, axis=0)
     points = points - centroid
@@ -248,22 +248,22 @@ def get_aligning_parameters(element, scaled_mean):
 #    # print('new_mean shape', new_mean.shape)
 #    return new_mean
 
-def lists_to_matrix(data,number_teeth,number_samples):
+def lists_to_matrix(data, number_teeth, number_samples):
     res = []
     for i in range(number_teeth):
         row = []
         for j in range(number_samples):
-            row.append(tooth_from_vector_to_matrix(data[i,j]))
+            row.append(tooth_from_vector_to_matrix(data[i, j]))
         res.append(np.array(row))
     res =  np.array(res)
     return res
 
-def matrix_to_list(data,number_teeth,number_samples):
+def matrix_to_list(data, number_teeth, number_samples):
     res = []
     for i in range(number_teeth):
         row = []
         for j in range(number_samples):
-            row.append(tooth_from_matrix_to_vector(data[i,j]))
+            row.append(tooth_from_matrix_to_vector(data[i, j]))
         res.append(np.array(row))
     res =  np.array(res)
     return res
@@ -280,6 +280,5 @@ def get_mirrored_radiographs(radiographs, save):
             # Specify the name where to print the Procrustes images 
             directory = '../Plot/Mirrored/mirrored' + str("%02d" % (i+1)) +'.tif'
             dir_path = os.path.join(os.getcwd(), directory)
-            cv2.imwrite(dir_path, image)
-            
+            cv2.imwrite(dir_path, image)  
     return mirrored

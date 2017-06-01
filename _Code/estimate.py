@@ -31,12 +31,12 @@ def slide(image, seg, step, window):
             yield (x, y, image[y:y + window[1], x:x + window[0]])
 
 
-def getcut(img,a1,b1,a2,b2):
+def getcut(img, a1, b1, a2, b2):
     h, w = img.shape
     #print(img.shape)   
     crp = img[a1 :a2, b1:b2]
     #crp = img[b1:b2, a1 :a2]
-    cv2.imshow("Cropped image",crp)
+    cv2.imshow("Cropped image", crp)
     return crp
  
 def load_database(radiographs, is_upper, four_incisor_bbox, rewidth, reheight, number_samples):
@@ -95,7 +95,7 @@ def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=Fa
             winW = int(width * wscale)
             winH = int(height * hscale)
             #print('winw winH image',winW,winH)
-            for (x, y, window) in slide(image, search_region, step=36, window=(winW, winH)):
+            for (x, y, window) in slide(image, search_region, step=36, window = (winW, winH)):
                 if window.shape[0] != winH or window.shape[1] != winW:
                     continue
 

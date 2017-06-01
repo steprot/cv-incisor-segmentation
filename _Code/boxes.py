@@ -8,7 +8,7 @@ box_coordinates = []
 condition = True
 point1 = (0, 0)
 point2 = (0, 0)
-point2tmp = (0,0)
+point2tmp = (0, 0)
 drawing = False
 
 #def get_box_per_tooth(radiograph, index):
@@ -95,8 +95,8 @@ def reset_global_variable():
     next coming calls. Also restart the drawing over the image. 
     '''
     global point1, point2, point2tmp, box_coordinates, condition, drawing
-    point1 = (0,0)
-    point2 = (0,0)
+    point1 = (0, 0)
+    point2 = (0, 0)
     # THIS ERASES EVERYTHING; KEEP A GLOBAL VARIABLE: 
     box_coordinates = []
     condition = True
@@ -113,11 +113,11 @@ def mouse_callback_function(ev, x, y, flags, param):
     
     if ev == cv2.EVENT_LBUTTONDOWN:
         # Button was clicked, store the first coordinate 
-        point1 = (x,y)
-        point2tmp = (x,y)
+        point1 = (x, y)
+        point2tmp = (x, y)
         drawing = True
     elif ev == cv2.EVENT_LBUTTONUP:
-        point2 = (x,y)
+        point2 = (x, y)
         drawing = False 
 
         # Extract the coordinates
