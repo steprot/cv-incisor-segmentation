@@ -2,7 +2,6 @@
 import os
 import cv2
 import numpy as np
-import math 
 import landmark as lm
 from sklearn.decomposition import PCA
 import preprocessing as pp
@@ -295,7 +294,7 @@ if __name__ == '__main__':
     print('* Finding upper refined boxes *')
     estimates = perfect_fit_box(True, preprocessed_r, number_samples, largest_b, upper, NR_INPUT, False)
     print('* Finding lower refined boxes *')
-    #e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, NR_INPUT, False)
+    e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, NR_INPUT, False)
     
     for i in range(len(estimates)):
         estimates[i].extend(e2[i])
