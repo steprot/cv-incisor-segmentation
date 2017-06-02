@@ -1,65 +1,143 @@
 \documentclass[a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-
+\usepackage{geometry}
+\usepackage{graphicx, multirow}
+\usepackage{subcaption}
+\usepackage[export]{adjustbox}
+\usepackage{wrapfig}
+\usepackage{amsmath}
+\geometry{a4paper, total={6in, 9.5in}}
 
 % Use wide margins, but not quite so wide as fullpage.sty
-\marginparwidth 0.5in 
-\oddsidemargin 0.25in 
-\evensidemargin 0.25in 
-\marginparsep 0.25in
-\topmargin 0.25in 
-\textwidth 6in \textheight 8 in
+% \marginparwidth 0.5in 
+% \oddsidemargin 0.25in 
+% \evensidemargin 0.25in 
+% \marginparsep 0.25in
+% \topmargin 0.25in 
+% \textwidth 6in \textheight 8 in
 
-
+% titlepage
 \author{Orsolya Lukacs-Kisbandi, r0650042 \\
 		Stefano Proto, r0650809}
 \title{ \textbf{Computer Vision Report \\ 
 		Incisor Segmentation} }
 \date{\today}
-
 \begin{document}
-
 \maketitle
+\thispagestyle{empty}
 \newpage
 \setcounter{page}{1}
 \tableofcontents
-
+\newpage
 
 \section{Introduction}
+The aim of this project was to write an algorithm that is capable of segmenting the upper and lower incisors in panoramic radiographs using a model based approach.
+The chosen method is called Active Shape Models, and it is described in \cite{cootes1} Cootes at al. The implemented algorithm can be broken down into sub-parts, namely: building the Active Shape Model, described in section \ref{sec:modelling}, pre-processing the input images, explained in section \ref{sec:preprocessing}, and finally fitting the model on the images, as presented in section \ref{sec:fitting}. In addition, our observations and experimental results will be discussed in the final part of the report. 
 
-The aim of this project was to write  an  algorithm  that  is  capable  of  segmenting  the upper and lower incisors in panoramic radiographs  using  a  model  based  approach. The choosen method is called Active Shape Models and it is described in \cite{cootes1} Cootes at al. The implemented model can be broken down into sub-parts, namely: building the model, preprocessing the input images and fitting the model on the new image. In addition our observations and experimental results will be discussed in the final part of the report. 
+\section{Active Shape Model}\label{sec:modelling}
 
-\section{Active Shape Model}
 
-The reason we are building an Active Shape Model is to create a more general representation of each incisor, which is not very sensitive to variability, this way allowing to analyse and process complex images such as radiographs. This method is based on a prior model of what is expected to be seen on the new image. In our case these are the incisors, represented with landmarks. Based on these landmarks, a general representation of the expected shape is created, which can be used to find the best match of the model in the new image. This model gives a compact representation of the previous knowledge allowing some variation, but being specific enough to not to allow changes which haven't been seen in the training data. The landmarks are points on the training images which represent a distinguishable point which appears on every training example.
 
-\subsection{Landmarks} % Maybe rename this
-The training set contains samples from several people, for each person every incisor is represented by a set of 40 landmark points describing the shape of the tooth. In order to create the models, the mean shape for each tooth is found. Then the shapes of the teeth had to be aligned, scaled and centred around the same mean point. To perform these operations, an iterative approach proposed in \cite{cootes1} has been implemented. By doing Generalized Procrustes Analysis iteratively until our model converged to a certain mean, we achieved a general representation of the incisor. The model was considered stable (it converged) when the squared sum of the distance of each shape to the mean was less than $10^{-10}$.
+The reason we are building Active Shape Models for every incisor is to create a general representation of each incisor.
+By obtaining these models from combining different representations of the same tooth extracted from different peoples' readiographs, we can build a global model which can be fit on the same incisor for new images. This is a good approach four such problems because it creates a general representation of the object in interest, becoming more robust against variability.
+
+Active shape models are based on a prior model of what is expected to be seen on the new image. In our case these are the incisors, represented by a set of characteristic points, the landmarks. Based on these landmarks, a general representation of the expected shape is created, which can be used to find the best match of the model in the new image. This model gives a compact representation of the previous knowledge allowing some variation, but being specific enough to exclude changes which haven't been seen in the training data. The landmarks are specific coordinates on the training images which represent a distinguishable point which appears on every training example.
+
+\subsection{Mean shape} 
+
+The training set contains samples from several people. For each person in the training data, every incisor is represented by a set of 40 landmark points describing the shape of the tooth. In order to create the models, the shape of each tooth had to be scaled and translated to the origin, to make the computations easier. Translating the images also included rotating them in a way that their \textit{x} and \textit{y} axes would be aligned. After the shapes were centered to the origin based on their center of gravity, the scaled mean shape for each tooth was computed. This was necessary because we wanted to build a scale and rotation invariant model which could handle any type of input. 
+The following procedure was done iteratively until the mean shapes converged to a value which did not change after realigning the landmarks to the new mean as proposed in \cite{cootes1}. After obtaining the mean shape, the landmarks were scaled and centered again around the new mean shape. This technique, is called the Generalized Procrustes Analysis. The main idea is that the alignment and re-centering of the shapes is done iteratively until the model converges to a value which does not change after adding anther iteration. Our models were considered stable when the squared sum of the distance of each shape to the mean was less than $10^{-10}$.
 
 \subsection{Principle Component Analysis}
-
-Principal Component Analysis is a statistical procedure used to identifying a smaller number of uncorrelated variables, called "principal components", from a large set of data to explain the maximum amount of variance with the fewest number of principal components. In other words, the aim of the PCA is to reduce the dimensionality of the data. This is an improvement both in terms of memory and computational power.\\
+Principal Component Analysis is a statistical procedure used for identifying a smaller number of uncorrelated variables, called "principal components" from a large set of data to explain the maximum amount of variance with the fewest number of principal components. In other words, the aim of PCA is to reduce the dimensionality of the data. This is an improvement both in terms of memory and computational power.\\
 In our case, we set the number of principal components to 8, which covers 99\% of the variance of the data. This way, we reduced the number of landmarks with a significant amount.
 
-\section{Pre-processing}
-Radiographs are usually noisy and low in contrast. These characteristics make the image features difficult to identify. In order to overcome this issue, sharpening techniques and contrast enhancement algorithms are applied to the images before they are analysed. \\
-In order to reduce noise, we experimented with different filters, each having it's own advantages and disadvantages.  A balance between these filters had to be found, since some of them removed important image filter such as edges and high contrast points. For reducing the impulsive and the Gaussian noise, without affecting the edges a median filter and a bilateral filter is applied. The median filter considers each pixel in the image in turn and looks at the nearby pixels to decide whether or not it is representative of its surroundings. It replaces the pixel value with the median of the neighbouring pixel values. The median is calculated by first sorting all the pixel values from the surrounding neighbourhood into numerical order and then replacing the pixel being considered with the middle pixel value.  Instead of the simple median filter, we tried to apply an adaptive median filter but this required too much computational power as well as time, so we decided to use the much simpler version of this. The Bilateral filter  is a non-linear, edge-preserving and noise-reducing smoothing filter. The intensity value at each pixel in an image is replaced by a weighted average of intensity values from nearby pixels, which is based on a Gaussian distribution. Its formulation is simple: each pixel is replaced by an average of its neighbours. It depends only on two parameters that indicate the size and contrast of the features to preserve \cite{paris}.\\
-After these transformations the contrast of the image is enhanced by means of two gray-level morphology techniques (top-hat and bottom-hat transform) and a histogram equalization technique.  \\
+\begin{figure}[htp] 
+    \centering
+    \includegraphics[width=10cm]{activeshapemodel}
+    \label{fig:bilateral}
+    \caption{Final results of active shape model(black) form landmarks (other colors)}
+\end{figure}
 
-The Adaptive Median filtering removes the salt-and-pepper noise, also called impulsive noise. However, it can't remove noise that spreads large areas of image because it would also destroy other features like edges, the bilateral filter is therefore applied. It replaces the intensity of each pixel with the weighted average of intensity values from nearby pixels, to equalize the colours throughout the large areas and remove the noise without affecting the edges. \\
-The next step is applying the top-hat transform, that is able to enhance brighter structures, and then the bottom-hat transform, that enhances the darker structures. \\ 
-The final step is enhanceing the constrast of the image. Several different techniques are available, hence there had been a lot of research on it. Among all the candidate algorithms, Ahmad et al. shown that the Contrast Limited Adaptive Histogram Equalization (CLAHE) better enhances the image quality and increases the diagnostic ease, overperforming both the Sharp Contrast Limited Adaptive Histogram Equalization (SCLAHE) and the Median Adaptive Histogram Equalization (SMAHE) \cite{ahmad}. This technique is based on the Adaptive Histogram Equalization (AHE): it divides the image in small blocks, \textit{tiles}, and then equalizes the histograms. This allows the algorithm to adapt to local variations in an image such as shadows and highlights which would not be handled by global histogram equalization. AHE could amplify the noise, so the Contrast Limited technique is used: if any histogram bin is above a specified contrast limit, those pixels are clipped and distributed uniformly to other bins before applying histogram equalization.
+\section{Image Processing}\label{sec:preprocessing}
+\subsection{Pre-processing}
+Radiographs are usually noisy and low in contrast. These characteristics make the image features difficult to extract. In order to overcome this issue, sharpening techniques and contrast enhancement algorithms are applied to the images before they are analyzed. \\
+In order to reduce noise, we experimented with different filters, each having it's own advantages and disadvantages. A balance between these filters had to be found, since some of them removed important image filter such as edges and high contrast points. For reducing the impulsive and the Gaussian noise without affecting the edges, a median filter and a bilateral filter is applied.\\
+The median filter considers each pixel in the image in turn and looks at the nearby pixels to decide whether or not it is representative of its surroundings. It replaces the pixel value with the median of the neighbouring pixel values. The median is calculated by first sorting all the pixel values from the surrounding neighbourhood into numerical order and then replacing the pixel being considered with the middle pixel value.  Instead of the simple median filter, we tried to apply an adaptive median filter but this required too much computational power as well as time, so we decided to use the much simpler version of this. \\
+The Bilateral filter is a non-linear, edge-preserving and noise-reducing smoothing filter. The intensity value at each pixel in an image is replaced by a weighted average of intensity values from nearby pixels, which is based on a Gaussian distribution. Its formulation is simple: each pixel is replaced by an average of its neighbours. It depends only on two parameters that indicate the size and contrast of the features to preserve \cite{paris}.\\
 
-\section{Fit the model to an image}
+% \begin{figure}[htp] 
+%     \centering
+%     \includegraphics[width=4cm]{bilateral01}
+%     \label{fig:bilateral}
+%     \caption{Image after bilateral filter}
+% \end{figure}
+
+After these transformations the contrast of the image is enhanced by means of two gray-level morphology techniques (top-hat and bottom-hat transform) and a histogram equalization technique. \\
+The top-hat transform is able to enhance brighter structures, while the bottom-hat transform enhances the darker structures. The obtained picture from top hat transform is added to, from the bottom hat transform is subtracted from the initial radiograph to apply the effect of this transformations. \\
+The last step to enhance the contrast of the image is histogram equalization. For this purpose many approaches has been tried: among all the candidate algorithms, in Ahmad et al. it is shown that the Contrast Limited Adaptive Histogram Equalization (CLAHE) better enhances the image quality and increases the diagnostic ease, overperforming both the Sharp Contrast Limited Adaptive Histogram Equalization (SCLAHE) and the Median Adaptive Histogram Equalization (SMAHE) \cite{ahmad}.
+CLAHE is based on the Adaptive Histogram Equalization (AHE). It divides the image in small blocks, \textit{tiles}, and then equalizes the histograms. This allows the algorithm to adapt to local variations in an image such as shadows and highlights which would not be handled by global histogram equalization. AHE could amplify the noise, so the Contrast Limited technique is used: if any histogram bin is above a specified contrast limit, those pixels are clipped and distributed uniformly to other bins before applying histogram equalization. 
+
+\begin{figure}[htp] 
+    \centering
+    \includegraphics[width=15cm]{preprocessing}
+    \label{fig:bilateral}
+    \caption{Preprocessing stages}
+\end{figure}
+
+\subsection{Detecting edges}
+In order to find the edges over the images, the Sobel operator is used. The Sobel operator performs a 2-D spatial gradient measurement on an image and emphasizes regions of high spatial frequency that correspond to edges. Typically it is used to find the approximate absolute gradient magnitude at each point in an input grayscale image. \textit{$G_x$} is representing the horizontal changes \textit{$G_y$} the vertical ones on the image.
+
+\[
+  G_x=
+  \begin{bmatrix}
+    -1 & 0 & +1 \\
+    -2 & 0 & +2 \\
+    -1 & 0 & +1
+  \end{bmatrix} * I\quad
+  G_y=
+  \begin{bmatrix}
+    -1 & 2 & -1 \\
+    0 & 0 & 0 \\
+    +1 & +2 & +1
+  \end{bmatrix} * I
+\]
+
+At each point of the image we calculate an approximation of the gradient in that point by combining both results above with the following formula.
+
+\begin{align}
+   G = \sqrt{ G_x^2 + G_y^2 }
+\end{align}
+
+
+
+
+\section{Fit model on an image}\label{sec:fitting}
 Fitting the models on the image consists of multiple stages. At first hand drawn boxes have to be created, than they are used in \textit{best\_box} function to fine tune them. After returning these boxes the active shape models are fitted on the image.
 
 \subsection{Hand draw boxes}
+In the training part, the user is asked to draw boxes around the upper and lower incisors for every sample image in the training set. \\ 
+The obtained boxes are stored in a file which are going to be used as an initial value for the automatic estimate. For testing, we select the coordinates which are the most extreme, the combination of these representing the largest box, in which all upper or lower incisors will fit in. These two boxes (one for the upper and one for the lower incisors) are used as initial estimates on the location of incisors when we are applying our model on an unseen radiograph. 
+% The largest possible box combinations for the upper jaw and the lower jaw are used indeed as starting point for the tuning function \textit{best\_box}. 
 
 \subsection{Fine-tune boxes}
+For fine-tuning the boxes the function \textit{estimate} was used. This function takes as parameter a preprocessed radiograph we want to fit the box on, a boolean variable weather we are looking for an upper or lower incisor, the preproecessed radiograph, the "biggest box" coordinates, which represent the biggest image segment selected when the boxes are hand-drawn. The next parameter is all the coordinates from the hand drawn boxes for the particular region and finally \textit{b\_model}, whether we want to build the model or just load the pre trained model. After getting the largest box, the radiographs are cut, resized and flattened (create a N x 1 array from the image segment) based on these coordinates. We apply PCA on the cut images and take the top six components, which capture most of the variance in the data. After these steps, we call the function \textit{best\_seg} which is taking as parameters the mean returned from PCA, the eigenvectors, the bounding box coordinates, the preprocessed radiograph, and the width and height. In this function, sliding windows of different scales are shifted over the region of interest on the radiograph and the error of reconstructing the segment using the eigenvectors and mean acquired from the cut shapes is calculated. The segment with the smallest error is returned. This box is returned to the main.
 
-\subsection{Fit Active shape models}
+\subsection{Fitting the active shape models}
+To fit the models, first the upper and lower incisor boxes which now are only containing the four incisors are divided in four equal parts, assuming that the teeth in the same jaw substantially have the same width. Following this, each tooth model is shaped in the corresponding box: the models are centred in the respective tooth box, scaled to fit in it, and then centered again. \\ 
+After this initial positioning and scaling of the models, they are parsed in order to look for a better estimation of the tooth in their neighbourhood. For every point in the model, the normal line is computed. In case another point is a better fit than the current point, we update the model. The criteria for a point to be better than another is to have a higher value, since edges are represented by light regions. For this reason brightness along the line is compared with the actual value of the model in point crossing that line. \\ In order to have a greater resistance to noise not only the points on the line are considered, but for each point all its neighbours are evaluated. An average of the region is computed, and then compared with the current brightest point for the line: if the value of the region is greater than a certain threshold (directly depending on the current brightest point), then the centre of the evaluated region will become part of the model. \\ 
+The parameters that allow flexibility in the model are the length of the norm we calculate, this can decide on the region we are looking for points which are more likely to be edges, the step we traverse the shape of the incisor, larger step is more resistant to noise, while smaller steps are following the shape more precisely.
 
+% Some parameters allows the model to be more or less flexible: how far on the line the analysis can go from the original point of the model, the step with which proceed looking for points on the line, the threshold to overcome in order to change the current model point. \\ 
+Due to this fitting, the shape of the model is affected, and it has to be smoothed. After the final model is found, the \textit{smooth\_model} function is invoked. This function smooths the model, computing an average of the shape over three consecutive points, reducing the effect of outliers in the model and creating a better representation of the incisor.  
+
+\section{Evaluation and final considerations}\label{sec:evaluation}
+In order to evaluate the obtained result, the Sum of Squared Errors is computed. This value represents how much the obtained model differs from the original landmarks, and it is computed for every sample of which we have the corresponding landmarks. \\
+Based on these, we can observe that the accuracy of the hand drawn boxes in the training has a significant affect on the outcome of the estimation. The estimated position of the incisors in the radiographs is also affected by this. In addition, unusual teeth positions might affect the model as well, because the built model was not trained with such examples.
+
+
+\newpage
 \begin{thebibliography}{99}
 
 \bibitem{cootes1} Cootes, Tim, E. Baldock, and J. Graham. "An introduction to active shape models." \textit{Image processing and analysis} (2000): 223-248.
