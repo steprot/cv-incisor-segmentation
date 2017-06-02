@@ -130,12 +130,12 @@ def perfect_fit_box(isupper, preprocessed_r, number_samples, largest_b, box_para
     """
     estimates = []
     for rad_nr in range(nr): # number_samples
-        e = estimate(preprocessed_r[rad_nr], isupper, preprocessed_r, rad_nr, number_samples, largest_b, box_param, True, build_model)
+        e = estimate(preprocessed_r[rad_nr], isupper, preprocessed_r, rad_nr, number_samples, largest_b, box_param, False, build_model)
 	estimates.append(e)
 	print('    Box for radiograph ' + str(rad_nr + 1) + ' done')    
     return estimates   
     
-def fit_model(estimates, nr, number_teeth, mean_shape, radiographs, edges, save):
+def fit_model(estimates, nr, number_teeth, mean_shape, radiographs, edges, save=True):
     detailed_boxes = []
     for i in range(nr):
         detailed_boxes.append(fit.get_detailed_boxes(estimates[i]))
@@ -317,7 +317,7 @@ if __name__ == '__main__':
     print(sse_average/40)
     err_perc = 100*sse_average/(40*radiographs[0].shape[1])
     print('  Average point SSE, percentage error with respect to image width:')
-    print(sse_average/40)
+    print(err_perc)
     
             
             
