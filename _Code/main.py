@@ -174,6 +174,9 @@ def fit_model(estimates, nr, number_teeth, mean_shape, radiographs, edges, save=
     return new_points
     
 def estimate_sse(number_teeth, number_samples, new_landmarks, teeth_landmarks):
+    print('num sample', number_samples)
+    print('teeth_landmarks.shape', teeth_landmarks.shape)
+    print('new_landmarks.shape', new_landmarks.shape)
     sse = []
     for j in range(number_samples): # number_samples 
         sse_sample = 0
@@ -315,12 +318,6 @@ if __name__ == '__main__':
     print(sse_average)
     print('  Average point SSE, divided by the number of landmarks:')
     print(sse_average/40)
-    err_perc = 100*sse_average/(40*radiographs[0].shape[1])
+    err_perc = 100*(sse_average/40)/(radiographs[0].shape[1])
     print('  Average point SSE, percentage error with respect to image width:')
     print(err_perc)
-    
-            
-            
-            
-            
-            

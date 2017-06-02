@@ -6,4 +6,4 @@
   Average point SSE, divided by the number of landmarks:
 17135.3745926
   Average point SSE, percentage error with respect to image width:
-14.17083575
+566.833430123
