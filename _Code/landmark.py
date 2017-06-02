@@ -80,15 +80,6 @@ def tooth_from_matrix_to_vector(vector):
         i += 1 
     
     return points
-    
-#def tooth_from_matrix_to_vector(vector):
-#    # Transform the matrix in an array  by appending the second list to the end 
-#    # of the first one
-#    """Original: [ [x1 y1] ,  [x2 y2],  [x3 y3] ... ] 
-#       Result  : [ x1, x2, x3,..., y1, y2, y3 ... ]
-#    """
-#    points = np.hstack(vector)
-#    return points
 
 def get_tooth_centroid(points):
     """
@@ -130,22 +121,15 @@ def scale_to_unit(tooth, centroid):
     
 def rotate(element, theta):
     '''
-        Shouldn't np.mean(element) be 0?
+        Rotate element by theta
     '''
     # create rotation matrix
     rotation_matrix = np.array([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
-
-    # apply rotation on each landmark point
-    #centroid = np.mean(element, axis=0)
-    #print centroid
-    #tmp_points = element - centroid
     
     element = tooth_from_vector_to_matrix(element)
     rotated_element = np.zeros_like(element)
     for ind in range(len(element)):
         rotated_element[ind, :] = element[ind, :].dot(rotation_matrix)
-        
-    #element = points + centroid
     
     return rotated_element
     
@@ -153,14 +137,14 @@ def scale(element, value):
     '''
         Rescale element by given value
     '''
-    #centroid  = np.mean(element, axis=0)
-    #Elem is already centered to 0 right??? If not, change code to something like this\/
-    #points = (self.points - centroid).dot(factor) + centroid
     e = element.dot(value)
 
     return e
  
 def align_teeth_to_mean_shape(elem, mean):
+    ''' 
+    Allign current incisor to the mean shape
+    '''
     t, s, theta = get_aligning_parameters(elem, mean)
     rotated_element = rotate(elem, theta)
     scaled = scale(rotated_element, s)
@@ -237,25 +221,26 @@ def get_aligning_parameters(element, scaled_mean):
 #    # print('new_mean shape', new_mean.shape)
 #    return new_mean
 
-def lists_to_matrix(data, number_teeth, number_samples):
-    res = []
-    for i in range(number_teeth):
-        row = []
-        for j in range(number_samples):
-            row.append(tooth_from_vector_to_matrix(data[i, j]))
-        res.append(np.array(row))
-    res =  np.array(res)
-    return res
+#def lists_to_matrix(data, number_teeth, number_samples):
+#    ''' '''
+#    res = []
+#    for i in range(number_teeth):
+#        row = []
+#        for j in range(number_samples):
+#            row.append(tooth_from_vector_to_matrix(data[i, j]))
+#        res.append(np.array(row))
+#    res =  np.array(res)
+#    return res
 
-def matrix_to_list(data, number_teeth, number_samples):
-    res = []
-    for i in range(number_teeth):
-        row = []
-        for j in range(number_samples):
-            row.append(tooth_from_matrix_to_vector(data[i, j]))
-        res.append(np.array(row))
-    res =  np.array(res)
-    return res
+#def matrix_to_list(data, number_teeth, number_samples):
+#    res = []
+#    for i in range(number_teeth):
+#        row = []
+#        for j in range(number_samples):
+#            row.append(tooth_from_matrix_to_vector(data[i, j]))
+#        res.append(np.array(row))
+#    res =  np.array(res)
+#    return res
     
 def get_mirrored_radiographs(radiographs, save):
     '''

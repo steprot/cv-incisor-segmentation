@@ -1,9 +1,6 @@
 import colorsys
-import math
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
-from matplotlib import gridspec
 import landmark as lm
 import os
 
@@ -33,7 +30,9 @@ def print_landmarks_over_radiographs(teeth_landmarks):
         i += 1
 
 def render_landmark_over_image(img, landmark):
-    
+    ''' 
+    Print lendmarks over image
+    '''
     points = lm.tooth_from_vector_to_matrix(landmark)
     
     for i in range(len(points) - 1):
@@ -70,23 +69,6 @@ def save_final_image(img, i):
     dir_path = os.path.join(os.getcwd(), directory)
     cv2.imwrite(dir_path, img)
     return
-
-#def render_landmark_over_image(img, landmark):
-#    
-#    #points = lm.tooth_from_vector_to_matrix(landmark)
-#    img = np.ones((1000, 600, 3), np.uint8) * 255
-#    mean_shape = scale_for_print(landmark,1100)
-#    points = translate(mean_shape,np.array([300,500]))
-#    
-#    for i in range(len(points) - 1):
-#        #cv2.line(img, (int(points[i, 1]), int(points[i, 0])), (int(points[i + 1, 1]), int(points[i + 1, 0])), (0, 255, 0))
-#        cv2.line(img, (int(points[i, 1]), int(points[i, 0])),
-#                 (int(points[(i + 1) % 40, 1]), int(points[(i + 1) % 40, 0])),
-#                 (0, 0, 0), 2)
-#    img = __fit_on_screen(img)
-#    cv2.imshow('Rendered image', img)
-#    cv2.waitKey(0)
-#    cv2.destroyAllWindows()
     
 def render_landmarks(data_collector):
     '''
@@ -219,19 +201,16 @@ def plot_procrustes(mean_shape, aligned_shapes, incisor_nr, save):
 #    cv2.waitKey(0)
 #    cv2.destroyAllWindows()
 
-def get_colors(num_colors):
+def get_colors(nr):
     '''
-    Get a list with ``num_colors`` different colors.
+    Automatically select N distinct colors
     Parameters:
-        num_colors (int): The number of colors needed.
+        nr: The number of colors needed.
     Returns:
-        list: ``num_colors`` different rgb-colors ([0,255], [0,255], [0,255])
-
-    .. _Code based on:
-        http://stackoverflow.com/a/9701141
+        list: nr different rgb-colors ([0,255], [0,255], [0,255])
     '''
     colors = []
-    for i in np.arange(0., 360., 360. / num_colors):
+    for i in np.arange(0., 360., 360. / nr):
         hue = i/360.
         lightness = (50 + np.random.rand() * 10)/100.
         saturation = (90 + np.random.rand() * 10)/100.
@@ -240,7 +219,7 @@ def get_colors(num_colors):
     
 def __fit_on_screen(image):
     '''
-    Rescales the given image such that it fits on the screen.
+    Rescale the given imageto fits on the screen.
     Parameters:
         image: The image to rescale
     '''

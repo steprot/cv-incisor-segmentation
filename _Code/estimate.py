@@ -25,12 +25,18 @@ def reconstruct(W, Y, mu):
     return np.dot(Y, W.T) + mu.T
 
 def slide(image, seg, step, window):
+    '''
+    Apply sliding window on the image
+    '''
     # Maybe change it a bit later if we have time so it would return one element and call it n times
     for y in range(seg[0][1], seg[1][1] - window[1], step) + [seg[1][1] - window[1]]:
         for x in range(seg[0][0], seg[1][0] - window[0], step) + [seg[1][0] - window[0]]:
             yield (x, y, image[y:y + window[1], x:x + window[0]])
 
 def getcut(img, a1, b1, a2, b2):
+    '''
+    Cut image segment from a1b1 to a2b2
+    '''
     h, w = img.shape
     #print(img.shape)   
     crp = img[a1 :a2, b1:b2]
@@ -38,7 +44,10 @@ def getcut(img, a1, b1, a2, b2):
     cv2.imshow("Cropped image", crp)
     return crp
  
-def load_database(radiographs, is_upper, four_incisor_bbox, rewidth, reheight, number_samples):
+def cut_radiographs(radiographs, is_upper, four_incisor_bbox, rewidth, reheight, number_samples):
+    '''
+    Obtain region of interest (hand drawn boxes) from radiograph than scale them to have the same size
+    '''
     smallImages = np.zeros((number_samples, rewidth * reheight))
     #radiographs = [preprocess_radiograph(radiograph) for radiograph in radiographs]
     for ind, radiograph in enumerate(radiographs):
@@ -82,73 +91,51 @@ def best_seg(mean, evecs, image, is_upper, largest_boxes, width, height, show=Fa
         a1 = int(largest_boxes[5])
         a2 = int(largest_boxes[7])
     search_region = [(b1, a1), (b2, a2)]
-    #print('search_region', search_region)
 
     best_score = float("inf")
     best_score_bbox = [(-1, -1), (-1, -1)]
     best_score_img = np.zeros((width, height))
-    for wscale in np.arange(0.7, 1.3, 0.1): # start 0.8 stop 1.3 step 0.1 -- Try different scales for width
+    for wscale in np.arange(0.7, 1.3, 0.1): # start 0.7 stop 1.3 step 0.1 -- Try different scales for width
         for hscale in np.arange(0.7, 1.3, 0.1): # start 0.7 stop 1.3 step 0.1 -- Try different scales for hight
-            winW = int(width * wscale)
-            winH = int(height * hscale)
+            slideW = int(width * wscale)
+            slideH = int(height * hscale)
             #print('winw winH image',winW,winH)
-            for (x, y, window) in slide(image, search_region, step=36, window = (winW, winH)):
-                if window.shape[0] != winH or window.shape[1] != winW:
-                    continue
-
+            for (x, y, window) in slide(image, search_region, step=36, window = (slideW, slideH)):
+                # If the size of the window is not what we wanted it means that we are sliding out of the image
+                # so we go to the next window
+                if window.shape[0] != slideH or window.shape[1] != slideW: continue
+                # Resize window to unit size 
                 reCut = cv2.resize(window, (width, height))
-                #cv2.imshow('recut', reCut)
-                #print('recut shape', reCut.shape)
-
-                #X = reCut
                 X = reCut.flatten()
-                
                 #Project X on the space spanned by the vectors in evecs. Mean is the average image.
                 Y = project(evecs, X, mean)
-                
-                #Reconstruct an image based on its PCA-coefficients Y, the evecs evecs and the average mean.
+                #Reconstruct an image based on its PCA-coefficients Y, the evecs and the average mean.
                 Xacc = reconstruct(evecs, Y, mean)
-
+                # Calculate score based on the error to reconstruct the image
                 score = np.linalg.norm(Xacc - X)
-                #print('score',score)
                 if score < best_score:
                     best_score = score
-                    best_score_bbox = [x, y, x + winW, y + winH]
+                    best_score_bbox = [x,y,x + slideW,y + slideH]
                     best_score_img = reCut
-                    #cv2.imshow('IF recut', reCut)
-        #print best_score
         if show:
             cv2.imshow('IF recut', best_score_img)
-            #best_coord = [x, y, x + winW, y + winH]
-            #img = image.copy()
-            #cv2.rectangle(img, (int(best_coord[0]), int(best_coord[1])), (int(best_coord[2]), int(best_coord[3])), (0, 255, 0), 1)
-            #cv2.imshow('Radiograph with best box', img)
-            #cv2.waitKey(0)
-
     return (best_score_bbox)
 
 def pca(X, nb_components):
-    dim = X.shape
-    if (nb_components <= 0) or (nb_components > dim[0]):
-        nb_components = dim[0]
-
     mu = np.average(X, axis=0)
     X = np.add(X, -mu.transpose(), out=X, casting="unsafe")
-    #X -= mu.transpose()
 
     eigenvalues, eigenvectors = np.linalg.eig(np.dot(X, np.transpose(X)))
     eigenvectors = np.dot(np.transpose(X), eigenvectors)
-
     eig = zip(eigenvalues, np.transpose(eigenvectors))
     eig = map(lambda x: (x[0] * np.linalg.norm(x[1]),
                          x[1] / np.linalg.norm(x[1])), eig)
-
     eig = sorted(eig, reverse=True, key=lambda x: abs(x[0]))
     eig = eig[:nb_components]
 
     eigenvalues, eigenvectors = map(np.array, zip(*eig))
 
-    return eigenvalues, np.transpose(eigenvectors), mu
+    return np.transpose(eigenvectors), mu
 
 
 
@@ -166,8 +153,8 @@ def estimate(rad, isupper, preprocessed_r, index, number_samples, coord, allcoor
         width = coord[2] - coord[0]
         height = coord[3] - coord[1] 
         if b_model:
-            data = load_database(np.asarray(preprocessed_r), isupper, allcoord, width, height, number_samples)
-            [_, eigen_vec, mean] = pca(data, 10)
+            data = cut_radiographs(np.asarray(preprocessed_r[0:14]), isupper, allcoord, width, height, number_samples)
+            [eigen_vec, mean] = pca(data, 10)
             
             filename = 'eigen_vec_upper.sav'
             pickle.dump(eigen_vec, open(filename, 'wb'))
@@ -183,9 +170,8 @@ def estimate(rad, isupper, preprocessed_r, index, number_samples, coord, allcoor
         width = coord[6]-coord[4]
         height = coord[7]-coord[5]
         if b_model:
-            data = load_database(np.asarray(preprocessed_r), isupper, allcoord, width, height, number_samples)
-            [_, eigen_vec, mean] = pca(data, 10)
-            
+            data = cut_radiographs(np.asarray(preprocessed_r[0:14]), isupper, allcoord, width, height, number_samples)
+            [eigen_vec, mean] = pca(data, 10)
             filename = 'eigen_vec_lower.sav'
             pickle.dump(eigen_vec, open(filename, 'wb'))
     
@@ -196,11 +182,6 @@ def estimate(rad, isupper, preprocessed_r, index, number_samples, coord, allcoor
         else: 
             eigen_vec = pickle.load(open('eigen_vec_lower.sav', 'rb'))
             mean = pickle.load(open('mean_lower.sav', 'rb')) 
-        
-    #pca_res = PCA(n_components=5) 
-    #pca_res.fit(np.asarray(data))
-    #eigen_vec= pca_res.components_
-    #mean  = pca_res.mean_
 
     # Find the region of the radiograph that matches best with the appearance model
     best_coord = best_seg(mean, eigen_vec, rad, isupper, coord, width, height, False)
