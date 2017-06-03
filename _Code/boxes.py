@@ -10,47 +10,6 @@ point2 = (0, 0)
 point2tmp = (0, 0)
 drawing = False
 
-#def get_box_per_tooth(radiograph, index):
-#    # grab references to the global variables
-#    global point1, point2, box_coordinates, condition
-#    
-#    # Draw the box around one tooth, it's sayi wich one.
-#    if index < 5:
-#        window_title = 'Draw a box around the upper incisor number ' + str(index) + ' from the left' 
-#    else:
-#        index = index % 4 
-#        window_title = 'Draw a box around the lower incisor number ' + str(index) + ' from the left' 
-#    
-#    # Setup the mouse callback function
-#    cv2.namedWindow(window_title)
-#    cv2.setMouseCallback(window_title, mouse_callback_function)
-#    
-#    while condition:
-#        # show the image, with the rectangle if present 
-#        rect_cpy = radiograph.copy()
-#        if point1 != (0, 0):
-#            cv2.rectangle(rect_cpy, point1, point1, (255, 0, 0), 1)
-#            cv2.imshow(window_title, rect_cpy)
-#        elif point1 != (0, 0) and point2 != (0, 0):
-#            cv2.rectangle(rect_cpy, point1, point2, (255, 0, 0), 1)
-#            cv2.imshow(window_title, rect_cpy)
-#            cv2.waitKey(0)
-#            cv2.destroyAllWindows()
-#            break
-#        elif point1 == (0,0): 
-#            cv2.imshow(window_title, radiograph)
-#        key = cv2.waitKey(1) & 0xFF
-#        if key == 27: 
-#            # 27 is ESC
-#            break
-#            
-#    boxes.append(box_coordinates)
-#    print('boxes len', len(boxes))
-#    # Reset the variables for the next loop
-#    reset_global_variable()
-#    cv2.destroyAllWindows() 
-#    return boxes
-
 def get_box_per_jaw(radiograph, i, where):
     '''
     Displays the image, and ask the user to print a box over the 'where' jaw.

@@ -7,10 +7,7 @@ from scipy.ndimage import morphology
 
 def load_radiographs(number_samples, testing):
     '''
-    Load the radiograph images
-    Returns:
-        An array with the requested radiographs as 3-channel color images,
-        ordered the same as the given indices.
+    Load the radiograph images and returns an array with the requested radiographs as 3-channel color images,
     '''
     images = []
     if testing:
@@ -66,7 +63,6 @@ def preprocess_radiograph(img):
 def bilateral_filter(img):
     '''
     Applies a bilateral filter to the given image.
-    This filter is highly effective in noise removal while keeping edges sharp.
     Parameters:
         img; a grayscale image of the radiograph after median filter
     '''
@@ -75,7 +71,6 @@ def bilateral_filter(img):
 def top_hat_transform(img):
     '''
     Calculates the top-hat transformation of a given image.
-    This transformation enhances the brighter structures in the image.
     Parameters:
         img; a grayscale image of the radiograph after median filter and bilateral filter
     '''
@@ -85,7 +80,6 @@ def top_hat_transform(img):
 def bottom_hat_transform(img):
     '''
     Calculates the bottom-hat transformation of a given image.
-    This transformation enhances the darker structures in the image.
     Parameters:
         img; a grayscale image of the radiograph after median filter and bilateral filter
     '''
@@ -119,19 +113,15 @@ def togradient_sobel(img):
     
 def adaptive_median(img, window, threshold):
     '''
-        Applies an adaptive median filter to the image. This is essentially a
-        despeckling filter for grayscale images.
-        Args:
-            image: The source image, as a numpy array
-            window: Sets the filter window size (must be a scalar between 1 and 5).
-                    Window size (ws) is defined as W = 2*ws + 1 so that W = 3 is a
-                    3x3 filter window.
-            threshold: Sets the adaptive threshold (0=normal median behavior).
-                        Higher values reduce the "aggresiveness" of the filter.
-        Returns:
-            The filtered image.
-        .. _Based on:
-            https://github.com/sarnold/adaptive-median/blob/master/adaptive_median.py
+    Applies an adaptive median filter to the image. This is essentially a
+    despeckling filter for grayscale images.
+    Args:
+        image: The source image, as a numpy array
+        window: Sets the filter window size (must be a scalar between 1 and 5).
+                Window size (ws) is defined as W = 2*ws + 1 so that W = 3 is a
+                3x3 filter window.
+        threshold: Sets the adaptive threshold (0=normal median behavior).
+                    Higher values reduce the "aggresiveness" of the filter.
     '''
     #img = image.copy()Top
     #img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
@@ -179,7 +169,8 @@ def adaptive_median(img, window, threshold):
 
 def med(target_array, array_length):
     '''
-    Computes the median of a sublist.
+    (for the adaptive median)
+    Computes the median of a sublist
     Parameters: 
         target_array; the list from which return the median
         array_length; length of the list.
@@ -190,6 +181,7 @@ def med(target_array, array_length):
     
 def resize(image, width, height):
     '''
+    (for the adaptive median)
     Resizes the given image to the given width and height. The scaling factor is returned. 
     Parameters:
         image: The radiograph to resize.
