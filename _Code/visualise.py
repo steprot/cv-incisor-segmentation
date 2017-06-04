@@ -61,8 +61,8 @@ def render_model_over_image(points, img, incisor_nr, color, save):
         dir_path = os.path.join(os.getcwd(), directory)
         cv2.imwrite(dir_path, img)
     ''' DECOMMENT THIS PART '''
-    #cv2.imshow('finalresult' + str("%02d" % (incisor_nr))+'.png', img) # SCREEN FITTING 
-    # cv2.waitKey(0)
+    cv2.imshow('finalresult' + str("%02d" % (incisor_nr))+'.png', img) # SCREEN FITTING 
+    cv2.waitKey(0)
     
 def save_final_image(img, i):
     directory = '../Plot/Final/finalresult' + str("%02d" % (i))+'.png'

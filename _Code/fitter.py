@@ -186,8 +186,8 @@ def get_max_along_normal(points, i, edge_img, radiograph):
     #cv2.circle(edge_img, (int(px), int(py)), 2, (200, 200, 200), 2)
     
     ''' Decomment next line it if you want to see the intermediate steps ''' 
-    # cv2.imshow('Img', img)
-    #cv2.imshow('Edge_img', edge_img)
+    #cv2.imshow('Img', img)
+    ##cv2.imshow('Edge_img', edge_img)
     #cv2.waitKey(0) 
     cv2.destroyAllWindows()   
     

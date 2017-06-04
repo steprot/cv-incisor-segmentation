@@ -153,7 +153,7 @@ def estimate(rad, isupper, preprocessed_r, index, number_samples, coord, allcoor
         width = coord[2] - coord[0]
         height = coord[3] - coord[1] 
         if b_model:
-            data = cut_radiographs(np.asarray(preprocessed_r[0:14]), isupper, allcoord, width, height, number_samples)
+            data = cut_radiographs(np.asarray(preprocessed_r[0:number_samples]), isupper, allcoord, width, height, number_samples)
             [eigen_vec, mean] = pca(data, 10)
             
             filename = 'eigen_vec_upper.sav'
@@ -170,7 +170,7 @@ def estimate(rad, isupper, preprocessed_r, index, number_samples, coord, allcoor
         width = coord[6]-coord[4]
         height = coord[7]-coord[5]
         if b_model:
-            data = cut_radiographs(np.asarray(preprocessed_r[0:14]), isupper, allcoord, width, height, number_samples)
+            data = cut_radiographs(np.asarray(preprocessed_r[0:number_samples]), isupper, allcoord, width, height, number_samples)
             [eigen_vec, mean] = pca(data, 10)
             filename = 'eigen_vec_lower.sav'
             pickle.dump(eigen_vec, open(filename, 'wb'))

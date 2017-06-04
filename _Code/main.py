@@ -173,17 +173,16 @@ def fit_model(estimates, nr, number_teeth, mean_shape, radiographs, edges, save=
     new_points = np.asarray(new_points)
     return new_points
     
-def estimate_sse(number_teeth, number_samples, new_landmarks, teeth_landmarks):
-    print('num sample', number_samples)
-    print('teeth_landmarks.shape', teeth_landmarks.shape)
-    print('new_landmarks.shape', new_landmarks.shape)
-    sse = []
-    for j in range(number_samples): # number_samples 
-        sse_sample = 0
-        for i in range(number_teeth):
-            sse_sample += lm.sse_tooth(new_landmarks[j, :, i], teeth_landmarks[i, j, :])
-        sse.append(sse_sample)
-    return sse
+def estimate_sse(number_teeth, new_landmarks, j, teeth_landmark):
+    ssex_sample = 0
+    ssey_sample = 0
+    for i in range(number_teeth):
+        x, y = lm.sse_tooth(new_landmarks[j,:, i], teeth_landmark[i,:])
+        ssex_sample += x
+        ssey_sample += y
+    ssex_sample
+    ssey_sample
+    return ssex_sample, ssey_sample
 
    
       
@@ -203,12 +202,12 @@ if __name__ == '__main__':
     
     directory = 'original/landmarks'
     teeth_landmarks = load_landmarks(number_teeth, number_samples, directory, False)
-    directory = 'mirrored/landmarks'
-    teeth_mirrored = load_landmarks(number_teeth, number_samples, directory, True)
-    teeth_landmarks = np.concatenate((teeth_landmarks, teeth_mirrored), axis=1)
-    # Double the number of samples because of the mirrored ones 
-    number_samples *= 2
-    print('* Landamrks loaded *')
+    #directory = 'mirrored/landmarks'
+    #teeth_mirrored = load_landmarks(number_teeth, number_samples, directory, True)
+    #teeth_landmarks = np.concatenate((teeth_landmarks, teeth_mirrored), axis=1)
+    ## Double the number of samples because of the mirrored ones 
+    #number_samples *= 2
+    #print('* Landamrks loaded *')
      
     # ***** Print the teeth_landmarks over radiographs ***** 
     #visual.print_landmarks_over_radiographs(teeth_landmarks)
@@ -247,7 +246,7 @@ if __name__ == '__main__':
     # ***** Do pre-processing of the images *****
     print('* Starting preprocessing *')
     # radiographs contains the raw radiographs images
-    radiographs = pp.load_radiographs(number_samples/2, False)
+    radiographs = pp.load_radiographs(number_samples, False)
     
     mirrored = lm.get_mirrored_radiographs(radiographs, False)
     for i in range(len(mirrored)):
@@ -291,13 +290,13 @@ if __name__ == '__main__':
     #    bx.print_boxes_on_teeth(largest_b, radiographs[i])
     
     ''' Number of inputs to estimate and fit '''
-    NR_INPUT = 28
+    NR_INPUT = 2
     
     # ***** Sharp the boxes ***** 
     print('* Finding upper refined boxes *')
-    estimates = perfect_fit_box(True, preprocessed_r, number_samples, largest_b, upper, NR_INPUT, False)
+    estimates = perfect_fit_box(True, preprocessed_r, number_samples, largest_b, upper, NR_INPUT, True)
     print('* Finding lower refined boxes *')
-    e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, NR_INPUT, False)
+    e2 = perfect_fit_box(False, preprocessed_r, number_samples, largest_b, lower, NR_INPUT, True)
     
     for i in range(len(estimates)):
         estimates[i].extend(e2[i])
@@ -309,15 +308,12 @@ if __name__ == '__main__':
     cv2.destroyAllWindows()
     
     # ***** Estimate error with the Sum of Squared Errors *****
-    print('* Estimating SSE *')
-    sse = estimate_sse(number_teeth, NR_INPUT, new_landmarks, teeth_landmarks)
-    print('  Sum of Squared Errors for each sample: ')
-    print(sse)
-    sse_average = np.average(sse)
-    print('  Average SSE, for the number of models:')
-    print(sse_average)
-    print('  Average point SSE, divided by the number of landmarks:')
-    print(sse_average/40)
-    err_perc = 100*(sse_average/40)/(radiographs[0].shape[1])
-    print('  Average point SSE, percentage error with respect to image width:')
-    print(err_perc)
+    for i in range(NR_INPUT):
+        print('* Estimating SSE for input ' + str(i+1) + ' *')
+        ssex, ssey = estimate_sse(number_teeth, new_landmarks, i, teeth_landmarks[:,i,:])
+        ssex = ssex/8
+        ssey = ssey/8
+        print('    Sum of Squared Errors for each radiograph per tooth: ')
+        print(ssex, ssey)
+        print('    SSE with respect to image widht and heights: ')
+        print(ssex/radiographs[i].shape[1], ssey/radiographs[i].shape[0])

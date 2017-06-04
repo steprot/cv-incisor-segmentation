@@ -265,8 +265,12 @@ def get_mirrored_radiographs(radiographs, save):
     
 def sse_tooth(tooth1, tooth2):
     i = 0
-    sse = 0
-    while i < len(tooth1):
-        sse += math.sqrt((tooth1[i] - tooth2[i+1])**2 + (tooth1[i] - tooth2[i+1])**2)
+    #sse = 0
+    ssex = 0
+    ssey = 0
+    while i < len(tooth1)-1:
+        #sse += math.sqrt((tooth1[i] - tooth2[i+1])**2 + (tooth1[i+2] - tooth2[i+3])**2)
+        ssex += math.sqrt((tooth1[i] - tooth2[i])**2)
+        ssey += math.sqrt((tooth1[i+1] - tooth2[i+1])**2)
         i += 2
-    return sse
+    return ssex, ssey
