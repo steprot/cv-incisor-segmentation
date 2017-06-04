@@ -132,7 +132,7 @@ def perfect_fit_box(isupper, test_preproc, preprocessed_r, number_samples, large
     build_model - should the model be built (True) or loaded (False)
     """
     estimates = []
-    e = estimate(test_preproc, isupper, preprocessed_r, 0, number_samples, largest_b, box_param, False, build_model)
+    e = estimate(test_preproc, isupper, preprocessed_r, 0, number_samples, largest_b, box_param, True, build_model)
     estimates.append(e)
     print('    Box for radiograph done')   
     return estimates  
@@ -169,6 +169,7 @@ def fit_model(estimates, nr, number_teeth, mean_shape, radiograph, edge, save=Tr
         # Loop over every tooth 
         for i in range(number_teeth):
             # Apply the model over the boxes 
+            print(detailed_boxes[j][i])
             img, newpoints = fit.fit_asm_model_to_box(mean_shape[i], detailed_boxes[j][i], radiograph, 1000, colors[i], edge)
             # Smooth the obtained points 
             newpoints = fit.smooth_model(newpoints)
@@ -217,7 +218,7 @@ if __name__ == '__main__':
     # Global variables 
     n_components = 8
     draw_handboxes = False 
-    TESTINGON = 0
+    TESTINGON = 8
     
     
     # ***** Read the landmarks ******
@@ -341,7 +342,6 @@ if __name__ == '__main__':
     for i in range(len(estimates)):
         estimates[i].extend(e2[i])
     print('* Found boxes for the teeth *') 
-    
     
     # ***** Apply and fit the model over the image ***** 
     new_landmarks = fit_model(estimates, NR_INPUT, number_teeth, mean_shape, test_radio, test_edge, True)
