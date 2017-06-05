@@ -132,7 +132,7 @@ def perfect_fit_box(isupper, test_preproc, preprocessed_r, number_samples, large
     build_model - should the model be built (True) or loaded (False)
     """
     estimates = []
-    e = estimate(test_preproc, isupper, preprocessed_r, 0, number_samples, largest_b, box_param, True, build_model)
+    e = estimate(test_preproc, isupper, preprocessed_r, 0, number_samples, largest_b, box_param, False, build_model)
     estimates.append(e)
     print('    Box for radiograph done')   
     return estimates  
@@ -169,7 +169,7 @@ def fit_model(estimates, nr, number_teeth, mean_shape, radiograph, edge, save=Tr
         # Loop over every tooth 
         for i in range(number_teeth):
             # Apply the model over the boxes 
-            print(detailed_boxes[j][i])
+            #print(detailed_boxes[j][i])
             img, newpoints = fit.fit_asm_model_to_box(mean_shape[i], detailed_boxes[j][i], radiograph, 1000, colors[i], edge)
             # Smooth the obtained points 
             newpoints = fit.smooth_model(newpoints)
@@ -218,7 +218,7 @@ if __name__ == '__main__':
     # Global variables 
     n_components = 8
     draw_handboxes = False 
-    TESTINGON = 8
+    TESTINGON = 13
     
     
     # ***** Read the landmarks ******
@@ -239,9 +239,9 @@ if __name__ == '__main__':
     
     # Removing the nth element to test on it 
     test_landmark = teeth_landmarks[:,TESTINGON,:]
-    print('test_landmark', test_landmark.shape)
+    #print('test_landmark', test_landmark.shape)
     teeth_landmarks = np.delete(teeth_landmarks, TESTINGON, 1)
-    print('teethlandmarks', teeth_landmarks.shape)
+    #print('teethlandmarks', teeth_landmarks.shape)
     
     around_origin_scaled, mean_shape = pre_procrustes(number_teeth, number_samples-1, teeth_landmarks) # number_samples - 1 because of testing 
     print('* Starting Procrustes Analysis *')
@@ -276,9 +276,9 @@ if __name__ == '__main__':
     # ***** Do pre-processing of the images *****
     print('* Starting preprocessing *')
     # radiographs contains the raw radiographs images
-    print(number_samples)
+    #print(number_samples)
     radiographs = pp.load_radiographs(number_samples, False)
-    print(len(radiographs[0].shape))
+    #print(len(radiographs[0].shape))
     
     #mirrored = lm.get_mirrored_radiographs(radiographs, False)
     #for i in range(len(mirrored)):
@@ -294,7 +294,7 @@ if __name__ == '__main__':
     
     # Preprocess the images
     preprocessed_r = []
-    print(len(radiographs))
+    #print(len(radiographs))
     for i in range(len(radiographs)):
         preprocessed_r.append(pp.preprocess_radiograph(radiographs[i]))
     # Find the edges of the radiographs
