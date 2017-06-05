@@ -170,7 +170,7 @@ def fit_model(estimates, nr, number_teeth, mean_shape, radiograph, edge, save=Tr
         for i in range(number_teeth):
             # Apply the model over the boxes 
             #print(detailed_boxes[j][i])
-            img, newpoints = fit.fit_asm_model_to_box(mean_shape[i], detailed_boxes[j][i], radiograph, 1000, colors[i], edge)
+            img, newpoints = fit.fit_asm_model_to_box(mean_shape[i], detailed_boxes[j][i], radiograph, 1000, colors[i], edge, i)
             # Smooth the obtained points 
             newpoints = fit.smooth_model(newpoints)
             visual.render_model_over_image(newpoints, radiograph, i+1, colors[i], False)
@@ -183,8 +183,8 @@ def fit_model(estimates, nr, number_teeth, mean_shape, radiograph, edge, save=Tr
             new_landmarks_sample.append(np.asarray(newpoints))
             
         if save:
-            visual.save_final_image(radiographs[j], j + 1)
-        print('    Fitting completed for image ' + str(j + 1)) 
+            visual.save_final_image(radiograph, TESTINGON + 1)
+        print('    Fitting completed for image ' + str(TESTINGON + 1)) 
         
         new_landmarks_sample = np.asarray(new_landmarks_sample)      
         new_points.append(new_landmarks_sample.T)
@@ -193,20 +193,18 @@ def fit_model(estimates, nr, number_teeth, mean_shape, radiograph, edge, save=Tr
     return new_points
     
 def estimate_sse(number_teeth, nr, new_landmarks, test_landmark):
-    ssex = []
-    ssey = []
     for j in range(nr): # number_samples 
         ssex_sample = 0
         ssey_sample = 0
+        ssexabs_sample = 0
+        sseyabs_sample = 0
         for i in range(number_teeth):
-            x, y = lm.sse_tooth(new_landmarks[j, :, i], test_landmark[i, :])
+            x, y, xabs, yabs = lm.sse_tooth(new_landmarks[j, :, i], test_landmark[i, :])
             ssex_sample += x
             ssey_sample += y
-        ssex.append(ssex_sample)
-        ssey.append(ssey_sample)
-    ssex = np.asarray(ssex)
-    ssey = np.asarray(ssey)
-    return ssex, ssey
+            ssexabs_sample = xabs
+            sseyabs_sample = yabs
+    return ssex_sample/40, ssey_sample/40, ssexabs_sample/40, sseyabs_sample/40
 
    
       
@@ -347,15 +345,15 @@ if __name__ == '__main__':
     new_landmarks = fit_model(estimates, NR_INPUT, number_teeth, mean_shape, test_radio, test_edge, True)
     cv2.destroyAllWindows()
         
-    # ***** Estimate error with the Sum of Squared Errors *****
-    print('* Estimating SSE *')
-    ssex, ssey = estimate_sse(number_teeth, NR_INPUT, new_landmarks, test_landmark)
-    ssex = ssex/8
-    ssey = ssey/8
-    print('  Sum of Squared Errors for each radiograph per tooth: ')
-    print(ssex[0], ssey[0])
-    print('  SSE with respect to image widht and heights: ')
-    print(ssex[0]/test_radio.shape[1], ssey[0]/test_radio.shape[0])
+    # ***** Estimate error with the Mean Squared Errors *****
+    print('* Estimating MSE *')
+    msex, msey , msexabs, mseyabs= estimate_sse(number_teeth, NR_INPUT, new_landmarks, test_landmark)
+    msex = msex/8
+    msey = msey/8
+    print('  Mean Squared Errors per estimations: ')
+    print('  {:.2f}, {:.2f}'.format(msex, msey))
+    print('  Mean Absolute Error with respect to image widht and heights: ')
+    print('  {:.2f} ( {:.2f}% ), {:.2f} ( {:.2f}% )'.format(msexabs, 100*msexabs/test_radio.shape[1], mseyabs, 100*mseyabs/test_radio.shape[0]))
 
     
     

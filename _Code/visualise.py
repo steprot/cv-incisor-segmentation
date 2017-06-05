@@ -23,13 +23,13 @@ def print_landmarks_over_radiographs(teeth_landmarks):
         dir_path = os.path.join(os.getcwd(), directory)
         img = cv2.imread(dir_path)
         while j < number_teeth:
-            render_landmark_over_image(img, teeth_landmarks[j,i,:])
+            render_landmark_over_image(img, teeth_landmarks[j,i,:], i)
             # Go to the next tooth
             j += 1
         # Got the next sample   
         i += 1
 
-def render_landmark_over_image(img, landmark):
+def render_landmark_over_image(img, landmark, i):
     ''' 
     Print lendmarks over image
     '''

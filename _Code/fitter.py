@@ -37,7 +37,7 @@ def get_detailed_boxes(boxes):
     
     return np.asarray(box)
     
-def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color, edge_img):
+def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color, edge_img, toothindex):
     '''
     Fit the tooth model into the tooth box. Scale, centre, and look for brighter neighbours. 
     Parameters:
@@ -75,6 +75,10 @@ def fit_asm_model_to_box(toothmodel, toothbox, radiograph, fact, color, edge_img
     bheight =toothbox[3] - toothbox[1]
     bwidth = toothbox[2] - toothbox[0]
     hfactor = (bheight/(hmax - hmin))*0.9
+    if toothindex == 0 or toothindex == 3: # most left and most right incisor 
+        hfactor = hfactor*0.85
+    if toothindex > 3: # lower jaw
+        hfactor = hfactor*0.9
     wfactor = bwidth/(wmax - wmin)
     #print('hfactor and wfactor', hfactor, wfactor)
     centroid = lm.get_tooth_centroid(points)
