@@ -216,7 +216,7 @@ if __name__ == '__main__':
     # Global variables 
     n_components = 8
     draw_handboxes = False 
-    TESTINGON = 13
+    TESTINGON = 8
     
     
     # ***** Read the landmarks ******
@@ -350,6 +350,8 @@ if __name__ == '__main__':
     msex, msey , msexabs, mseyabs= estimate_sse(number_teeth, NR_INPUT, new_landmarks, test_landmark)
     msex = msex/8
     msey = msey/8
+    msexabs = msexabs/8
+    mseyabs = mseyabs/8
     print('  Mean Squared Errors per estimations: ')
     print('  {:.2f}, {:.2f}'.format(msex, msey))
     print('  Mean Absolute Error with respect to image widht and heights: ')
